@@ -587,6 +587,7 @@ const CHANGELOG=[
 {v:9,d:'17 nov 2026',t:'Grafica di prova: terreno di Muse',n:[
  'Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle del terreno usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e le due basi con il piedistallo oro e viola.',
  'Spento, il gioco resta com’è: grafica attuale invariata, si può sempre tornare indietro. La scelta resta salvata sul telefono.',
+ 'Le caselle mantengono angoli arrotondati e bordo sottile, come nella grafica attuale.',
  'Il vulcano e gli oggetti alti (alberi, montagne, stazione, bandiere), le pedine e gli effetti restano per ora quelli vettoriali, in attesa dei disegni di Muse.',
  'I disegni si caricano solo quando accendi il tasto. Regole e bilanciamento invariati.']},
 {v:8,d:'17 nov 2026',t:'Versione app per Android',n:[
@@ -920,8 +921,12 @@ function drawBlock(x,y,t,gelo,tick,veil){
   if(GP.on){
     const nm=gpName(t,x,y,gelo),im=nm&&gpPick(nm,cs*lay.dpr);
     if(im){
-      ctx.drawImage(im,cx(x),py,cs+.75,cs+.75);
-      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(cx(x),py,cs,fh+dz)}
+      // stessa forma di prima: casella con angoli arrotondati e bordo sottile, così le caselle restano distinte
+      ctx.save();rr(px,py,w,cs-1,r);ctx.clip();
+      ctx.drawImage(im,px,py,w,cs-1);
+      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(px,py,w,cs-1)}
+      ctx.restore();
+      rr(px+.5,py+.5,w-1,cs-2,r);ctx.strokeStyle='rgba(16,34,22,.55)';ctx.lineWidth=Math.max(1,1.1*k);ctx.stroke();
       return;
     }
   }
