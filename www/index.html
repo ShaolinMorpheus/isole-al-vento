@@ -587,7 +587,7 @@ const CHANGELOG=[
 {v:9,d:'17 nov 2026',t:'Grafica di prova: terreno di Muse',n:[
  'Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle del terreno usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e le due basi con il piedistallo oro e viola.',
  'Spento, il gioco resta com’è: grafica attuale invariata, si può sempre tornare indietro. La scelta resta salvata sul telefono.',
- 'Le caselle mantengono angoli arrotondati e bordo sottile, come nella grafica attuale.',
+ 'Le caselle mantengono angoli arrotondati, fronte di terra sottile e distacco morbido come nella grafica attuale: dei disegni di Muse si usa la faccia superiore.',
  'Il vulcano e gli oggetti alti (alberi, montagne, stazione, bandiere), le pedine e gli effetti restano per ora quelli vettoriali, in attesa dei disegni di Muse.',
  'I disegni si caricano solo quando accendi il tasto. Regole e bilanciamento invariati.']},
 {v:8,d:'17 nov 2026',t:'Versione app per Android',n:[
@@ -921,12 +921,14 @@ function drawBlock(x,y,t,gelo,tick,veil){
   if(GP.on){
     const nm=gpName(t,x,y,gelo),im=nm&&gpPick(nm,cs*lay.dpr);
     if(im){
-      // stessa forma di prima: casella con angoli arrotondati e bordo sottile, così le caselle restano distinte
-      ctx.save();rr(px,py,w,cs-1,r);ctx.clip();
-      ctx.drawImage(im,px,py,w,cs-1);
-      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(px,py,w,cs-1)}
+      // faccia superiore di Muse + fronte vettoriale di prima (terra con bordo verde sottile): le caselle restano morbide e distinte
+      const pp=PAL[t]||PAL.P,sc=im.width/256;
+      rr(px,py+fh*.5,w,fh*.5+dz,r);ctx.fillStyle=pp.side;ctx.fill();
+      rr(px,py+fh-1.5*k,w,dz*.5+1.5*k,2*k);ctx.fillStyle=pp.lip;ctx.fill();
+      ctx.save();rr(px,py,w,fh,r);ctx.clip();
+      ctx.drawImage(im,0,0,im.width,194*sc,px,py,w,fh);
       ctx.restore();
-      rr(px+.5,py+.5,w-1,cs-2,r);ctx.strokeStyle='rgba(16,34,22,.55)';ctx.lineWidth=Math.max(1,1.1*k);ctx.stroke();
+      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh+dz,r);ctx.fill()}
       return;
     }
   }
