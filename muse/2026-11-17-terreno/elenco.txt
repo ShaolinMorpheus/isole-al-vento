@@ -1,0 +1,16 @@
+terreno_prato_a.png
+terreno_prato_b.png
+terreno_stazione_a.png
+terreno_stazione_b.png
+terreno_bosco_a.png
+terreno_bosco_b.png
+terreno_lago_a.png
+terreno_lago_b.png
+terreno_ghiaccio_a.png
+terreno_ghiaccio_b.png
+terreno_monte_a.png
+terreno_monte_b.png
+terreno_cenere_a.png
+terreno_cenere_b.png
+terreno_base_oro.png
+terreno_base_viola.png
