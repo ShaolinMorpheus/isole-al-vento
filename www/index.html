@@ -129,6 +129,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <p class="st" id="stats"></p>
     <button class="btn" id="bPlay" type="button" style="min-height:48px">Gioca contro il computer</button>
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
+    <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
     <ul>
       <li>Vinci portando una tua unità sulla base del nemico, o eliminando tutte le sue unità.</li>
@@ -583,6 +584,11 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:9,d:'17 nov 2026',t:'Grafica di prova: terreno di Muse',n:[
+ 'Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle del terreno usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e le due basi con il piedistallo oro e viola.',
+ 'Spento, il gioco resta com’è: grafica attuale invariata, si può sempre tornare indietro. La scelta resta salvata sul telefono.',
+ 'Il vulcano e gli oggetti alti (alberi, montagne, stazione, bandiere), le pedine e gli effetti restano per ora quelli vettoriali, in attesa dei disegni di Muse.',
+ 'I disegni si caricano solo quando accendi il tasto. Regole e bilanciamento invariati.']},
 {v:8,d:'17 nov 2026',t:'Versione app per Android',n:[
  'Il gioco ora si installa come app Android (Capacitor) e si carica da GitHub Pages: gli aggiornamenti arrivano da soli, senza reinstallare.',
  'Schermo intero senza barre di Android; margini di sicurezza per notch e angoli arrotondati.',
@@ -666,6 +672,41 @@ function buildSeg(){
 }
 const lay={cs:40,dz:8,fh:32,th:8,ox:0,oy:0,cw:0,ch:0,dpr:1};
 const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
+
+/* --- Grafica di prova: blocchi del terreno disegnati da Muse (PNG 256×256: faccia 194 px + fronte 62 px) --- */
+const GP={on:LS.get('isole-gp')==='1',mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
+  names:['prato_a','prato_b','stazione_a','stazione_b','bosco_a','bosco_b','lago_a','lago_b','ghiaccio_a','ghiaccio_b','monte_a','monte_b','cenere_a','cenere_b','base_oro','base_viola']};
+function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sfuoca e sfarfalla
+  const L=[im];let s=256;
+  while(s>32){s/=2;const c=document.createElement('canvas');c.width=c.height=s;const q=c.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(L[L.length-1],0,0,s,s);L.push(c)}
+  return L;
+}
+function gpLoad(){
+  if(GP.loading)return;GP.loading=true;
+  for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
+}
+function gpReady(){return GP.on&&!!GP.mips.prato_a}
+function gpName(t,x,y,gelo){
+  const v=((((x*73856093)^(y*19349663))>>>3)&1)?'b':'a';
+  if(t==='P'){
+    if(x===BASE[0].x&&y===BASE[0].y)return 'base_oro';
+    if(x===BASE[1].x&&y===BASE[1].y)return 'base_viola';
+    return 'prato_'+v;
+  }
+  if(t==='S')return 'stazione_'+v;
+  if(t==='F')return 'bosco_'+v;
+  if(t==='L')return (gelo?'ghiaccio_':'lago_')+v;
+  if(t==='M')return 'monte_'+v;
+  if(t==='C')return 'cenere_'+v;
+  return null; // il vulcano resta vettoriale
+}
+function gpPick(n,px){
+  const L=GP.mips[n];if(!L)return null;
+  for(let i=L.length-1;i>=0;i--)if(L[i].width>=px)return L[i];
+  return L[0];
+}
+function gpLabel(){$('bGP').textContent='Grafica di prova: '+(GP.on?'accesa':'spenta')}
+if(GP.on)gpLoad();
 
 function icon(t,dir){
   const st='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -876,6 +917,14 @@ function drawPlinth(){
 }
 function drawBlock(x,y,t,gelo,tick,veil){
   const cs=lay.cs,k=cs/40,px=cx(x)+1,py=cy(y),w=cs-2,fh=lay.fh,dz=lay.dz,r=5*k;
+  if(GP.on){
+    const nm=gpName(t,x,y,gelo),im=nm&&gpPick(nm,cs*lay.dpr);
+    if(im){
+      ctx.drawImage(im,cx(x),py,cs+.75,cs+.75);
+      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(cx(x),py,cs,fh+dz)}
+      return;
+    }
+  }
   if(t==='L'&&!gelo){
     // pozza incavata: sponda scura, acqua più in basso del prato
     rr(px,py+fh*.5,w,fh*.5+dz,r);ctx.fillStyle='#6b5240';ctx.fill();
@@ -1193,7 +1242,7 @@ function draw(ts){
   if(nebbia)for(const u of g.units)if(u.o===0)for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.abs(xx)+Math.abs(yy)<=2)seen.add((u.x+xx)+','+(u.y+yy));
   drawPlinth();
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)drawBlock(x,y,tileAt(g,x,y),gelo,tick,nebbia&&!seen.has(x+','+y));
-  drawBaseMark(0);drawBaseMark(1);
+  if(!gpReady()){drawBaseMark(0);drawBaseMark(1)}
   // stazioni occupate: bordo del colore di chi le tiene
   for(const st of STATIONS){
     const u=unitAt(g,st.x,st.y);if(!u)continue;
@@ -1425,6 +1474,8 @@ $('bRec').onclick=()=>{if(!canPlay())return;recSheet();$('ovRec').hidden=false};
 $('bRecClose').onclick=()=>{$('ovRec').hidden=true};
 $('bPlay').onclick=()=>startGame(false);
 $('bTut').onclick=()=>startGame(true);
+$('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
+gpLabel();
 $('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;
 $('bLog').onclick=()=>{logBuild();$('ovLog').hidden=false};
 $('bLogClose').onclick=()=>{$('ovLog').hidden=true};
