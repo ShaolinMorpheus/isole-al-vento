@@ -584,6 +584,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:10,d:'18 nov 2026',t:'Grafica di prova: oggetti di Muse',n:[
+ 'Con «Grafica di prova» accesa, ora anche gli oggetti sono i disegni di Muse (consegna oggetti): pini e boschetti sul bosco, montagne innevate, stazione meteo con le coppe che girano (più veloci col vento), bandiere oro e viola che sventolano.',
+ 'Il vulcano è una casella intera disegnata: calmo, con la lava accesa quando manca 1 round all’eruzione, annerito dopo l’eruzione. Il numero del conto alla rovescia resta in alto a destra.',
+ 'Pedine ed effetti restano ancora vettoriali. Spento il tasto, tutto torna alla grafica di prima. Regole invariate.']},
 {v:9,d:'17 nov 2026',t:'Grafica di prova: terreno di Muse',n:[
  'Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle del terreno usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e le due basi con il piedistallo oro e viola.',
  'Spento, il gioco resta com’è: grafica attuale invariata, si può sempre tornare indietro. La scelta resta salvata sul telefono.',
@@ -683,8 +687,17 @@ function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sf
   return L;
 }
 function gpLoad(){
-  if(GP.loading)return;GP.loading=true;
+  if(GP.loading)return;GP.loading=true;goLoad();
   for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
+}
+const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
+  A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
+function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
+function goReady(){return gpReady()&&!!GO.im.pino_a&&!!GO.im.stazione_0}
+function goDraw(n,X,gy,cs,al){ // ancora (128, altezza−24) del disegno posata su (X,gy)
+  const im=GO.im[n];if(!im)return false;const sc=cs/256;
+  if(al!==undefined)ctx.globalAlpha=al;
+  ctx.drawImage(im,X-128*sc,gy-GO.A[n]*sc,256*sc,im.height*sc);return true;
 }
 function gpReady(){return GP.on&&!!GP.mips.prato_a}
 function gpName(t,x,y,gelo){
@@ -699,7 +712,8 @@ function gpName(t,x,y,gelo){
   if(t==='L')return (gelo?'ghiaccio_':'lago_')+v;
   if(t==='M')return 'monte_'+v;
   if(t==='C')return 'cenere_'+v;
-  return null; // il vulcano resta vettoriale
+  if(t==='V'&&goReady())return g.erupted?'vulcano_eruttato':eruptionRound(g)-g.round<=1?'vulcano_arde':'vulcano_calmo';
+  return null;
 }
 function gpPick(n,px){
   const L=GP.mips[n];if(!L)return null;
@@ -925,7 +939,14 @@ function drawPlinth(){
 function drawBlock(x,y,t,gelo,tick,veil){
   const cs=lay.cs,k=cs/40,px=cx(x)+1,py=cy(y),w=cs-2,fh=lay.fh,dz=lay.dz,r=5*k;
   if(GP.on){
-    const nm=gpName(t,x,y,gelo),im=nm&&gpPick(nm,cs*lay.dpr);
+    const nm=gpName(t,x,y,gelo);
+    if(nm&&nm.startsWith('vulcano_')){
+      const vi=GO.im['terreno_'+nm];
+      ctx.save();rr(px,py,w,fh,r);ctx.clip();ctx.drawImage(vi,px,py,w,fh);ctx.restore();
+      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
+      return;
+    }
+    const im=nm&&gpPick(nm,cs*lay.dpr);
     if(im){
       // solo la faccia di Muse (ritaglio quadrato), niente strati di terra: un filo di spazio tra le caselle
       const sc=im.width/256,sz=194*sc;
@@ -1002,6 +1023,7 @@ function peak(ax,by,ay,hw,cl,cr,snow){
 }
 function volcanoObj(x,y,tick){
   const cs=lay.cs,k=cs/40,X=cx(x)+cs/2,top=cy(y),fh=lay.fh,by=top+fh*.93,ty=top+fh*.08,hB=cs*.5,hT=cs*.17;
+  if(goReady()){volcanoBadge(x,y);return}
   ctx.fillStyle='#8a5b4f';ctx.beginPath();ctx.moveTo(X-hT,ty);ctx.lineTo(X-hB,by);ctx.lineTo(X+hB*.05,by);ctx.lineTo(X+hT*.1,ty);ctx.closePath();ctx.fill();
   ctx.fillStyle='#603c39';ctx.beginPath();ctx.moveTo(X+hT*.1,ty);ctx.lineTo(X+hB*.05,by);ctx.lineTo(X+hB,by);ctx.lineTo(X+hT,ty);ctx.closePath();ctx.fill();
   const n=eruptionRound(g)-g.round,pulse=.65+.35*Math.sin(tick*(n===0?9:4));
@@ -1015,6 +1037,10 @@ function volcanoObj(x,y,tick){
       ctx.beginPath();ctx.arc(X+Math.sin(ph*4+i)*cs*.06,ty-cs*.04-ph*cs*.22,cs*(.05+ph*.05),0,7);ctx.fill();
     }
   }
+  volcanoBadge(x,y);
+}
+function volcanoBadge(x,y){
+  const cs=lay.cs,top=cy(y),fh=lay.fh,n=eruptionRound(g)-g.round;
   const bx=cx(x)+cs*.78,bY=top+fh*.76;
   ctx.fillStyle=n===0?'#ef6a5a':'rgba(8,20,28,.88)';ctx.beginPath();ctx.arc(bx,bY,cs*.17,0,7);ctx.fill();
   ctx.fillStyle='#fff';ctx.font=`600 ${Math.round(cs*.26)}px Fredoka, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
@@ -1023,6 +1049,7 @@ function volcanoObj(x,y,tick){
 function stationObj(x,y,tick){
   const cs=lay.cs,k=cs/40,X=cx(x)+cs/2,top=cy(y),fh=lay.fh,by=top+fh*.88,hy=top+fh*.2;
   const wt=wNow(g).t,sp=wt==='vento'?7:wt==='sereno'?1.2:2.4,a0=tick*sp;
+  if(goReady()){const fr=REDUCE?0:Math.floor(((tick*sp)/2.094*1)%3+3)%3;goDraw('stazione_'+['0','40','80'][fr],X,top+fh*.72,cs);return}
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(X+2,by+1.5,cs*.26,cs*.08,0,0,7);ctx.fill();
   ctx.fillStyle='#b8c9c6';ctx.beginPath();ctx.ellipse(X,by,cs*.24,cs*.075,0,0,7);ctx.fill();
   const cups=[0,1,2].map(i=>{const a=a0+i*2.094;return {a,ex:X+Math.cos(a)*cs*.3,ey:hy+Math.sin(a)*cs*.11}});
@@ -1035,7 +1062,11 @@ function stationObj(x,y,tick){
 }
 function drawObject(x,y,t,tick){
   const cs=lay.cs,fh=lay.fh,top=cy(y),X=cx(x)+cs/2;
-  if(t==='F'){
+  if(goReady()&&(t==='F'||t==='M')){
+    const h=((((x*73856093)^(y*19349663))>>>3)&3);
+    const n=t==='F'?(['pino_a','pino_b','pino_c','boschetto_a','boschetto_b'])[(x*3+y*5)%5]:(h&1?'montagna_b':'montagna_a');
+    goDraw(n,X,top+fh*.72,cs);
+  }else if(t==='F'){
     pine(X,top+fh*.5,cs*.56,cs*.34);
     pine(X-cs*.23,top+fh*.8,cs*.5,cs*.31);
     pine(X+cs*.24,top+fh*.76,cs*.54,cs*.33);
@@ -1047,6 +1078,7 @@ function drawObject(x,y,t,tick){
   else if(t==='S')stationObj(x,y,tick);
 }
 function baseFlag(o,tick){
+  if(goReady()){const b0=BASE[o];goDraw('bandiera_'+(o===0?'oro_':'viola_')+(REDUCE||Math.sin(tick*3+o*2)>0?1:2),cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs);return}
   const b=BASE[o],cs=lay.cs,k=cs/40,col=o===0?'#f2b84b':'#9a86ee',dark=o===0?'#a8741f':'#5f4cae',X=cx(b.x)+cs/2,top=cy(b.y),fh=lay.fh;
   const pw=cs*.36,py=top+fh*.66;
   rr(X-pw,py+3*k,pw*2,fh*.2,4*k);ctx.fillStyle=dark;ctx.fill();

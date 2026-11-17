@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v10 · 18 nov 2026 — Grafica di prova: oggetti di Muse
+- Con «Grafica di prova» accesa: pini/boschetti, montagne, stazione meteo animata (3 fotogrammi, velocità secondo il meteo), bandiere oro/viola, vulcano a 3 stati (calmo / arde a ≤1 round / eruttato).
+- Pedine ed effetti ancora vettoriali. Regole invariate.
+
 ## Versione 9 — 17 nov 2026 — Grafica di prova: terreno di Muse
 - Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e basi oro/viola.
 - Più semplice: niente fronte di terra marrone né strati sotto le caselle. Ogni casella è la sola faccia del disegno di Muse, con angoli arrotondati e un filo di spazio verde scuro tra le vicine.
