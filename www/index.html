@@ -587,7 +587,7 @@ const CHANGELOG=[
 {v:9,d:'17 nov 2026',t:'Grafica di prova: terreno di Muse',n:[
  'Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle del terreno usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e le due basi con il piedistallo oro e viola.',
  'Spento, il gioco resta com’è: grafica attuale invariata, si può sempre tornare indietro. La scelta resta salvata sul telefono.',
- 'Le caselle mantengono angoli arrotondati, fronte di terra sottile e distacco morbido come nella grafica attuale: dei disegni di Muse si usa la faccia superiore.',
+ 'Più semplice: niente fronte di terra marrone né strati sotto le caselle. Ogni casella è la sola faccia del disegno di Muse, con angoli arrotondati e un filo di spazio verde scuro tra le vicine.',
  'Il vulcano e gli oggetti alti (alberi, montagne, stazione, bandiere), le pedine e gli effetti restano per ora quelli vettoriali, in attesa dei disegni di Muse.',
  'I disegni si caricano solo quando accendi il tasto. Regole e bilanciamento invariati.']},
 {v:8,d:'17 nov 2026',t:'Versione app per Android',n:[
@@ -841,7 +841,7 @@ function camClamp(){
   cam.oy=bh+2*m<=lay.ch?(lay.ch-bh)/2+cs*.05:Math.min(m+cs*.12,Math.max(lay.ch-bh-m,cam.oy));
 }
 function camLayout(){
-  const cs=cam.fit*cam.z,dz=Math.round(cs*.24);
+  const cs=cam.fit*cam.z,dz=Math.round(cs*(gpReady()?.04:.24));
   lay.cs=cs;lay.dz=dz;lay.fh=cs-dz;lay.th=Math.round(cs*.27);lay.ox=Math.round(cam.ox);lay.oy=Math.round(cam.oy);
   const zi=$('zIn'),zo=$('zOut'),zf=$('zFit');
   if(zi){zi.disabled=cam.z>=ZMAX-.01;zo.disabled=cam.z<=1.01;zf.disabled=cam.z<=1.01}
@@ -906,6 +906,12 @@ const PAL={
 const TUFT=[[.2,.3],[.72,.6],[.45,.8],[.82,.22],[.3,.62]];
 // Base dell'isola: terra tra le caselle, fronte di roccia e ombra sul mare.
 function drawPlinth(){
+  if(gpReady()){ // niente strati di terra e roccia: una semplice cornice verde scura con ombra
+    const cs=lay.cs,bh=cs*H+5;
+    ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(lay.ox+cs*W/2,lay.oy+bh+2,cs*W*.52,cs*.14,0,0,7);ctx.fill();
+    rr(lay.ox-4,lay.oy-4,cs*W+8,bh+1,9);ctx.fillStyle='#2a5230';ctx.fill();
+    return;
+  }
   const cs=lay.cs,x0=lay.ox-5,wd=cs*W+10,y0=lay.oy-5,bh=cs*H+5,th=lay.th;
   ctx.fillStyle='rgba(0,0,0,.34)';ctx.beginPath();ctx.ellipse(lay.ox+cs*W/2,lay.oy+bh+th-3,cs*W*.53,cs*.2,0,0,7);ctx.fill();
   const gr=ctx.createLinearGradient(0,y0+bh,0,y0+bh+th);gr.addColorStop(0,'#4d3b30');gr.addColorStop(1,'#2d221c');
@@ -921,14 +927,12 @@ function drawBlock(x,y,t,gelo,tick,veil){
   if(GP.on){
     const nm=gpName(t,x,y,gelo),im=nm&&gpPick(nm,cs*lay.dpr);
     if(im){
-      // faccia superiore di Muse + fronte vettoriale di prima (terra con bordo verde sottile): le caselle restano morbide e distinte
-      const pp=PAL[t]||PAL.P,sc=im.width/256;
-      rr(px,py+fh*.5,w,fh*.5+dz,r);ctx.fillStyle=pp.side;ctx.fill();
-      rr(px,py+fh-1.5*k,w,dz*.5+1.5*k,2*k);ctx.fillStyle=pp.lip;ctx.fill();
+      // solo la faccia di Muse (ritaglio quadrato), niente strati di terra: un filo di spazio tra le caselle
+      const sc=im.width/256,sz=194*sc;
       ctx.save();rr(px,py,w,fh,r);ctx.clip();
-      ctx.drawImage(im,0,0,im.width,194*sc,px,py,w,fh);
+      ctx.drawImage(im,(im.width-sz)/2,0,sz,sz,px,py,w,fh);
       ctx.restore();
-      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh+dz,r);ctx.fill()}
+      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
       return;
     }
   }
@@ -1238,6 +1242,7 @@ function drawVfx(dt){
 let last=0,tick=0,flash=0;
 function draw(ts){
   const dt=Math.min(50,ts-last||16);last=ts;tick+=dt/1000;
+  camLayout();
   if(tut)tutLayout();
   ctx.clearRect(0,0,lay.cw,lay.ch);
   ctx.save();

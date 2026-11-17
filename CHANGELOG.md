@@ -4,7 +4,7 @@
 
 ## Versione 9 — 17 nov 2026 — Grafica di prova: terreno di Muse
 - Nuovo tasto «Grafica di prova» nel menu iniziale (spento di default). Acceso, le caselle usano i disegni di Muse (consegna terreno v2): prato, stazione meteo, bosco, lago, ghiaccio, monte, cenere e basi oro/viola.
-- Le caselle mantengono angoli arrotondati, fronte di terra sottile e distacco morbido come nella grafica attuale: dei disegni di Muse si usa la faccia superiore.
+- Più semplice: niente fronte di terra marrone né strati sotto le caselle. Ogni casella è la sola faccia del disegno di Muse, con angoli arrotondati e un filo di spazio verde scuro tra le vicine.
 - Spento, il gioco resta com'è; la scelta resta salvata sul telefono.
 - Vulcano, oggetti alti, pedine ed effetti restano vettoriali in attesa dei disegni di Muse.
 - I disegni si caricano solo quando accendi il tasto. Regole e bilanciamento invariati.
