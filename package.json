@@ -1,0 +1,11 @@
+{
+  "name": "isole-al-vento",
+  "version": "0.8.0",
+  "private": true,
+  "description": "Isole al Vento - strategia a turni a tema meteo",
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  }
+}

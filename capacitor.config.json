@@ -1,0 +1,14 @@
+{
+  "appId": "it.isolealvento.game",
+  "appName": "Isole al Vento",
+  "webDir": "www",
+  "backgroundColor": "#0e2433",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "url": "https://shaolinmorpheus.github.io/isole-al-vento/",
+    "cleartext": false,
+    "errorPath": "offline.html"
+  }
+}
