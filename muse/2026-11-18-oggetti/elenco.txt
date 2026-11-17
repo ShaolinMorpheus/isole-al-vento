@@ -1,0 +1,17 @@
+oggetto_pino_a.png
+oggetto_pino_b.png
+oggetto_pino_c.png
+oggetto_boschetto_a.png
+oggetto_boschetto_b.png
+oggetto_montagna_a.png
+oggetto_montagna_b.png
+oggetto_stazione_0.png
+oggetto_stazione_40.png
+oggetto_stazione_80.png
+oggetto_bandiera_oro_1.png
+oggetto_bandiera_oro_2.png
+oggetto_bandiera_viola_1.png
+oggetto_bandiera_viola_2.png
+terreno_vulcano_calmo.png
+terreno_vulcano_arde.png
+terreno_vulcano_eruttato.png
