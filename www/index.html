@@ -160,6 +160,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <input id="seedIn" type="text" inputmode="numeric" maxlength="9" placeholder="Mappa n. (vuoto = a caso)" aria-label="Numero della mappa" style="min-height:40px;border-radius:12px;border:1px solid #2c4a5c;background:#0f2433;color:#e8f1f4;text-align:center;font:inherit;padding:0 10px">
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
     <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
+    <button class="btn alt" id="bMus" type="button" style="min-height:44px"></button>
     <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
     <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
@@ -648,6 +649,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:18,d:'19 nov 2026',t:'Musica e suoni del meteo',n:[
+ 'Musica di sottofondo dolce e continua, composta dal telefono (nessun file da scaricare). Si spegne dal nuovo tasto «Musica» nel menu; parte al primo tocco.',
+ 'A ogni nuovo round, per qualche secondo si sente il meteo sopra la musica: pioggia con le gocce, folate di vento, tintinnio di ghiaccio con il gelo, un ronzio sordo con la nebbia, cinguettii col sereno. La musica si abbassa mentre suona. Si disattivano con «Suoni e vibrazione».',
+ 'Quando l’app va in secondo piano l’audio si ferma.']},
 {v:17,d:'19 nov 2026',t:'Grafica di prova: schermate di Muse',n:[
  'Con «Grafica di prova» accesa, il menu iniziale ha lo sfondo con le due isole (oro e viola) e il logo «Isole al Vento» al posto del titolo scritto.',
  'A fine partita lo sfondo cambia: isola in festa se vinci, cielo nuvoloso con la bandiera viola se perdi, due bandiere pari se pareggi.',
@@ -788,6 +793,68 @@ function sfx(k){
   }catch(e){}
   if(!REDUCE&&navigator.vibrate&&(k==='hit'||k==='kill'||k==='erupt'))try{navigator.vibrate(k==='erupt'?[60,40,80]:k==='kill'?40:20)}catch(e){}
 }
+
+/* --- musica di sottofondo e suoni del meteo (tutto sintetizzato, nessun file) --- */
+let MUS=LS.get('isole-mus')!=='0',musTimer=0,musNext=0,musBar=0,musGain=null,noiseBuf=null,lastWxKey='';
+function acx(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}catch(e){return null}}
+function noiseSrc(){const a=acx();if(!noiseBuf){noiseBuf=a.createBuffer(1,a.sampleRate*2,a.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+  const n=a.createBufferSource();n.buffer=noiseBuf;n.loop=true;return n}
+function tone(f,t0,dur,type,vol,dest,f2){const a=AC,o=a.createOscillator(),gn=a.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+dur);
+  gn.gain.setValueAtTime(0,t0);gn.gain.linearRampToValueAtTime(vol,t0+Math.min(.04,dur/3));gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);o.connect(gn);gn.connect(dest);o.start(t0);o.stop(t0+dur+.05)}
+const CHORDS=[[146.8,185,220,277.2],[123.5,146.8,185,220],[98,123.5,146.8,185],[110,138.6,164.8,220]], // Re, Si-, Sol, La (accordi dolci)
+  PENTA=[293.7,329.6,370,440,493.9,587.3];
+function musSchedule(){
+  const a=AC;if(!a||!MUS||!musGain)return;
+  while(musNext<a.currentTime+1.4){
+    const t=musNext,beat=60/70;
+    const ch=CHORDS[musBar%4];
+    for(const f of ch){ // pad lungo e morbido
+      const o=a.createOscillator(),gn=a.createGain(),lp=a.createBiquadFilter();o.type='triangle';o.frequency.value=f;lp.type='lowpass';lp.frequency.value=900;
+      gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.05,t+1.2);gn.gain.linearRampToValueAtTime(.03,t+beat*3);gn.gain.linearRampToValueAtTime(0,t+beat*4.2);
+      o.connect(lp);lp.connect(gn);gn.connect(musGain);o.start(t);o.stop(t+beat*4.3);
+    }
+    for(let i=0;i<8;i++){ // piccoli tocchi di arpa
+      if(Math.random()<.62)tone(PENTA[(Math.random()*PENTA.length)|0],t+i*beat/2,1.1,'triangle',.035,musGain);
+    }
+    musNext+=beat*4;musBar++;
+  }
+}
+function musStart(){
+  if(!MUS||musTimer)return;const a=acx();if(!a)return;
+  if(!musGain){musGain=a.createGain();musGain.gain.value=.5;musGain.connect(a.destination)}
+  musNext=a.currentTime+.1;musSchedule();musTimer=setInterval(musSchedule,500);
+}
+function musStop(){clearInterval(musTimer);musTimer=0;if(musGain){try{musGain.disconnect();musGain=null}catch(e){}}}
+function duck(sec){if(!musGain||!AC)return;const t=AC.currentTime;musGain.gain.cancelScheduledValues(t);musGain.gain.setTargetAtTime(.2,t,.4);musGain.gain.setTargetAtTime(.5,t+sec,.8)}
+function weatherSfx(w){ // qualche secondo di ambiente, sopra la musica
+  if(!SND||!w)return;const a=acx();if(!a)return;
+  const t=a.currentTime,D=5,out=a.createGain();out.gain.value=1;out.connect(a.destination);duck(D);
+  const env=(g0,peak,att,rel)=>{g0.gain.setValueAtTime(0,t);g0.gain.linearRampToValueAtTime(peak,t+att);g0.gain.setValueAtTime(peak,t+D-rel);g0.gain.linearRampToValueAtTime(0,t+D)};
+  const n=noiseSrc(),flt=a.createBiquadFilter(),gn=a.createGain();n.connect(flt);flt.connect(gn);gn.connect(out);
+  if(w.t==='pioggia'){
+    flt.type='bandpass';flt.frequency.value=4200;flt.Q.value=.5;env(gn,.1,.8,1.6);
+    for(let i=0;i<22;i++)tone(2200+Math.random()*2200,t+.3+Math.random()*(D-.8),.05,'sine',.025,out,1400);
+  }else if(w.t==='vento'){
+    flt.type='bandpass';flt.Q.value=1.4;flt.frequency.setValueAtTime(260,t);flt.frequency.linearRampToValueAtTime(900,t+1.8);flt.frequency.linearRampToValueAtTime(380,t+3.2);flt.frequency.linearRampToValueAtTime(760,t+4.2);
+    gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(.16,t+1.7);gn.gain.linearRampToValueAtTime(.05,t+3);gn.gain.linearRampToValueAtTime(.12,t+4);gn.gain.linearRampToValueAtTime(0,t+D);
+  }else if(w.t==='gelo'){
+    flt.type='highpass';flt.frequency.value=5000;env(gn,.035,1,1.5);
+    for(let i=0;i<7;i++){const f=2400+Math.random()*2600;tone(f,t+.4+i*.55+Math.random()*.2,.9,'sine',.04,out)}
+    const w2=noiseSrc(),f2=a.createBiquadFilter(),g2=a.createGain();f2.type='lowpass';f2.frequency.value=350;w2.connect(f2);f2.connect(g2);g2.connect(out);env(g2,.05,1.4,1.5);w2.start(t);w2.stop(t+D+.1);
+  }else if(w.t==='nebbia'){
+    flt.type='lowpass';flt.frequency.value=260;env(gn,.09,1.6,1.8);
+    tone(82,t,D,'sine',.035,out);
+  }else{
+    flt.type='highpass';flt.frequency.value=9000;gn.gain.value=0; // sereno: qualche cinguettio
+    for(let i=0;i<3;i++){const t0=t+.6+i*1.3+Math.random()*.4;tone(2300,t0,.09,'sine',.03,out,3300);tone(2900,t0+.12,.09,'sine',.03,out,3700)}
+  }
+  n.start(t);n.stop(t+D+.1);
+}
+function weatherCue(force){ // una volta per round
+  if(!started||g.over!==null)return;const k=g.seed+'/'+g.round;if(!force&&k===lastWxKey)return;lastWxKey=k;weatherSfx(wNow(g));
+}
+document.addEventListener('pointerdown',()=>{if(MUS)musStart()},{once:false,passive:true});
+document.addEventListener('visibilitychange',()=>{if(!AC)return;if(document.hidden)AC.suspend();else AC.resume()});
 const lay={cs:40,dz:8,fh:32,th:8,ox:0,oy:0,cw:0,ch:0,dpr:1};
 const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
 
@@ -1714,6 +1781,7 @@ function afterEnd(){
   if(g.turn===1){computerTurn();return}
   busy=false;refreshUI();
   if(g.erupted){sfx('erupt');geEruption();if(!REDUCE)flash=1}else sfx('turn');
+  setTimeout(()=>weatherCue(false),900);
   saveGame();
   toast(g.erupted?'Il vulcano erutta! '+(g.eruptN?g.eruptN+(g.eruptN===1?' unità colpita':' unità colpite'):'Nessuno colpito'):g.thawN?'Il ghiaccio si scioglie':g.windN?'Il vento sposta '+g.windN+' unità':'Round '+g.round+' · '+wName(wNow(g)),1800);
 }
@@ -1754,6 +1822,7 @@ function startGame(withTut,seed){
   strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;camFit();
   if(!seed){const v=parseInt(($('seedIn')||{}).value,10);seed=v>0?v:0}
   g=freshGame(seed);lastSeed=g.seed;sel=null;inspect=null;tinfo=null;busy=false;started=true;saveGame();
+  setTimeout(()=>weatherCue(true),700);
   refreshUI();toast('Mappa '+g.seed+' · '+wName(wNow(g))+' · tocca a te',2200);
   if(withTut===true||(!tutSeen&&!LS.get('isole-tut')))tutStart();
 }
@@ -1765,6 +1834,9 @@ $('bPlay').onclick=()=>startGame(false);
 $('bCont').onclick=resumeGame;
 $('bSame').onclick=()=>startGame(false,lastSeed);
 $('bSnd').onclick=()=>{SND=!SND;LS.set('isole-snd',SND?'1':'0');sndLabel();sfx('recruit')};
+$('bMus').onclick=()=>{MUS=!MUS;LS.set('isole-mus',MUS?'1':'0');musLabel();if(MUS)musStart();else musStop()};
+function musLabel(){$('bMus').textContent='Musica: '+(MUS?'accesa':'spenta')}
+musLabel();
 function sndLabel(){$('bSnd').textContent='Suoni e vibrazione: '+(SND?'accesi':'spenti')}
 sndLabel();contButton();
 $('bTut').onclick=()=>startGame(true);
@@ -1820,6 +1892,7 @@ legend();buildSeg();size();refreshUI();requestAnimationFrame(draw);
 
 /* appoggio per le prove automatiche */
 window.Isole={
+  audio:{weatherSfx,musStart,info:()=>({ac:AC&&AC.state,mus:musTimer>0})},
   state:()=>g,setFast:v=>{fast=v},tap,endTurn:playerEnd,lay:()=>lay,
   setWeather:(t,d)=>{g.wx[g.round-1]={t,dir:d||null};refreshUI()},
   start:()=>{$('bPlay').click()},
