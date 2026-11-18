@@ -2,6 +2,13 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v21 — 19 nov 2026 · Più spazio al campo, vita con numero, pedine animate
+- Pannelli meteo/dati più piccoli: campo più grande
+- Barra vita più grossa con numero
+- Unità pronte: salto + alone dorato; usate: grigie
+- Pedine animate (respiro, passo, sciamano che fluttua)
+- Prova «Terreno» nel menu: caselle continue, 4 aspetti
+
 ## v20 · 19 nov 2026 — Si capisce quali unità si muovono
 - Anello dorato (da muovere), rosso (può attaccare), spunta (finita); conteggio nel pannello; Fine turno pulsa solo a fine azioni.
 
