@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v16 · 19 nov 2026 — Grafica di prova: interfaccia di Muse
+- Pannelli a 9 parti, bottoni a 3 stati, zoom, icone meteo/unità/moneta dietro «Grafica di prova».
+
 ## v15 · 19 nov 2026 — Cenere calda, riepilogo, pedina stanca
 - Cenere dell'eruzione calda per 1 round (−1), riepilogo di fine partita, pedina stanca più bassa.
 

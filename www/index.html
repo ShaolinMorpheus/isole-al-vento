@@ -89,6 +89,28 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .log h3 small{display:block;font:700 12px var(--body);color:var(--mint);margin-bottom:1px}
 .log ul{font-size:13px;color:var(--muted);gap:3px}
 .log .note{font-size:12.5px}
+
+/* Grafica di prova: interfaccia di Muse (pannelli a 9 parti, bottoni, zoom) */
+body.gpui .wbox,body.gpui .stat,body.gpui #info,body.gpui .card,body.gpui .rec{position:relative;isolation:isolate;background:none;border-color:transparent}
+body.gpui .wbox::before,body.gpui .stat::before,body.gpui #info::before,body.gpui .card::before,body.gpui .rec::before{content:'';position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:16px solid transparent}
+body.gpui .wbox::before{border-image:url(assets/interfaccia/ui_pannello_meteo.png) 48 fill/16px stretch}
+body.gpui .stat::before{border-image:url(assets/interfaccia/ui_pannello_stat.png) 48 fill/16px stretch}
+body.gpui #info::before{border-image:url(assets/interfaccia/ui_pannello_info.png) 48 fill/16px stretch}
+body.gpui .rec::before{border-image:url(assets/interfaccia/ui_pannello_riga.png) 48 fill/16px stretch}
+body.gpui .card::before{border-width:22px;border-image:url(assets/interfaccia/ui_pannello_scheda.png) 66 fill/22px stretch}
+body.gpui .btn,body.gpui .btn.alt{border:12px solid transparent;padding:0 4px;background:none;border-radius:0}
+body.gpui .btn.alt{border-image:url(assets/interfaccia/ui_bottone_chiaro_normale.png) 36 fill/12px stretch;color:var(--ink)}
+body.gpui .btn.alt:active{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_premuto.png)}
+body.gpui .btn.alt[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_disattivo.png);opacity:1}
+body.gpui .btn:not(.alt){border-image:url(assets/interfaccia/ui_bottone_oro_normale.png) 36 fill/12px stretch;color:#2a1d02}
+body.gpui .btn:not(.alt):active{border-image-source:url(assets/interfaccia/ui_bottone_oro_premuto.png)}
+body.gpui .btn:not(.alt)[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_oro_disattivo.png);opacity:1}
+body.gpui .btn.pulse:not(.alt){border-image-source:url(assets/interfaccia/ui_bottone_oro_pulsante.png);animation:none}
+body.gpui #zoomBox button{background:url(assets/interfaccia/ui_zoom_normale.png) center/100% 100% no-repeat;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.gpui #zoomBox button:active{background-image:url(assets/interfaccia/ui_zoom_premuto.png)}
+body.gpui #zoomBox button[disabled]{background-image:url(assets/interfaccia/ui_zoom_disattivo.png);opacity:1}
+.wnow img{width:26px;height:26px;flex:none}.wnext img{width:16px;height:16px}
+.rec img.ui{width:40px;height:40px;flex:none}.stat .c img{width:22px;height:22px;vertical-align:-5px;margin-right:2px}
 @media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}#toast{transition:none}}
 </style></head><body>
 
@@ -621,6 +643,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:16,d:'19 nov 2026',t:'Grafica di prova: interfaccia di Muse',n:[
+ 'Con «Grafica di prova» accesa, pannelli (meteo, monete, informazioni, schede, righe di reclutamento) e bottoni (Recluta, Annulla, Fine turno, zoom) usano i disegni di Muse, con i tre stati normale, premuto e disattivato.',
+ 'Icone di Muse per il meteo (anche nel «Dopo»), per le unità nella lista di reclutamento e per la moneta.',
+ 'Spento il tasto, torna l’interfaccia di prima.']},
 {v:15,d:'19 nov 2026',t:'Cenere calda, riepilogo, pedina stanca',n:[
  'Dopo l’eruzione le quattro caselle di cenere attorno al vulcano restano calde per un round: chi ci sta sopra a fine round perde 1 vita (segnate con −1 e il triangolo di avviso). Dal round dopo sono normali.',
  'A fine partita compare un riepilogo: round giocati, nemici sconfitti, unità perse, eruzioni e scottature di cenere.',
@@ -833,10 +859,11 @@ function gpPick(n,px){
   for(let i=L.length-1;i>=0;i--)if(L[i].width>=px)return L[i];
   return L[0];
 }
-function gpLabel(){$('bGP').textContent='Grafica di prova: '+(GP.on?'accesa':'spenta')}
+function gpLabel(){$('bGP').textContent='Grafica di prova: '+(GP.on?'accesa':'spenta');document.body.classList.toggle('gpui',GP.on);try{if(g)refreshUI()}catch(e){}}
 if(GP.on)gpLoad();
 
 function icon(t,dir){
+  if(GP.on){const rot=t==='vento'?{E:0,S:90,O:180,N:270}[dir||'E']:0;return `<img src="assets/interfaccia/icona_meteo_${t}.png" alt=""${rot?` style="transform:rotate(${rot}deg)"`:''}>`}
   const st='fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
   if(t==='sereno')return `<svg viewBox="0 0 24 24" ${st}><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>`;
   if(t==='vento'){const rot={E:0,S:90,O:180,N:270}[dir||'E'];return `<svg viewBox="0 0 24 24" ${st}><g transform="rotate(${rot} 12 12)"><path d="M3 12h16M13.5 6.5 19 12l-5.5 5.5"/></g></svg>`}
@@ -850,7 +877,7 @@ function renderTop(){
   const more=x2?`<span title="Poi: ${wName(x2)}" aria-label="Poi: ${wName(x2)}" style="display:flex;align-items:center;gap:3px">›${icon(x2.t,x2.dir)}</span>`:'';
   $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${wName(x)}</b></span>${more}</div>`;
   $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+'</small>';
-  $('coins').innerHTML=g.coins[0]+' <small>monete<br>+'+(2+heldBy(g,0))+' a round</small>';
+  $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>monete<br>+'+(2+heldBy(g,0))+' a round</small>';
 }
 function terrInfo(x,y){
   const t=tileAt(g,x,y),gelo=wNow(g).t==='gelo';
@@ -952,7 +979,7 @@ function recSheet(){
   for(const t of ['G','A','E','K','W']){
     const r=canRecruit(g,0,t);if(r&&!why)why=r;
     const b=document.createElement('button');b.type='button';b.className='rec';b.disabled=!!r;
-    b.innerHTML=`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
+    b.innerHTML=(GP.on?`<img class="ui" src="assets/interfaccia/icona_unita_${{G:'guerriero',A:'arciere',E:'esploratore',K:'cavaliere',W:'sciamano'}[t]}.png" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
     b.onclick=()=>{if(doRecruit(g,0,t)){g.lastRec=g.units[g.units.length-1].id;sfx('recruit');$('ovRec').hidden=true;sel=null;inspect=null;toast(UT[t].n+' reclutato');refreshUI()}};
     l.appendChild(b);
   }
