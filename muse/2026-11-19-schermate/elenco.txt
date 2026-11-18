@@ -1,0 +1,10 @@
+sfondo_menu.png
+sfondo_vittoria.png
+sfondo_sconfitta.png
+sfondo_pareggio.png
+logo_titolo.png
+logo_titolo_solo_simbolo.png
+icona_primo_piano.png
+icona_sfondo.png
+icona_play_store.png
+sfondo_caricamento.png
