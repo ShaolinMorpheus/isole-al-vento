@@ -134,6 +134,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
     <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
     <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
+    <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
     <ul>
       <li>Vinci portando una tua unità sulla base del nemico, o eliminando tutte le sue unità.</li>
@@ -309,10 +310,32 @@ function hitOf(g,a,d,ax,ay){
 }
 function counterOf(g,d,a){let c=Math.max(1,atkOf(g,d)-1);if(tileAt(g,a.x,a.y)==='F')c-=1;return Math.max(1,c)}
 function addFx(g,x,y,txt,col,delay){g.fx.push({x,y,txt,col,life:1,delay:delay||0})}
-function doMove(g,u,x,y){u.px=u.x;u.py=u.y;u.x=x;u.y=y;u.moved=true}
+function pathTo(g,u,x,y){ // percorso più economico dalla casella attuale a (x,y), con le stesse regole di reach()
+  const bud=mvOf(g,u),best=new Map([[u.x+','+u.y,0]]),par=new Map(),q=[[u.x,u.y,0]];
+  while(q.length){
+    q.sort((a,b)=>a[2]-b[2]);const [cx0,cy0,c]=q.shift();
+    if(cx0===x&&cy0===y)break;
+    if(c>(best.get(cx0+','+cy0)??Infinity))continue;
+    for(const [dx,dy] of Object.values(DIRS)){
+      const nx=cx0+dx,ny=cy0+dy;
+      if(nx<0||ny<0||nx>=W||ny>=H)continue;
+      const sc=stepCost(g,nx,ny,u);if(sc===Infinity||unitAt(g,nx,ny))continue;
+      const nc=c+sc;if(nc>bud)continue;const k=nx+','+ny;
+      if(nc<(best.get(k)??Infinity)){best.set(k,nc);par.set(k,cx0+','+cy0);q.push([nx,ny,nc])}
+    }
+  }
+  const out=[];let k=x+','+y;
+  while(k&&k!==u.x+','+u.y){const [a,b]=k.split(',').map(Number);out.unshift({x:a,y:b});k=par.get(k)}
+  return out;
+}
+function doMove(g,u,x,y){
+  let pth=null;try{pth=pathTo(g,u,x,y)}catch(e){}
+  u.px=u.x;u.py=u.y;u.x=x;u.y=y;u.moved=true;
+  u.path=pth&&pth.length>1?pth:null; // unità a una sola casella: nessun percorso da mostrare
+}
 function doAttack(g,a,d){
   // lead: se l'attaccante sta ancora camminando verso la casella, il colpo parte dopo l'arrivo
-  const lead=Math.hypot((a.vx===undefined?a.x:a.vx)-a.x,(a.vy===undefined?a.y:a.vy)-a.y)>.15?T_LEAD:0;
+  const lead=a.path&&a.path.length?a.path.length*.17+.1:Math.hypot((a.vx===undefined?a.x:a.vx)-a.x,(a.vy===undefined?a.y:a.vy)-a.y)>.15?T_LEAD:0;
   const dist=md(a,d),h=hitOf(g,a,d),dm=h.dm,tHit=(dist>1?T_RANGED:T_MELEE)+lead;
   const aHp0=a.hp,dHp0=d.hp,dx0=d.x,dy0=d.y;
   d.hp-=dm;addFx(g,dx0,dy0,'−'+dm,h.bump?'#ffb36b':'#ff8a78',tHit);d.hold=tHit;
@@ -589,6 +612,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:12,d:'18 nov 2026',t:'Percorso a passi, bandiere fluide, oggetti 3D di prova',n:[
+ 'Le pedine ora camminano casella per casella lungo il percorso fino a quella toccata, invece di saltarci sopra (anche quelle del computer). Il colpo parte quando sono arrivate.',
+ 'Le bandiere ondeggiano in modo continuo e più rapido: la stoffa è divisa a strisce che si muovono in tempo reale, e col vento si agitano ancora di più.',
+ 'Nuovo tasto «Oggetti 3D (prova)», spento di default e da usare con «Grafica di prova» accesa: alberi e montagne hanno ognuno dimensione, posizione e verso diversi, più ingranditi, e a volte un secondo albero o monte che sconfina nelle caselle vicine, per non sembrare un timbro identico su ogni casella.']},
 {v:11,d:'18 nov 2026',t:'Suoni, partita salvata, mappe a numero',n:[
  'Suoni e vibrazione leggera (movimento, colpi, reclutamento, eruzione, vittoria e sconfitta), sintetizzati dal telefono. Si spengono dal tasto nel menu.',
  'Partita salvata: se chiudi l’app a metà, nel menu trovi «Continua partita» con round e numero della mappa.',
@@ -689,6 +716,7 @@ function buildSeg(){
   $('stats').textContent=statsText();
 }
 /* --- suoni e vibrazione (sintetizzati, nessun file) --- */
+let G3=LS.get('isole-g3')==='1';
 let SND=LS.get('isole-snd')!=='0',AC=null;
 function sfx(k){
   if(!SND)return;
@@ -722,10 +750,24 @@ const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','m
   A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
 function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
 function goReady(){return gpReady()&&!!GO.im.pino_a&&!!GO.im.stazione_0}
-function goDraw(n,X,gy,cs,al){ // ancora (128, altezza−24) del disegno posata su (X,gy)
-  const im=GO.im[n];if(!im)return false;const sc=cs/256;
+function goDraw(n,X,gy,cs,al,k2,flip){ // ancora (128, altezza−24) del disegno posata su (X,gy); k2 = ingrandimento, flip = specchio
+  const im=GO.im[n];if(!im)return false;const sc=cs/256*(k2||1);
   if(al!==undefined)ctx.globalAlpha=al;
-  ctx.drawImage(im,X-128*sc,gy-GO.A[n]*sc,256*sc,im.height*sc);return true;
+  if(flip){ctx.save();ctx.translate(X,0);ctx.scale(-1,1);ctx.drawImage(im,-128*sc,gy-GO.A[n]*sc,256*sc,im.height*sc);ctx.restore()}
+  else ctx.drawImage(im,X-128*sc,gy-GO.A[n]*sc,256*sc,im.height*sc);
+  return true;
+}
+// Bandiera: l'asta resta ferma, la stoffa è tagliata a strisce che ondeggiano in continuo (fluido, indipendente dai fotogrammi).
+function goFlag(n,X,gy,cs,tick,ph){
+  const im=GO.im[n];if(!im)return false;const sc=cs/256,x0=X-128*sc,y0=gy-GO.A[n]*sc,PX=136,CL=130,SW=4;
+  const wnd=wNow(g).t==='vento',om=REDUCE?0:(wnd?17:12),amp=(wnd?9:6)*sc;
+  ctx.drawImage(im,0,0,PX,im.height,x0,y0,PX*sc,im.height*sc);
+  ctx.drawImage(im,PX,CL,256-PX,im.height-CL,x0+PX*sc,y0+CL*sc,(256-PX)*sc,(im.height-CL)*sc);
+  for(let sx=PX;sx<256;sx+=SW){
+    const f=(sx-PX)/(256-PX),dy=Math.sin(tick*om-sx*.06+ph)*amp*f,dy2=Math.cos(tick*om*.7-sx*.045+ph)*amp*.25*f;
+    ctx.drawImage(im,sx,0,SW,CL,x0+sx*sc,y0+(dy+dy2)*1,SW*sc+.5,CL*sc);
+  }
+  return true;
 }
 function gpReady(){return GP.on&&!!GP.mips.prato_a}
 function gpName(t,x,y,gelo){
@@ -1092,9 +1134,14 @@ function stationObj(x,y,tick){
 function drawObject(x,y,t,tick){
   const cs=lay.cs,fh=lay.fh,top=cy(y),X=cx(x)+cs/2;
   if(goReady()&&(t==='F'||t==='M')){
-    const h=((((x*73856093)^(y*19349663))>>>3)&3);
+    const h=((((x*73856093)^(y*19349663))>>>3)&1023);
     const n=t==='F'?(['pino_a','pino_b','pino_c','boschetto_a','boschetto_b'])[(x*3+y*5)%5]:(h&1?'montagna_b':'montagna_a');
-    goDraw(n,X,top+fh*.72,cs);
+    if(G3){ // prova: dimensioni, posizione e verso diversi per ogni casella, e a volte un secondo disegno che sconfina nelle vicine
+      const k2=(t==='F'?1.2:1.35)+((h>>2)&7)/7*(t==='F'?.35:.4),ox=(((h>>5)&15)-7.5)/7.5*cs*.14,oy=(((h>>9)&1)?1:-1)*cs*.03,fl=!!((h>>1)&1);
+      goDraw(n,X+ox,top+fh*.74+oy,cs,undefined,k2,fl);
+      if(t==='F'&&((h>>3)&3)!==0){const n2=['pino_a','pino_b','pino_c'][(h>>4)%3],sd=((h>>6)&1)?1:-1;goDraw(n2,X+sd*cs*.34,top+fh*.84,cs,undefined,k2*.78,!fl)}
+      if(t==='M'&&((h>>3)&1)){goDraw(h&1?'montagna_a':'montagna_b',X-Math.sign(ox||1)*cs*.36,top+fh*.8,cs,undefined,k2*.7,fl)}
+    }else goDraw(n,X,top+fh*.72,cs);
   }else if(t==='F'){
     pine(X,top+fh*.5,cs*.56,cs*.34);
     pine(X-cs*.23,top+fh*.8,cs*.5,cs*.31);
@@ -1107,7 +1154,7 @@ function drawObject(x,y,t,tick){
   else if(t==='S')stationObj(x,y,tick);
 }
 function baseFlag(o,tick){
-  if(goReady()){const b0=BASE[o];goDraw('bandiera_'+(o===0?'oro_':'viola_')+(REDUCE||Math.sin(tick*3+o*2)>0?1:2),cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs);return}
+  if(goReady()){const b0=BASE[o];goFlag('bandiera_'+(o===0?'oro_':'viola_')+'1',cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs,tick,o*2);return}
   const b=BASE[o],cs=lay.cs,k=cs/40,col=o===0?'#f2b84b':'#9a86ee',dark=o===0?'#a8741f':'#5f4cae',X=cx(b.x)+cs/2,top=cy(b.y),fh=lay.fh;
   const pw=cs*.36,py=top+fh*.66;
   rr(X-pw,py+3*k,pw*2,fh*.2,4*k);ctx.fillStyle=dark;ctx.fill();
@@ -1115,7 +1162,7 @@ function baseFlag(o,tick){
   ctx.fillStyle='rgba(255,255,255,.22)';rr(X-pw+3*k,py+1.5*k,pw*2-6*k,2*k,k);ctx.fill();
   const ax=X-pw*.8,y0=py+fh*.08,y1=top-cs*.02;
   ctx.strokeStyle='#e8dcc8';ctx.lineWidth=2.4*k;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(ax,y0);ctx.lineTo(ax,y1);ctx.stroke();
-  const wv=REDUCE?0:Math.sin(tick*3+o*2)*2.2*k,fw=cs*.36,fl=cs*.24;
+  const wv=REDUCE?0:Math.sin(tick*11+o*2)*2.2*k,fw=cs*.36,fl=cs*.24;
   ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(ax,y1);
   ctx.quadraticCurveTo(ax+fw*.5,y1-2*k+wv,ax+fw,y1+fl*.42+wv*.6);
   ctx.quadraticCurveTo(ax+fw*.5,y1+fl*.95+wv,ax,y1+fl);ctx.closePath();ctx.fill();
@@ -1357,7 +1404,12 @@ function draw(ts){
   // unità: tween
   for(const u of g.units){
     if(u.wait>0&&!fast)u.wait-=dt/1000;
-    else{u.vx+=(u.x-u.vx)*(fast?1:.28);u.vy+=(u.y-u.vy)*(fast?1:.28)}
+    else if(u.path&&u.path.length&&!fast){ // cammina casella per casella, a passo costante
+      const w0=u.path[0],ddx=w0.x-u.vx,ddy=w0.y-u.vy,dd=Math.hypot(ddx,ddy),stp=dt/1000*6;
+      if(dd<=stp){u.vx=w0.x;u.vy=w0.y;u.path.shift();if(!u.path.length)u.path=null}
+      else{u.vx+=ddx/dd*stp;u.vy+=ddy/dd*stp}
+    }
+    else{u.path=null;u.vx+=(u.x-u.vx)*(fast?1:.28);u.vy+=(u.y-u.vy)*(fast?1:.28)}
     if(u.hv===undefined)u.hv=u.hp;
     if(u.hold>0)u.hold-=dt/1000;
     else{u.hv+=(u.hp-u.hv)*(fast?1:.14);if(Math.abs(u.hp-u.hv)<.02)u.hv=u.hp}
@@ -1536,7 +1588,7 @@ function undoMove(){
     const i=g.units.findIndex(u=>u.id===g.lastRec),u=g.units[i];g.coins[0]+=UT[u.t].cost;g.units.splice(i,1);g.lastRec=0;sel=null;toast('Recluta annullata');refreshUI();return;
   }
   if(!(canPlay()&&!!sel&&g.units.includes(sel)&&sel.o===0&&sel.moved&&!sel.done&&sel.px!==undefined&&wNow(g).t!=='nebbia'))return;
-  sel.x=sel.px;sel.y=sel.py;sel.moved=false;sel.px=undefined;sel.py=undefined;
+  sel.x=sel.px;sel.y=sel.py;sel.path=null;sel.moved=false;sel.px=undefined;sel.py=undefined;
   refreshUI();
 }
 const SAVEK='isole-save';
@@ -1576,6 +1628,9 @@ $('bSnd').onclick=()=>{SND=!SND;LS.set('isole-snd',SND?'1':'0');sndLabel();sfx('
 function sndLabel(){$('bSnd').textContent='Suoni e vibrazione: '+(SND?'accesi':'spenti')}
 sndLabel();contButton();
 $('bTut').onclick=()=>startGame(true);
+$('bG3').onclick=()=>{G3=!G3;LS.set('isole-g3',G3?'1':'0');g3Label()};
+function g3Label(){$('bG3').textContent='Oggetti 3D (prova): '+(G3?'accesi':'spenti')}
+g3Label();
 $('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
 gpLabel();
 $('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;

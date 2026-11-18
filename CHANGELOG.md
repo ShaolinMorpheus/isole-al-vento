@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v12 · 18 nov 2026 — Percorso a passi, bandiere fluide, oggetti 3D di prova
+- Le pedine camminano casella per casella. Bandiere con stoffa a strisce, ondeggiamento continuo e più rapido. Tasto «Oggetti 3D (prova)»: alberi/montagne variati e sconfinanti.
+
 ## v11 · 18 nov 2026 — Suoni, partita salvata, mappe a numero
 - Suoni/vibrazione (spegnibili), «Continua partita», mappe a numero + «Rigioca questa mappa», annulla recluta, serie e vittoria più veloce nelle statistiche.
 
