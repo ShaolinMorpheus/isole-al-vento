@@ -649,6 +649,9 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:20,d:'19 nov 2026',t:'Si capisce quali unità si muovono',n:[
+ 'Anello dorato che pulsa sotto le unità che puoi ancora muovere; anello rosso su quelle che hanno già mosso ma possono ancora attaccare; spunta verde e colori spenti per quelle che hanno finito (anche se hanno mosso e non hanno nemici a tiro).',
+ 'Il pannello in basso dice quante unità sono ancora da muovere e quante possono ancora attaccare. Il tasto Fine turno pulsa solo quando non resta più niente da fare.']},
 {v:19,d:'19 nov 2026',t:'Pericolo eruzione sopra agli alberi',n:[
  'I segni di pericolo del vulcano (triangolo e danni −3 / −1, anche per la cenere calda) ora sono disegnati sopra alberi, montagne e unità, quindi si vedono sempre.']},
 {v:18,d:'19 nov 2026',t:'Musica e suoni del meteo',n:[
@@ -986,9 +989,10 @@ function renderInfo(){
     const [n,d]=terrInfo(tinfo.x,tinfo.y);
     el.innerHTML=`<b>${n}</b><span class="sub">${d}</span>`;
   }else{
-    el.innerHTML='<b>Tocca a te</b><span class="sub">Tocca una tua unità per muoverla. Con la base libera puoi reclutare.</span>';
+    const mine=g.units.filter(x=>x.o===0&&g.turn===0),nr=mine.filter(x=>actState(x)==='ready').length,na=mine.filter(x=>actState(x)==='att').length;
+    el.innerHTML='<b>Tocca a te</b><span class="sub">'+(g.turn===0&&started?(nr?'Da muovere: '+nr+(na?' · possono ancora attaccare: '+na:'')+'. ':na?'Possono ancora attaccare: '+na+'. ':'Tutte le unità hanno finito: tocca Fine turno. ')+'Anello dorato = si muove, rosso = può attaccare, spunta = ha finito.':'Tocca una tua unità per muoverla. Con la base libera puoi reclutare.')+'</span>';
   }
-  bEnd.classList.toggle('pulse',!g.units.some(x=>x.o===0&&!x.done));
+  bEnd.classList.toggle('pulse',!g.units.some(x=>x.o===0&&actState(x)!=='done'));
 }
 function canUndoRec(){return canPlay()&&g.lastRec&&g.units.some(u=>u.id===g.lastRec)}
 function canUndo(){
@@ -1340,16 +1344,35 @@ function drawGlyph(t,x,y,r,col){
   else{ctx.beginPath();ctx.moveTo(-r*.5,r*.15);ctx.lineTo(0,-r*.4);ctx.lineTo(r*.5,r*.15);ctx.stroke();ctx.beginPath();ctx.moveTo(-r*.5,r*.62);ctx.lineTo(0,r*.07);ctx.lineTo(r*.5,r*.62);ctx.stroke()}
   ctx.restore();
 }
+// Cosa può ancora fare una tua unità: 'ready' = può muoversi (e poi attaccare), 'att' = ha mosso ma può ancora attaccare, 'done' = ha finito.
+function actState(u){
+  if(u.done)return 'done';
+  if(u.moved)return targetsFrom(g,u,u.x,u.y).length?'att':'done';
+  return 'ready';
+}
+function actMarks(u,x,gy,st,after){
+  const cs=lay.cs,pl=.5+.5*Math.sin(tick*(st==='att'?7:4));
+  if(!after){ // anello a terra: dorato = si muove, rosso = può attaccare
+    if(st==='ready'){ctx.strokeStyle='rgba(255,224,138,'+(.45+.45*pl).toFixed(2)+')';ctx.lineWidth=2.6;ctx.beginPath();ctx.ellipse(x,gy+1,cs*.44,cs*.16,0,0,7);ctx.stroke()}
+    else if(st==='att'){ctx.strokeStyle='rgba(239,106,90,'+(.55+.4*pl).toFixed(2)+')';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,gy+1,cs*.44,cs*.16,0,0,7);ctx.stroke()}
+  }else if(st==='done'){ // spunta: ha già finito
+    const bx=x+cs*.3,by=gy-cs*.12,rr0=cs*.13;
+    ctx.fillStyle='rgba(8,20,28,.88)';ctx.beginPath();ctx.arc(bx,by,rr0,0,7);ctx.fill();
+    ctx.strokeStyle='#59cdb7';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(bx-rr0*.5,by);ctx.lineTo(bx-rr0*.1,by+rr0*.4);ctx.lineTo(bx+rr0*.55,by-rr0*.4);ctx.stroke();
+  }
+}
 function drawUnit(u,hidden,sc,al){
   if(hidden)return;
   const cs=lay.cs,o=uoff.get(u.id),x=gcx(u.vx)+(o?o.x:0),y=gcy(u.vy)+(o?o.y:0),r=cs*.34;
   const col=u.o===0?'#f2b84b':'#9a86ee',dk=u.o===0?'#a8741f':'#5f4cae';
-  const tired=u.o===0&&u.done&&g.turn===0&&g.over===null&&!strikes.some(k=>k.from===u.id||k.to===u.id);
+  const mine=u.o===0&&g.turn===0&&g.over===null&&started&&!busy&&!strikes.some(k=>k.from===u.id||k.to===u.id);
+  const ast=mine?actState(u):null,tired=ast==='done';
   const bob=(sel===u&&!REDUCE&&g.turn===0&&g.over===null&&started)?Math.abs(Math.sin(tick*4.5))*cs*.05:0;
   const gy=y+r*.62,ty=y-r*.12-bob;
   const scaled=sc!==undefined&&sc!==1;
   if(scaled){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.translate(-x,-y)}
   ctx.globalAlpha=(tired?.55:1)*(al===undefined?1:al);
+  if(ast&&ast!=='done'&&!(sel===u))actMarks(u,x,gy,ast,false);
   if(guReady()){ // pedina disegnata da Muse (prova): l'ombra è già nel disegno
     const tn=GU.T[u.t],pz=tired?'stanca':'normale',im=GU.im[tn+'_'+(u.o===0?'oro':'viola')+'_'+pz];
     if(im){
@@ -1363,6 +1386,7 @@ function drawUnit(u,hidden,sc,al){
       const f2=Math.max(0,u.hv===undefined?u.hp:u.hv)/UT[u.t].hp;ctx.fillStyle=f2>.55?'#59cdb7':f2>.28?'#f2b84b':'#ef6a5a';
       rr(hx,hy,hw*f2,cs*.14,2);ctx.fill();
       ctx.globalAlpha=1;
+      if(ast==='done')actMarks(u,x,gy,ast,true);
       if(scaled)ctx.restore();
       return;
     }
@@ -1386,6 +1410,7 @@ function drawUnit(u,hidden,sc,al){
   const f=Math.max(0,u.hv===undefined?u.hp:u.hv)/UT[u.t].hp;ctx.fillStyle=f>.55?'#59cdb7':f>.28?'#f2b84b':'#ef6a5a';
   rr(hx,hy,hw*f,cs*.14,2);ctx.fill();
   ctx.globalAlpha=1;
+  if(ast==='done')actMarks(u,x,gy,ast,true);
   if(scaled)ctx.restore();
 }
 /* --- animazioni di combattimento: affondo, freccia, lampo, scintille, caduta --- */
@@ -1895,6 +1920,7 @@ legend();buildSeg();size();refreshUI();requestAnimationFrame(draw);
 
 /* appoggio per le prove automatiche */
 window.Isole={
+  reach:(u)=>reach(g,u),
   audio:{weatherSfx,musStart,info:()=>({ac:AC&&AC.state,mus:musTimer>0})},
   state:()=>g,setFast:v=>{fast=v},tap,endTurn:playerEnd,lay:()=>lay,
   setWeather:(t,d)=>{g.wx[g.round-1]={t,dir:d||null};refreshUI()},

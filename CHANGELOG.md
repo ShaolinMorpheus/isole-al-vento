@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v20 · 19 nov 2026 — Si capisce quali unità si muovono
+- Anello dorato (da muovere), rosso (può attaccare), spunta (finita); conteggio nel pannello; Fine turno pulsa solo a fine azioni.
+
 ## v19 · 19 nov 2026 — Pericolo eruzione sopra agli alberi
 - Segni di pericolo del vulcano disegnati sopra oggetti e unità, più marcati.
 
