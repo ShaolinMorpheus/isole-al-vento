@@ -68,6 +68,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .tl{background:none;border:0;color:var(--muted);font-weight:700;font-size:12.5px;min-height:32px;padding:0 4px;text-decoration:underline}
 .ov{position:fixed;inset:0;z-index:20;background:rgba(5,14,20,.78);display:flex;align-items:center;justify-content:center;padding:16px}
 .ov[hidden]{display:none}
+.btn[hidden]{display:none}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px 18px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
 .card h1{margin:0;font-family:var(--disp);font-weight:600;font-size:34px;line-height:1.05;text-wrap:balance}
 .card h2{margin:0;font-family:var(--disp);font-weight:600;font-size:24px}
@@ -127,8 +128,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <p>Due isole, un solo cielo. Il meteo cambia ogni turno e cambia le regole.</p>
     <div class="seg" id="seg" role="group" aria-label="Livello del computer"></div>
     <p class="st" id="stats"></p>
+    <button class="btn" id="bCont" type="button" style="min-height:48px" hidden>Continua partita</button>
     <button class="btn" id="bPlay" type="button" style="min-height:48px">Gioca contro il computer</button>
+    <input id="seedIn" type="text" inputmode="numeric" maxlength="9" placeholder="Mappa n. (vuoto = a caso)" aria-label="Numero della mappa" style="min-height:40px;border-radius:12px;border:1px solid #2c4a5c;background:#0f2433;color:#e8f1f4;text-align:center;font:inherit;padding:0 10px">
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
+    <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
     <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
     <ul>
@@ -164,6 +168,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <h2 id="endT"></h2>
     <p id="endD"></p>
     <button class="btn" id="bAgain" type="button" style="min-height:48px">Nuova partita</button>
+    <button class="btn alt" id="bSame" type="button" style="min-height:44px">Rigioca questa mappa</button>
     <button class="btn alt" id="bMenu" type="button" style="min-height:44px">Cambia livello</button>
   </div>
 </div>
@@ -422,7 +427,7 @@ function heldBy(g,o){return STATIONS.filter(s=>{const u=unitAt(g,s.x,s.y);return
 // Chi muove per primo cambia a ogni round: round dispari il giocatore, pari il computer.
 // g.turn = a chi tocca adesso (0 giocatore, 1 computer); g.step = 0 primo a muovere, 1 secondo.
 function startTurnOf(g,o){
-  g.turn=o;
+  g.turn=o;g.lastRec=0;
   g.units.forEach(u=>{if(u.o===o){u.moved=false;u.done=false;u.aid=false;u.px=undefined;u.py=undefined}});
 }
 function endTurn(g){
@@ -584,6 +589,12 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:11,d:'18 nov 2026',t:'Suoni, partita salvata, mappe a numero',n:[
+ 'Suoni e vibrazione leggera (movimento, colpi, reclutamento, eruzione, vittoria e sconfitta), sintetizzati dal telefono. Si spengono dal tasto nel menu.',
+ 'Partita salvata: se chiudi l’app a metà, nel menu trovi «Continua partita» con round e numero della mappa.',
+ 'Mappe a numero: ogni partita ha un numero, mostrato all’inizio e alla fine. Scrivilo nel campo del menu per rigiocare la stessa mappa, oppure usa «Rigioca questa mappa».',
+ 'Annulla ora ritira anche l’ultima recluta del turno, restituendo le monete.',
+ 'Statistiche per livello: serie di vittorie migliore e vittoria più veloce.']},
 {v:10,d:'18 nov 2026',t:'Grafica di prova: oggetti di Muse',n:[
  'Con «Grafica di prova» accesa, ora anche gli oggetti sono i disegni di Muse (consegna oggetti): pini e boschetti sul bosco, montagne innevate, stazione meteo con le coppe che girano (più veloci col vento), bandiere oro e viola che sventolano.',
  'Il vulcano è una casella intera disegnata: calmo, con la lava accesa quando manca 1 round all’eruzione, annerito dopo l’eruzione. Il numero del conto alla rovescia resta in alto a destra.',
@@ -652,18 +663,20 @@ function logBuild(){
   }
 }
 let level=AI_LEVELS[LS.get('isole-level')]?LS.get('isole-level'):'normale';
-function freshGame(seed){const n=newGame(seed);n.bonus=[0,AI_LEVELS[level].bonus];return n}
+function freshGame(seed){const n=newGame(seed);n.lvl=level;n.bonus=[0,AI_LEVELS[level].bonus];return n}
 let g=freshGame(),sel=null,inspect=null,tinfo=null,busy=false,started=false,fast=false;
 function getStats(){try{return JSON.parse(LS.get('isole-stats')||'{}')||{}}catch(e){return {}}}
 function addStat(res){
   const s=getStats(),r=s[level]||{w:0,l:0,d:0};
-  r[res]=(r[res]||0)+1;s[level]=r;LS.set('isole-stats',JSON.stringify(s));
+  r[res]=(r[res]||0)+1;
+  if(res==='w'){r.st=(r.st||0)+1;r.bs=Math.max(r.bs||0,r.st);if(!r.fr||g.round<r.fr)r.fr=g.round}else r.st=0;
+  s[level]=r;LS.set('isole-stats',JSON.stringify(s));
 }
 function statsText(){
   const r=getStats()[level];
   if(!r)return 'Nessuna partita a questo livello.';
   const n=(r.w||0)+(r.l||0)+(r.d||0);
-  return AI_LEVELS[level].n+': '+(r.w||0)+' vittorie su '+n+(n===1?' partita':' partite')+'.';
+  return AI_LEVELS[level].n+': '+(r.w||0)+' vittorie su '+n+(n===1?' partita':' partite')+'.'+(r.bs>1?' Serie migliore: '+r.bs+'.':'')+(r.fr?' Vittoria più veloce: round '+r.fr+'.':'');
 }
 function buildSeg(){
   const el=$('seg');el.innerHTML='';
@@ -674,6 +687,21 @@ function buildSeg(){
     el.appendChild(b);
   }
   $('stats').textContent=statsText();
+}
+/* --- suoni e vibrazione (sintetizzati, nessun file) --- */
+let SND=LS.get('isole-snd')!=='0',AC=null;
+function sfx(k){
+  if(!SND)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended')AC.resume();
+    const T={move:[[330,.05,'triangle',.07]],hit:[[180,.09,'square',.09],[110,.12,'square',.08]],kill:[[220,.08,'square',.09],[140,.1,'square',.09],[80,.2,'sawtooth',.08]],
+      recruit:[[392,.07,'triangle',.08],[523,.1,'triangle',.08]],erupt:[[70,.5,'sawtooth',.14],[55,.6,'sawtooth',.12]],
+      win:[[523,.12,'triangle',.1],[659,.12,'triangle',.1],[784,.25,'triangle',.1]],lose:[[330,.18,'triangle',.1],[262,.18,'triangle',.1],[196,.4,'triangle',.1]],turn:[[262,.06,'sine',.06]]}[k];
+    let t=AC.currentTime;
+    for(const [f,d,w,v] of T){const o=AC.createOscillator(),gn=AC.createGain();o.type=w;o.frequency.value=f;gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(gn);gn.connect(AC.destination);o.start(t);o.stop(t+d+.02);t+=d*.8}
+  }catch(e){}
+  if(!REDUCE&&navigator.vibrate&&(k==='hit'||k==='kill'||k==='erupt'))try{navigator.vibrate(k==='erupt'?[60,40,80]:k==='kill'?40:20)}catch(e){}
 }
 const lay={cs:40,dz:8,fh:32,th:8,ox:0,oy:0,cw:0,ch:0,dpr:1};
 const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
@@ -772,12 +800,13 @@ function renderInfo(){
   }
   bEnd.classList.toggle('pulse',!g.units.some(x=>x.o===0&&!x.done));
 }
+function canUndoRec(){return canPlay()&&g.lastRec&&g.units.some(u=>u.id===g.lastRec)}
 function canUndo(){
-  return canPlay()&&!!sel&&g.units.includes(sel)&&sel.o===0&&sel.moved&&!sel.done&&sel.px!==undefined&&wNow(g).t!=='nebbia';
+  return canUndoRec()||canPlay()&&!!sel&&g.units.includes(sel)&&sel.o===0&&sel.moved&&!sel.done&&sel.px!==undefined&&wNow(g).t!=='nebbia';
 }
 function renderBtns(){
   const pl=g.turn===0&&!busy&&g.over===null&&started;
-  $('bEnd').disabled=!pl;$('bRec').disabled=!pl;$('bUndo').disabled=!canUndo();
+  $('bEnd').disabled=!pl;$('bRec').disabled=!pl;$('bUndo').disabled=!(canUndo()||canUndoRec());
 }
 function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck()}
 
@@ -839,7 +868,7 @@ function recSheet(){
     const r=canRecruit(g,0,t);if(r&&!why)why=r;
     const b=document.createElement('button');b.type='button';b.className='rec';b.disabled=!!r;
     b.innerHTML=`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
-    b.onclick=()=>{if(doRecruit(g,0,t)){$('ovRec').hidden=true;sel=null;inspect=null;toast(UT[t].n+' reclutato');refreshUI()}};
+    b.onclick=()=>{if(doRecruit(g,0,t)){g.lastRec=g.units[g.units.length-1].id;sfx('recruit');$('ovRec').hidden=true;sel=null;inspect=null;toast(UT[t].n+' reclutato');refreshUI()}};
     l.appendChild(b);
   }
   $('recNote').textContent='Hai '+g.coins[0]+' monete. L’unità compare sulla tua base e agisce dal turno dopo.'+(why?' '+why:'');
@@ -1437,7 +1466,7 @@ function tap(x,y){
   const u=unitAt(g,x,y);
   if(sel&&g.units.includes(sel)&&sel.o===0){
     if(u&&u.o===1&&sees(g,0,u)&&!sel.done&&targetsFrom(g,sel,sel.x,sel.y).includes(u)){
-      const r=doAttack(g,sel,u);
+      const r=doAttack(g,sel,u);sfx(r.killed||r.died?'kill':'hit');
       if(r.killed)toast(UT[u.t].n+' eliminato');
       if(r.died)toast('Il tuo '+UT[sel.t].n+' è caduto');
       inspect=null;tinfo=null;if(!g.units.includes(sel))sel=null;
@@ -1445,7 +1474,7 @@ function tap(x,y){
     }
     if(!u&&!sel.moved&&!sel.done){
       const rc=reach(g,sel);
-      if(rc.has(x+','+y)){doMove(g,sel,x,y);afterAction();return}
+      if(rc.has(x+','+y)){doMove(g,sel,x,y);sfx('move');afterAction();return}
     }
   }
   if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null}
@@ -1457,15 +1486,15 @@ function afterAction(){
   tinfo=null;
   checkCapture(g);
   if(g.over!==null){finish();return}
-  refreshUI();
+  saveGame();refreshUI();
 }
 function finish(){
   tutEnd();
   refreshUI();
-  const o=g.over;
+  const o=g.over;sfx(o===0?'win':'lose');clearSave();
   if(!g.counted){g.counted=true;addStat(o===0?'w':o===1?'l':'d')}
   $('endT').textContent=o===0?'Hai vinto!':o===1?'Hai perso':'Pareggio';
-  $('endD').textContent=g.why;
+  $('endD').textContent=g.why+' (mappa '+g.seed+')';
   setTimeout(()=>{$('ovEnd').hidden=false},fast?0:1300);
 }
 async function computerTurn(){
@@ -1478,7 +1507,9 @@ async function computerTurn(){
     const a=aiStep(g,1,L);
     if(!a)break;
     refreshUI();
-    if(a.recruit){await sleep(350);continue}
+    if(a.recruit){sfx('recruit');await sleep(350);continue}
+    if(a.moved)sfx('move');
+    if(a.attacked)setTimeout(()=>sfx('hit'),fast?0:250);
     await sleep(a.moved?420:60);
     if(a.attacked)await sleep(a.res&&a.res.counter?1000:650);
   }
@@ -1490,7 +1521,8 @@ function afterEnd(){
   if(g.over!==null){busy=false;finish();return}
   if(g.turn===1){computerTurn();return}
   busy=false;refreshUI();
-  if(g.erupted&&!REDUCE)flash=1;
+  if(g.erupted){sfx('erupt');if(!REDUCE)flash=1}else sfx('turn');
+  saveGame();
   toast(g.erupted?'Il vulcano erutta! '+(g.eruptN?g.eruptN+(g.eruptN===1?' unità colpita':' unità colpite'):'Nessuno colpito'):g.thawN?'Il ghiaccio si scioglie':g.windN?'Il vento sposta '+g.windN+' unità':'Round '+g.round+' · '+wName(wNow(g)),1800);
 }
 function playerEnd(){
@@ -1500,16 +1532,37 @@ function playerEnd(){
   afterEnd();
 }
 function undoMove(){
-  if(!canUndo())return;
+  if(canUndoRec()&&!(sel&&g.units.includes(sel)&&sel.moved&&!sel.done&&sel.px!==undefined)){
+    const i=g.units.findIndex(u=>u.id===g.lastRec),u=g.units[i];g.coins[0]+=UT[u.t].cost;g.units.splice(i,1);g.lastRec=0;sel=null;toast('Recluta annullata');refreshUI();return;
+  }
+  if(!(canPlay()&&!!sel&&g.units.includes(sel)&&sel.o===0&&sel.moved&&!sel.done&&sel.px!==undefined&&wNow(g).t!=='nebbia'))return;
   sel.x=sel.px;sel.y=sel.py;sel.moved=false;sel.px=undefined;sel.py=undefined;
   refreshUI();
 }
-function startGame(withTut){
+const SAVEK='isole-save';
+function saveGame(){
+  if(!started||g.over!==null||g.turn!==0)return;
+  try{const c=Object.assign({},g,{ev:[],fx:[],trail:[]});LS.set(SAVEK,JSON.stringify({g:c,level}))}catch(e){}
+}
+function clearSave(){try{LS.set(SAVEK,'')}catch(e){}}
+function loadSave(){try{const t=LS.get(SAVEK);if(!t)return null;const o=JSON.parse(t);return o&&o.g&&Array.isArray(o.g.units)&&o.g.over===null?o:null}catch(e){return null}}
+function contButton(){const o=loadSave();$('bCont').hidden=!o;if(o)$('bCont').textContent='Continua partita · round '+o.g.round+' · mappa '+o.g.seed}
+function resumeGame(){
+  const o=loadSave();if(!o)return;
+  $('ovStart').hidden=true;$('ovEnd').hidden=true;$('ovRec').hidden=true;tutEnd();
+  strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;camFit();
+  if(AI_LEVELS[o.level]){level=o.level;LS.set('isole-level',level)}
+  g=o.g;g.ev=[];g.fx=[];g.trail=[];sel=null;inspect=null;tinfo=null;busy=false;started=true;
+  refreshUI();toast('Partita ripresa · '+wName(wNow(g)),1800);
+}
+let lastSeed=0;
+function startGame(withTut,seed){
   $('ovStart').hidden=true;$('ovEnd').hidden=true;$('ovRec').hidden=true;
   tutEnd();
   strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;camFit();
-  g=freshGame();sel=null;inspect=null;tinfo=null;busy=false;started=true;
-  refreshUI();toast(wName(wNow(g))+' · tocca a te',1800);
+  if(!seed){const v=parseInt(($('seedIn')||{}).value,10);seed=v>0?v:0}
+  g=freshGame(seed);lastSeed=g.seed;sel=null;inspect=null;tinfo=null;busy=false;started=true;saveGame();
+  refreshUI();toast('Mappa '+g.seed+' · '+wName(wNow(g))+' · tocca a te',2200);
   if(withTut===true||(!tutSeen&&!LS.get('isole-tut')))tutStart();
 }
 $('bEnd').onclick=playerEnd;
@@ -1517,16 +1570,21 @@ $('bUndo').onclick=undoMove;
 $('bRec').onclick=()=>{if(!canPlay())return;recSheet();$('ovRec').hidden=false};
 $('bRecClose').onclick=()=>{$('ovRec').hidden=true};
 $('bPlay').onclick=()=>startGame(false);
+$('bCont').onclick=resumeGame;
+$('bSame').onclick=()=>startGame(false,lastSeed);
+$('bSnd').onclick=()=>{SND=!SND;LS.set('isole-snd',SND?'1':'0');sndLabel();sfx('recruit')};
+function sndLabel(){$('bSnd').textContent='Suoni e vibrazione: '+(SND?'accesi':'spenti')}
+sndLabel();contButton();
 $('bTut').onclick=()=>startGame(true);
 $('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
 gpLabel();
 $('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;
 $('bLog').onclick=()=>{logBuild();$('ovLog').hidden=false};
 $('bLogClose').onclick=()=>{$('ovLog').hidden=true};
-$('bAgain').onclick=()=>startGame(false);
+$('bAgain').onclick=()=>{$('seedIn').value='';startGame(false,0)};
 $('tutNext').onclick=tutNext;
 $('tutSkip').onclick=tutEnd;
-$('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();$('ovStart').hidden=false};
+$('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStart').hidden=false};
 // Un tocco breve sceglie/muove/attacca; un dito che si sposta trascina la mappa; due dita zoomano.
 const ptrs=new Map();let gest=null;
 const cvPos=e=>{const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};

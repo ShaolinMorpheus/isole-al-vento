@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v11 · 18 nov 2026 — Suoni, partita salvata, mappe a numero
+- Suoni/vibrazione (spegnibili), «Continua partita», mappe a numero + «Rigioca questa mappa», annulla recluta, serie e vittoria più veloce nelle statistiche.
+
 ## v10 · 18 nov 2026 — Grafica di prova: oggetti di Muse
 - Con «Grafica di prova» accesa: pini/boschetti, montagne, stazione meteo animata (3 fotogrammi, velocità secondo il meteo), bandiere oro/viola, vulcano a 3 stati (calmo / arde a ≤1 round / eruttato).
 - Pedine ed effetti ancora vettoriali. Regole invariate.
