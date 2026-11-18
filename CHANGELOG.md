@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v19 · 19 nov 2026 — Pericolo eruzione sopra agli alberi
+- Segni di pericolo del vulcano disegnati sopra oggetti e unità, più marcati.
+
 ## v18 · 19 nov 2026 — Musica e suoni del meteo
 - Musica di sottofondo sintetizzata (tasto «Musica»), suoni del meteo di qualche secondo a ogni round, audio in pausa in secondo piano.
 
