@@ -7,7 +7,7 @@
 - Barra vita più grossa con numero
 - Unità pronte: salto + alone dorato; usate: grigie
 - Pedine animate (respiro, passo, sciamano che fluttua)
-- Prova «Terreno» nel menu: caselle continue, 4 aspetti
+- Prova «Terreno» nel menu: caselle continue, 5 aspetti (l'ultimo variato)
 
 ## v20 · 19 nov 2026 — Si capisce quali unità si muovono
 - Anello dorato (da muovere), rosso (può attaccare), spunta (finita); conteggio nel pannello; Fine turno pulsa solo a fine azioni.
