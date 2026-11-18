@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v13 · 19 nov 2026 — Grafica di prova: pedine di Muse
+- 5 unità × oro/viola, posa normale e stanca, dietro «Grafica di prova».
+
 ## v12 · 18 nov 2026 — Percorso a passi, bandiere fluide, oggetti 3D di prova
 - Le pedine camminano casella per casella. Bandiere con stoffa a strisce, ondeggiamento continuo e più rapido. Tasto «Oggetti 3D (prova)»: alberi/montagne variati e sconfinanti.
 

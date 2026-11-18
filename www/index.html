@@ -612,6 +612,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:13,d:'19 nov 2026',t:'Grafica di prova: pedine di Muse',n:[
+ 'Con «Grafica di prova» accesa, le 5 unità (esploratore, guerriero, arciere, cavaliere, sciamano) sono i disegni di Muse, in oro per te e viola per il computer.',
+ 'Quando una tua unità ha già agito nel turno, passa al disegno «stanco» (colori più spenti). Lampo bianco quando viene colpita, barra della vita sopra la testa.',
+ 'Anelli di selezione, frecce e colpi restano disegnati dal gioco. Spento il tasto, tornano le pedine di prima.']},
 {v:12,d:'18 nov 2026',t:'Percorso a passi, bandiere fluide, oggetti 3D di prova',n:[
  'Le pedine ora camminano casella per casella lungo il percorso fino a quella toccata, invece di saltarci sopra (anche quelle del computer). Il colpo parte quando sono arrivate.',
  'Le bandiere ondeggiano in modo continuo e più rapido: la stoffa è divisa a strisce che si muovono in tempo reale, e col vento si agitano ancora di più.',
@@ -743,12 +747,15 @@ function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sf
   return L;
 }
 function gpLoad(){
-  if(GP.loading)return;GP.loading=true;goLoad();
+  if(GP.loading)return;GP.loading=true;goLoad();guLoad();
   for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
 }
 const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
   A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
 function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
+const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano'}};
+function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','viola'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
+function guReady(){return gpReady()&&!!GU.im.esploratore_oro_normale}
 function goReady(){return gpReady()&&!!GO.im.pino_a&&!!GO.im.stazione_0}
 function goDraw(n,X,gy,cs,al,k2,flip){ // ancora (128, altezza−24) del disegno posata su (X,gy); k2 = ingrandimento, flip = specchio
   const im=GO.im[n];if(!im)return false;const sc=cs/256*(k2||1);
@@ -1202,6 +1209,23 @@ function drawUnit(u,hidden,sc,al){
   const scaled=sc!==undefined&&sc!==1;
   if(scaled){ctx.save();ctx.translate(x,y);ctx.scale(sc,sc);ctx.translate(-x,-y)}
   ctx.globalAlpha=(tired?.55:1)*(al===undefined?1:al);
+  if(guReady()){ // pedina disegnata da Muse (prova): l'ombra è già nel disegno
+    const tn=GU.T[u.t],pz=tired?'stanca':'normale',im=GU.im[tn+'_'+(u.o===0?'oro':'viola')+'_'+pz];
+    if(im){
+      const k=cs/256*1.06,h=GU.H[tn],lift=bob*1.4;
+      ctx.globalAlpha=al===undefined?1:al;
+      ctx.drawImage(im,x-128*k,gy-(h-24)*k-lift,256*k,h*k);
+      if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,x-128*k,gy-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
+      ctx.globalAlpha=al===undefined?1:al;
+      const hw=cs*.58,hx=x-hw/2,hy=gy-(h-24)*k-lift+cs*.02;
+      ctx.fillStyle='rgba(8,18,26,.85)';rr(hx-1.5,hy-1.5,hw+3,cs*.14+3,3);ctx.fill();
+      const f2=Math.max(0,u.hv===undefined?u.hp:u.hv)/UT[u.t].hp;ctx.fillStyle=f2>.55?'#59cdb7':f2>.28?'#f2b84b':'#ef6a5a';
+      rr(hx,hy,hw*f2,cs*.14,2);ctx.fill();
+      ctx.globalAlpha=1;
+      if(scaled)ctx.restore();
+      return;
+    }
+  }
   // ombra e base (la pedina sta in piedi come un segnalino)
   ctx.fillStyle='rgba(0,0,0,'+(.3-bob/cs*2).toFixed(2)+')';ctx.beginPath();ctx.ellipse(x,gy+1.5,r*.95,r*.3,0,0,7);ctx.fill();
   ctx.fillStyle='#1a1424';ctx.beginPath();ctx.ellipse(x,gy+3.2,r*.82,r*.28,0,0,7);ctx.fill();
