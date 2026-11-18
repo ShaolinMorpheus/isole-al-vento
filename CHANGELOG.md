@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v14 · 19 nov 2026 — Grafica di prova: effetti e meteo di Muse
+- Meteo a tessere, fiocchi/foglie, colpi e frecce disegnati, eruzione con lava/fumo/cenere, caselle libere/attacco/pericolo e anello di selezione.
+
 ## v13 · 19 nov 2026 — Grafica di prova: pedine di Muse
 - 5 unità × oro/viola, posa normale e stanca, dietro «Grafica di prova».
 
