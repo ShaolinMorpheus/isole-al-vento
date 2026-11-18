@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v17 · 19 nov 2026 — Grafica di prova: schermate di Muse
+- Sfondo e logo del menu, sfondi vittoria/sconfitta/pareggio dietro «Grafica di prova». Icona app e caricamento non ancora attivi.
+
 ## v16 · 19 nov 2026 — Grafica di prova: interfaccia di Muse
 - Pannelli a 9 parti, bottoni a 3 stati, zoom, icone meteo/unità/moneta dietro «Grafica di prova».
 

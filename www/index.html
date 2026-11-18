@@ -111,6 +111,11 @@ body.gpui #zoomBox button:active{background-image:url(assets/interfaccia/ui_zoom
 body.gpui #zoomBox button[disabled]{background-image:url(assets/interfaccia/ui_zoom_disattivo.png);opacity:1}
 .wnow img{width:26px;height:26px;flex:none}.wnext img{width:16px;height:16px}
 .rec img.ui{width:40px;height:40px;flex:none}.stat .c img{width:22px;height:22px;vertical-align:-5px;margin-right:2px}
+body.gpui #ovStart{background:linear-gradient(rgba(5,14,20,.12),rgba(5,14,20,.12)),url(assets/schermate/sfondo_menu.webp) center/cover no-repeat}
+body.gpui #ovEnd.vit{background:url(assets/schermate/sfondo_vittoria.webp) center/cover no-repeat}
+body.gpui #ovEnd.sco{background:url(assets/schermate/sfondo_sconfitta.webp) center/cover no-repeat}
+body.gpui #ovEnd.par{background:url(assets/schermate/sfondo_pareggio.webp) center/cover no-repeat}
+body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;background:url(assets/schermate/logo_titolo.png) center/contain no-repeat}
 @media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}#toast{transition:none}}
 </style></head><body>
 
@@ -643,6 +648,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:17,d:'19 nov 2026',t:'Grafica di prova: schermate di Muse',n:[
+ 'Con «Grafica di prova» accesa, il menu iniziale ha lo sfondo con le due isole (oro e viola) e il logo «Isole al Vento» al posto del titolo scritto.',
+ 'A fine partita lo sfondo cambia: isola in festa se vinci, cielo nuvoloso con la bandiera viola se perdi, due bandiere pari se pareggi.',
+ 'L’icona dell’app e la schermata di caricamento di Muse non sono ancora attive.']},
 {v:16,d:'19 nov 2026',t:'Grafica di prova: interfaccia di Muse',n:[
  'Con «Grafica di prova» accesa, pannelli (meteo, monete, informazioni, schede, righe di reclutamento) e bottoni (Recluta, Annulla, Fine turno, zoom) usano i disegni di Muse, con i tre stati normale, premuto e disattivato.',
  'Icone di Muse per il meteo (anche nel «Dopo»), per le unità nella lista di reclutamento e per la moneta.',
@@ -1674,6 +1683,7 @@ function finish(){
   refreshUI();
   const o=g.over;sfx(o===0?'win':'lose');clearSave();
   if(!g.counted){g.counted=true;addStat(o===0?'w':o===1?'l':'d')}
+  $('ovEnd').className='ov '+(o===0?'vit':o===1?'sco':'par');
   $('endT').textContent=o===0?'Hai vinto!':o===1?'Hai perso':'Pareggio';
   $('endD').textContent=g.why+' (mappa '+g.seed+')';
   {const st=g.st||{lost:0,kills:0,erupt:0,burn:0};$('endS').textContent='Round giocati: '+Math.min(g.round,MAXR)+' · nemici sconfitti: '+st.kills+' · unità perse: '+st.lost+' · eruzioni: '+st.erupt+(st.burn?' · scottature di cenere: '+st.burn:'')}
