@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v15 · 19 nov 2026 — Cenere calda, riepilogo, pedina stanca
+- Cenere dell'eruzione calda per 1 round (−1), riepilogo di fine partita, pedina stanca più bassa.
+
 ## v14 · 19 nov 2026 — Grafica di prova: effetti e meteo di Muse
 - Meteo a tessere, fiocchi/foglie, colpi e frecce disegnati, eruzione con lava/fumo/cenere, caselle libere/attacco/pericolo e anello di selezione.
 

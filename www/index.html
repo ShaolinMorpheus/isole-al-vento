@@ -168,6 +168,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   <div class="card">
     <h2 id="endT"></h2>
     <p id="endD"></p>
+    <p id="endS" style="opacity:.85;font-size:.92em"></p>
     <button class="btn" id="bAgain" type="button" style="min-height:48px">Nuova partita</button>
     <button class="btn alt" id="bSame" type="button" style="min-height:44px">Rigioca questa mappa</button>
     <button class="btn alt" id="bMenu" type="button" style="min-height:44px">Cambia livello</button>
@@ -346,6 +347,9 @@ function doAttack(g,a,d){
   if(d.hp>0&&md(a,d)<=rgOf(g,d)){counter=counterOf(g,d,a);a.hp-=counter;addFx(g,a.x,a.y,'−'+counter,'#ffc07a',T_COUNTER+tHit);a.hold=T_COUNTER+tHit}
   a.moved=true;a.done=true;
   const res={dm,counter,killed:d.hp<=0,died:a.hp<=0,pushed:!!pushed,bump:h.bump};
+  g.st=g.st||{lost:0,kills:0,erupt:0,burn:0};
+  if(res.killed){if(d.o===0)g.st.lost++;else g.st.kills++}
+  if(res.died){if(a.o===0)g.st.lost++;else g.st.kills++}
   // evento per l'animazione: le unità cadute restano visibili finché il colpo non arriva
   g.ev.push({aU:a,dU:d,aHp0,dHp0,ax:a.x,ay:a.y,dx:dx0,dy:dy0,dist,dm,counter,lead,push:pushed,bump:h.bump,killed:res.killed,died:res.died});
   g.units=g.units.filter(u=>u.hp>0);
@@ -429,18 +433,23 @@ function thaw(g){
 // I prati attorno diventano cenere (costano 2 passi, nessun riparo).
 function eruptionRound(g){return Math.ceil(g.round/ERUPT)*ERUPT}
 function erupt(g){
-  g.erupted=false;g.eruptN=0;
+  g.erupted=false;g.eruptN=0;g.st=g.st||{lost:0,kills:0,erupt:0,burn:0};
+  if(g.hot){ // la cenere dell'eruzione scotta ancora per un round
+    for(const u of g.units)if(g.hot.some(h=>h.x===u.x&&h.y===u.y)){u.hp-=1;addFx(g,u.x,u.y,'−1','#ff8a78');g.eruptN++;g.st.burn++}
+    for(const u of g.units)if(u.hp<=0){g.ev.push({k:'die',u});if(u.o===0)g.st.lost++;else g.st.kills++}
+    g.units=g.units.filter(u=>u.hp>0);g.hot=null;checkElim(g);
+  }
   if(g.round%ERUPT!==0)return;
-  g.erupted=true;
+  g.erupted=true;g.st.erupt++;g.hot=null;
   for(const u of g.units){
     const d=md(u,VOL),dm=d===1?3:d===2?1:0;
     if(dm){u.hp-=dm;addFx(g,u.x,u.y,'−'+dm,'#ff8a78');g.eruptN++}
   }
   for(const [dx,dy] of Object.values(DIRS)){
     const x=VOL.x+dx,y=VOL.y+dy;
-    if(g.map[y][x]==='P')g.map[y][x]='C';
+    if(g.map[y][x]==='P'){g.map[y][x]='C';(g.hot=g.hot||[]).push({x,y})}
   }
-  for(const u of g.units)if(u.hp<=0)g.ev.push({k:'die',u});
+  for(const u of g.units)if(u.hp<=0){g.ev.push({k:'die',u});if(u.o===0)g.st.lost++;else g.st.kills++}
   g.units=g.units.filter(u=>u.hp>0);
   checkElim(g);
 }
@@ -612,6 +621,10 @@ const LS={
 };
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:15,d:'19 nov 2026',t:'Cenere calda, riepilogo, pedina stanca',n:[
+ 'Dopo l’eruzione le quattro caselle di cenere attorno al vulcano restano calde per un round: chi ci sta sopra a fine round perde 1 vita (segnate con −1 e il triangolo di avviso). Dal round dopo sono normali.',
+ 'A fine partita compare un riepilogo: round giocati, nemici sconfitti, unità perse, eruzioni e scottature di cenere.',
+ 'Con «Grafica di prova» la pedina stanca è anche un po’ più bassa, oltre ai colori più spenti.']},
 {v:14,d:'19 nov 2026',t:'Grafica di prova: effetti e meteo di Muse',n:[
  'Con «Grafica di prova» accesa: pioggia, nebbia, gelo e vento sono tessere di Muse che scorrono su due strati, con fiocchi di neve (gelo) e foglie (vento) che volano.',
  'Colpi: lampo di impatto (più grande se uccide), segno di taglio per la mischia, freccia disegnata per gli arcieri e onda d’aria per lo sciamano.',
@@ -674,7 +687,7 @@ const CHANGELOG=[
  'Riquadro che evidenzia il pezzo di schermo di cui si parla; alcuni passi si completano toccando davvero.',
  'Pulsante Tutorial nel menu e “Salta tutorial”.']},
 {v:3,d:'24–25 ott 2026',t:'Vulcano e stazioni meteo',n:[
- 'Vulcano al centro: erutta alla fine dei round 4, 8, 12… (−3 a una casella, −1 a due; il prato accanto diventa cenere).',
+ 'Vulcano al centro: erutta alla fine dei round 4, 8, 12… (−3 a una casella, −1 a due; il prato accanto diventa cenere e scotta ancora un round: −1).',
  'Due stazioni meteo: chi le occupa a fine round prende +1 moneta e vede un round di meteo in più.',
  'Il computer cerca le stazioni e si tiene lontano dal vulcano prima dell’eruzione.']},
 {v:2,d:'24–25 ott 2026',t:'Computer più sveglio e partite più giuste',n:[
@@ -1235,7 +1248,7 @@ function drawUnit(u,hidden,sc,al){
   if(guReady()){ // pedina disegnata da Muse (prova): l'ombra è già nel disegno
     const tn=GU.T[u.t],pz=tired?'stanca':'normale',im=GU.im[tn+'_'+(u.o===0?'oro':'viola')+'_'+pz];
     if(im){
-      const k=cs/256*1.06,h=GU.H[tn],lift=bob*1.4;
+      const k=cs/256*1.06,h=GU.H[tn],lift=bob*1.4-(tired?cs*.04:0);
       ctx.globalAlpha=al===undefined?1:al;
       ctx.drawImage(im,x-128*k,gy-(h-24)*k-lift,256*k,h*k);
       if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,x-128*k,gy-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
@@ -1423,6 +1436,13 @@ function draw(ts){
   for(const st of STATIONS){
     const u=unitAt(g,st.x,st.y);if(!u)continue;
     ctx.strokeStyle=u.o===0?'#f2b84b':'#9a86ee';ctx.lineWidth=2.5;rr(...faceR(st.x,st.y,2),7);ctx.stroke();
+  }
+  if(started&&g.over===null&&g.hot&&g.hot.length){ // cenere ancora calda
+    const ph=.55+.45*Math.sin(tick*4);
+    for(const h of g.hot){const [fx0,fy0,fw0,fh0]=faceR(h.x,h.y,0);
+      if(geReady()){ctx.globalAlpha=.35+.35*ph;ctx.drawImage(GE.im.ui_casella_pericolo,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
+      else{ctx.fillStyle='rgba(255,110,50,'+(.14+.14*ph).toFixed(2)+')';rr(...faceR(h.x,h.y,1),6);ctx.fill()}
+      ctx.fillStyle='rgba(255,232,214,.9)';ctx.font=`600 ${Math.round(cs*.26)}px Fredoka, sans-serif`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('−1',cx(h.x)+cs*.12,cy(h.y)+cs*.08);ctx.textBaseline='alphabetic';}
   }
   // zona dell'eruzione: debole il round prima, forte nel round dell'eruzione
   const nErupt=eruptionRound(g)-g.round;
@@ -1629,6 +1649,7 @@ function finish(){
   if(!g.counted){g.counted=true;addStat(o===0?'w':o===1?'l':'d')}
   $('endT').textContent=o===0?'Hai vinto!':o===1?'Hai perso':'Pareggio';
   $('endD').textContent=g.why+' (mappa '+g.seed+')';
+  {const st=g.st||{lost:0,kills:0,erupt:0,burn:0};$('endS').textContent='Round giocati: '+Math.min(g.round,MAXR)+' · nemici sconfitti: '+st.kills+' · unità perse: '+st.lost+' · eruzioni: '+st.erupt+(st.burn?' · scottature di cenere: '+st.burn:'')}
   setTimeout(()=>{$('ovEnd').hidden=false},fast?0:1300);
 }
 async function computerTurn(){
