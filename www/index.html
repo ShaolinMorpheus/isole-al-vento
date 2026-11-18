@@ -650,7 +650,7 @@ const LS={
   get(k){try{return localStorage.getItem(k)}catch(e){return null}},
   set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 };
-let LOOK=+(LS.get('isole-look')||0)||0;
+let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
 {v:21,d:'19 nov 2026',t:'Più spazio al campo, vita con numero, pedine animate',n:[
@@ -658,7 +658,7 @@ const CHANGELOG=[
 'Barra della vita più grossa con il numero dei punti vita dentro',
 'Le unità che puoi ancora muovere saltellano con un alone dorato; quelle già usate diventano grigie',
 'Pedine animate: respirano, camminano con piccoli salti quando si spostano, lo sciamano fluttua',
-'Nuova prova «Terreno» nel menu: caselle continue senza spazi (5 aspetti; quello «variato» cambia verso, ritaglio e luce di ogni casella)'
+'Nuova prova «Terreno» nel menu: caselle continue senza spazi (6 aspetti). Il nuovo «tutt’uno» è quello di base: erba sfumata senza bordi, laghi fusi nel prato, griglia appena accennata'
 ]},
 {v:20,d:'19 nov 2026',t:'Si capisce quali unità si muovono',n:[
  'Anello dorato che pulsa sotto le unità che puoi ancora muovere; anello rosso su quelle che hanno già mosso ma possono ancora attaccare; spunta verde e colori spenti per quelle che hanno finito (anche se hanno mosso e non hanno nemici a tiro).',
@@ -1170,6 +1170,51 @@ function drawPlinth(){
   for(let i=1;i<W;i++){const xx=lay.ox+i*cs+(i%2?-3:4);ctx.moveTo(xx,y0+bh+2);ctx.lineTo(xx+(i%2?2:-2),y0+bh+th*.7)}
   ctx.stroke();
 }
+
+/* Terreno «tutt'uno»: strato base + strato di erba sfumata sovrapposta (nessun bordo visibile) + laghi/ceneri/vulcano sfumati */
+const GCACHE=new Map();
+function featherTile(im,sx,sy,sw,S,r0,flipx,flipy,rot){
+  const c=document.createElement('canvas');c.width=c.height=Math.max(8,Math.round(S));const q=c.getContext('2d');
+  q.translate(c.width/2,c.height/2);if(rot)q.rotate(Math.PI);q.scale(flipx?-1:1,flipy?-1:1);
+  q.drawImage(im,sx,sy,sw,sw,-c.width/2,-c.height/2,c.width,c.height);q.setTransform(1,0,0,1,0,0);
+  const gr=q.createRadialGradient(c.width/2,c.height/2,c.width*r0,c.width/2,c.height/2,c.width*.5);
+  gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');
+  q.globalCompositeOperation='destination-in';q.fillStyle=gr;q.fillRect(0,0,c.width,c.height);return c;
+}
+function groundOne(gelo,nebbia,seen){
+  const cs=lay.cs,fh=cy(1)-cy(0),dpr=lay.dpr;
+  const ready=['prato_a','prato_b'].every(n=>GP.mips[n]);if(!ready)return false;
+  const key0=Math.round(cs*dpr);if(GCACHE.get('k')!==key0){GCACHE.clear();GCACHE.set('k',key0)}
+  const hh=(x,y)=>((x*2654435761)^(y*40503)^(x*y*97))>>>0;
+  const cells=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){const t=tileAt(g,x,y);cells.push({x,y,t,nm:gpName(t,x,y,gelo)})}
+  const gwin=(im,h)=>{const sc=im.width/256,sz=(150+(h%44))*sc;return[(h>>>6)%1000/1000*(194*sc-sz)+(im.width-194*sc)/2,(h>>>16)%1000/1000*(194*sc-sz),sz]};
+  ctx.save();ctx.beginPath();ctx.rect(cx(0),cy(0),W*cs,H*fh);ctx.clip();
+  // 0) base piena
+  for(const c of cells){const h=hh(c.x,c.y),im=gpPick((h>>>3)&1?'prato_a':'prato_b',cs*dpr),[sx,sy,sw]=gwin(im,h);
+    ctx.drawImage(im,sx,sy,sw,sw,cx(c.x)-.5,cy(c.y)-.5,cs+1,fh+1)}
+  // 1) erba sfumata sovrapposta, tessere più grandi e ruotate a caso
+  for(const c of cells){const h=hh(c.x+31,c.y+17),nm=(h>>>2)&1?'prato_a':'prato_b',k='g'+nm+(h&255);
+    let t=GCACHE.get(k);if(!t){const im=gpPick(nm,cs*dpr*1.8),[sx,sy,sw]=gwin(im,h);t=featherTile(im,sx,sy,sw,cs*dpr*1.8,.26,(h>>1)&1,h&1,(h>>3)&1);GCACHE.set(k,t)}
+    const S=cs*1.8;ctx.drawImage(t,cx(c.x)+cs/2-S/2,cy(c.y)+fh/2-S/2*fh/cs,S,S*fh/cs)}
+  // 2) laghi, ghiaccio, cenere, vulcano, basi: sfumati sopra l'erba
+  for(const c of cells){const nm=c.nm;if(!nm||nm.startsWith('prato')||nm.startsWith('bosco')||nm.startsWith('monte')||nm.startsWith('stazione'))continue;
+    const vul=nm.startsWith('vulcano_'),im=vul?GO.im['terreno_'+nm]:gpPick(nm,cs*dpr);if(!im)continue;
+    const k='f'+nm+Math.round(cs);let t=GCACHE.get(k);
+    if(!t){const sc=im.width/256,sz=vul?im.width:194*sc;t=featherTile(im,vul?0:(im.width-sz)/2,0,sz,cs*dpr*1.14,nm.startsWith('base')?.44:.36,0,0,0);GCACHE.set(k,t)}
+    const S=cs*1.14;ctx.drawImage(t,cx(c.x)+cs/2-S/2,cy(c.y)+fh/2-S/2*fh/cs,S,S*fh/cs)}
+  // 3) macchie di luce continue su tutto il campo
+  const vn=(a,b)=>{const hs=(i,j)=>(((i*374761393+j*668265263)^(i*j*2246822519))>>>0)%1000/1000;const i=Math.floor(a),j=Math.floor(b),u=a-i,v=b-j,su=u*u*(3-2*u),sv=v*v*(3-2*v);return(hs(i,j)*(1-su)+hs(i+1,j)*su)*(1-sv)+(hs(i,j+1)*(1-su)+hs(i+1,j+1)*su)*sv};
+  const st=Math.max(3,Math.round(cs/6));
+  for(let yy=0;yy<H*cs;yy+=st)for(let xx=0;xx<W*cs;xx+=st){const nv=vn(xx/cs*.5+3,yy/cs*.5+7)*.65+vn(xx/cs*1.3+11,yy/cs*1.3+5)*.35-.5;
+    ctx.fillStyle=nv>0?'rgba(255,250,190,'+(nv*.3).toFixed(3)+')':'rgba(0,25,10,'+(-nv*.36).toFixed(3)+')';ctx.fillRect(cx(0)+xx,cy(0)+yy*fh/cs,st+.5,st*fh/cs+.5)}
+  ctx.strokeStyle='rgba(255,255,230,.13)';ctx.lineWidth=Math.max(1,cs*.014);ctx.beginPath(); // griglia appena accennata, per leggere le caselle
+  for(let i=1;i<W;i++){ctx.moveTo(cx(i),cy(0));ctx.lineTo(cx(i),cy(0)+H*fh)}
+  for(let j=1;j<H;j++){ctx.moveTo(cx(0),cy(j));ctx.lineTo(cx(0)+W*cs,cy(j))}
+  ctx.stroke();
+  if(nebbia)for(const c of cells)if(!seen.has(c.x+','+c.y)){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(cx(c.x),cy(c.y),cs,fh)}
+  ctx.restore();
+  return true;
+}
 function drawBlock(x,y,t,gelo,tick,veil){
   const cs=lay.cs,k=cs/40,px=cx(x)+1,py=cy(y),w=cs-2,fh=lay.fh,dz=lay.dz,r=5*k;
   if(GP.on){
@@ -1608,6 +1653,7 @@ function draw(ts){
   const seen=new Set();
   if(nebbia)for(const u of g.units)if(u.o===0)for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.abs(xx)+Math.abs(yy)<=2)seen.add((u.x+xx)+','+(u.y+yy));
   drawPlinth();
+  if(!(GP.on&&LOOK===5&&groundOne(gelo,nebbia,seen)))
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)drawBlock(x,y,tileAt(g,x,y),gelo,tick,nebbia&&!seen.has(x+','+y));
   if(!gpReady()){drawBaseMark(0);drawBaseMark(1)}
   // stazioni occupate: bordo del colore di chi le tiene
@@ -1917,8 +1963,8 @@ function sndLabel(){$('bSnd').textContent='Suoni e vibrazione: '+(SND?'accesi':'
 sndLabel();contButton();
 $('bTut').onclick=()=>startGame(true);
 $('bG3').onclick=()=>{G3=!G3;LS.set('isole-g3',G3?'1':'0');g3Label()};
-const LOOKN=['a caselle separate','continuo','continuo + linee sottili','continuo + sfumature','continuo e variato'];
-$('bLook').onclick=()=>{LOOK=(LOOK+1)%5;LS.set('isole-look',String(LOOK));lookLabel()};
+const LOOKN=['a caselle separate','continuo','continuo + linee sottili','continuo + sfumature','continuo e variato','tutt\'uno (sfumato)'];
+$('bLook').onclick=()=>{LOOK=(LOOK+1)%6;LS.set('isole-look',String(LOOK));lookLabel()};
 function lookLabel(){$('bLook').textContent='Terreno (prova): '+LOOKN[LOOK]}
 function g3Label(){$('bG3').textContent='Oggetti 3D (prova): '+(G3?'accesi':'spenti')}
 g3Label();lookLabel();
