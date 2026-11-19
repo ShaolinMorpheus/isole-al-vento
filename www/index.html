@@ -85,6 +85,15 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .rec .d{font-size:12.5px;color:var(--muted)}
 .rec .p{margin-left:auto;font-family:var(--disp);font-weight:600;color:var(--gold);font-size:18px}
 .rec .t{flex:1;min-width:0}
+.card.menu{overflow:hidden;gap:8px}
+.card.menu .sc{overflow:auto;display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.dt{background:var(--sea);border:1px solid var(--line);border-radius:12px;padding:0 12px;flex:none}
+.dt summary{cursor:pointer;list-style:none;padding:11px 0;font-family:var(--disp);font-weight:600;font-size:16px;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+.dt summary::-webkit-details-marker{display:none}
+.dt summary::after{content:'▾';color:var(--muted);transition:transform .2s}
+.dt[open] summary::after{transform:rotate(180deg)}
+.dt ul{padding-bottom:10px}.dt .wl{padding-bottom:12px}
+.dtb{display:flex;flex-direction:column;gap:8px;padding-bottom:12px}
 .log{gap:10px}
 .log .e{background:var(--sea);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
 .log h3{margin:0;font-family:var(--disp);font-weight:600;font-size:16px;line-height:1.2}
@@ -152,8 +161,9 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
 </div>
 
 <div class="ov" id="ovStart">
-  <div class="card">
+  <div class="card menu">
     <h1>Isole al Vento</h1>
+    <div class="sc">
     <p>Due isole, un solo cielo. Il meteo cambia ogni turno e cambia le regole.</p>
     <div class="seg" id="seg" role="group" aria-label="Livello del computer"></div>
     <p class="st" id="stats"></p>
@@ -161,13 +171,8 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <button class="btn" id="bPlay" type="button" style="min-height:48px">Gioca contro il computer</button>
     <input id="seedIn" type="text" inputmode="numeric" maxlength="9" placeholder="Mappa n. (vuoto = a caso)" aria-label="Numero della mappa" style="min-height:40px;border-radius:12px;border:1px solid #2c4a5c;background:#0f2433;color:#e8f1f4;text-align:center;font:inherit;padding:0 10px">
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
-    <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
-    <button class="btn alt" id="bMus" type="button" style="min-height:44px"></button>
-    <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
-    <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
-    <button class="btn alt" id="bLook" type="button" style="min-height:44px"></button>
-    <button class="tl" id="bLog" type="button" style="align-self:center"></button>
-    <ul>
+    <details class="dt"><summary>Come si gioca</summary>
+      <ul>
       <li>Vinci portando una tua unità sulla base del nemico, o eliminando tutte le sue unità.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
@@ -176,7 +181,19 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
       <li>Il vulcano al centro erutta ogni 4 round: chi è vicino si ferisce e il prato attorno diventa cenere.</li>
       <li>Le due stazioni meteo danno +1 moneta a round a chi le occupa e mostrano un round di meteo in più.</li>
     </ul>
-    <div class="wl" id="wl"></div>
+      <div class="wl" id="wl"></div>
+    </details>
+    <details class="dt"><summary>Impostazioni e prove grafiche</summary>
+      <div class="dtb">
+        <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bMus" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bLook" type="button" style="min-height:44px"></button>
+      </div>
+    </details>
+    <button class="tl" id="bLog" type="button" style="align-self:center"></button>
+    </div>
   </div>
 </div>
 <div class="ov" id="ovLog" hidden>
@@ -653,6 +670,12 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:22,d:'19 nov 2026',t:'Suono di selezione, vibrazione, menu riordinato',n:[
+'Suono (e piccola vibrazione) quando selezioni una tua pedina',
+'Vibrazione ora anche nell’app Android (serve reinstallare l’APK una volta): colpi, eliminazioni, eruzione',
+'Menu iniziale riordinato: restano in vista livello, Gioca e Tutorial; «Come si gioca» e «Impostazioni e prove grafiche» si aprono a tendina',
+'Il menu non esce più dal riquadro: scorre dentro la cornice'
+]},
 {v:21,d:'19 nov 2026',t:'Più spazio al campo, vita con numero, pedine animate',n:[
 'Pannelli di meteo e dati molto più piccoli: il campo di battaglia è più grande',
 'Barra della vita più grossa con il numero dei punti vita dentro',
@@ -796,18 +819,24 @@ function buildSeg(){
 /* --- suoni e vibrazione (sintetizzati, nessun file) --- */
 let G3=LS.get('isole-g3')==='1';
 let SND=LS.get('isole-snd')!=='0',AC=null;
+function buzz(pat){ // vibrazione: plugin nativo Capacitor (app Android) oppure API del browser
+  if(REDUCE||LS.get('isole-vib')==='0')return;
+  try{const H=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.Haptics;
+    if(H&&H.vibrate){const a=[].concat(pat);let t=0;a.forEach((d,i)=>{if(i%2===0)setTimeout(()=>{try{H.vibrate({duration:d})}catch(e){}},t);t+=d});return}
+    if(navigator.vibrate)navigator.vibrate(pat)}catch(e){}
+}
 function sfx(k){
+  if(k==='hit'||k==='kill'||k==='erupt'||k==='sel')buzz(k==='erupt'?[60,40,80]:k==='kill'?40:k==='sel'?12:20);
   if(!SND)return;
   try{
     AC=AC||new (window.AudioContext||window.webkitAudioContext)();
     if(AC.state==='suspended')AC.resume();
-    const T={move:[[330,.05,'triangle',.07]],hit:[[180,.09,'square',.09],[110,.12,'square',.08]],kill:[[220,.08,'square',.09],[140,.1,'square',.09],[80,.2,'sawtooth',.08]],
+    const T={sel:[[587,.045,'triangle',.08],[880,.07,'sine',.07]],move:[[330,.05,'triangle',.07]],hit:[[180,.09,'square',.09],[110,.12,'square',.08]],kill:[[220,.08,'square',.09],[140,.1,'square',.09],[80,.2,'sawtooth',.08]],
       recruit:[[392,.07,'triangle',.08],[523,.1,'triangle',.08]],erupt:[[70,.5,'sawtooth',.14],[55,.6,'sawtooth',.12]],
       win:[[523,.12,'triangle',.1],[659,.12,'triangle',.1],[784,.25,'triangle',.1]],lose:[[330,.18,'triangle',.1],[262,.18,'triangle',.1],[196,.4,'triangle',.1]],turn:[[262,.06,'sine',.06]]}[k];
     let t=AC.currentTime;
     for(const [f,d,w,v] of T){const o=AC.createOscillator(),gn=AC.createGain();o.type=w;o.frequency.value=f;gn.gain.setValueAtTime(v,t);gn.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(gn);gn.connect(AC.destination);o.start(t);o.stop(t+d+.02);t+=d*.8}
   }catch(e){}
-  if(!REDUCE&&navigator.vibrate&&(k==='hit'||k==='kill'||k==='erupt'))try{navigator.vibrate(k==='erupt'?[60,40,80]:k==='kill'?40:20)}catch(e){}
 }
 
 /* --- musica di sottofondo e suoni del meteo (tutto sintetizzato, nessun file) --- */
@@ -1861,7 +1890,7 @@ function tap(x,y){
       if(rc.has(x+','+y)){doMove(g,sel,x,y);sfx('move');afterAction();return}
     }
   }
-  if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null}
+  if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null;if(sel)sfx('sel')}
   else if(u&&sees(g,0,u)){inspect=u;sel=null;tinfo=null}
   else{sel=null;inspect=null;tinfo={x,y}}
   refreshUI();

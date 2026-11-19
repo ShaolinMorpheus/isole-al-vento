@@ -2,6 +2,11 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v22 — 19 nov 2026 · Suono di selezione, vibrazione, menu riordinato
+- Suono + micro vibrazione alla selezione di una pedina
+- Vibrazione nativa nell'app Android (plugin Haptics + permesso VIBRATE; serve nuovo APK)
+- Menu iniziale a tendine, contenuto dentro la cornice
+
 ## v21 — 19 nov 2026 · Più spazio al campo, vita con numero, pedine animate
 - Pannelli meteo/dati più piccoli: campo più grande
 - Barra vita più grossa con numero

@@ -26,6 +26,12 @@ jobs:
       - name: Crea il progetto Android
         run: npx cap add android
 
+      - name: Permesso di vibrazione
+        run: |
+          f=android/app/src/main/AndroidManifest.xml
+          grep -q VIBRATE "$f" || sed -i 's#<application#<uses-permission android:name="android.permission.VIBRATE" />\n    <application#' "$f"
+          grep -n "VIBRATE" "$f"
+
       - name: Icona del gioco (isola con vortice di vento)
         run: |
           find android/app/src/main/res -name 'ic_launcher*' -delete
