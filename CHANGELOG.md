@@ -7,6 +7,7 @@
 - Barra vita più grossa con numero
 - Unità pronte: salto + alone dorato; usate: grigie
 - Pedine animate (respiro, passo, sciamano che fluttua)
+- Prato gigante con chiazze variegate
 - Prova «Terreno» nel menu: caselle continue, 6 aspetti; di base «tutt’uno» (erba sfumata senza bordi, laghi fusi nel prato, griglia appena accennata)
 
 ## v20 · 19 nov 2026 — Si capisce quali unità si muovono
