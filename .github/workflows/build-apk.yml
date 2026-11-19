@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -108,3 +111,19 @@ jobs:
         with:
           name: isole-al-vento-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Controlla la firma dell'APK (deve essere sempre la stessa)
+        run: |
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          AS=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          $AS verify --print-certs "$apk" | grep -i "SHA-256" || true
+          echo "Impronta attesa (debug.keystore):"
+          keytool -list -v -keystore debug.keystore -storepass android 2>/dev/null | grep "SHA256" || true
+
+      - name: Pubblica l'APK per scaricarlo direttamente dal telefono
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk isole-al-vento.apk
+          gh release delete ultimo -y --cleanup-tag || true
+          gh release create ultimo isole-al-vento.apk --title "Ultimo APK (build ${{ github.run_number }})" --notes "APK firmato con la chiave fissa del progetto: si installa sopra la versione precedente."

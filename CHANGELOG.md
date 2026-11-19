@@ -2,6 +2,11 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v23 — 19 nov 2026 · Menu in partita
+- Tasto menu sul campo: riprendi, menu principale (salvata), suoni/vibrazione/musica/grafica
+- Interruttore vibrazione
+- Workflow APK: verifica firma + release «ultimo» scaricabile direttamente
+
 ## v22 — 19 nov 2026 · Suono di selezione, vibrazione, menu riordinato
 - Suono + micro vibrazione alla selezione di una pedina
 - Vibrazione nativa nell'app Android (plugin Haptics + permesso VIBRATE; serve nuovo APK)

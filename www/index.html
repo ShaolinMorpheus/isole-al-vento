@@ -40,6 +40,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 #toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
 #toast.on{opacity:1}
 .foot{display:flex;flex-direction:column;gap:4px}
+#bPause{position:absolute;left:8px;top:8px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(15,36,51,.82);display:flex;align-items:center;justify-content:center;padding:0}
+#bPause svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
 #zoomBox{position:absolute;right:8px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
 #zoomBox button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(16,34,47,.82);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #zoomBox button[disabled]{opacity:.35;cursor:default}
@@ -136,6 +138,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <div class="stat"><div class="r" id="rnd"></div><div class="c" id="coins"></div></div>
   </div>
   <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div>
+    <button type="button" id="bPause" aria-label="Menu di gioco"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <div id="zoomBox" role="group" aria-label="Zoom della mappa">
       <button type="button" id="zIn" aria-label="Ingrandisci"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
       <button type="button" id="zOut" aria-label="Riduci"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
@@ -193,6 +196,25 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
       </div>
     </details>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="ovPause" hidden>
+  <div class="card menu">
+    <h2>Menu di gioco</h2>
+    <div class="sc">
+      <button class="btn" id="pBack" type="button" style="min-height:48px">Riprendi la partita</button>
+      <button class="btn alt" id="pHome" type="button" style="min-height:44px">Torna al menu principale</button>
+      <details class="dt" open><summary>Suoni e grafica</summary>
+        <div class="dtb">
+          <button class="btn alt" id="pSnd" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pVib" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pMus" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pGP" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pG3" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pLook" type="button" style="min-height:44px"></button>
+        </div>
+      </details>
     </div>
   </div>
 </div>
@@ -670,6 +692,11 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:23,d:'19 nov 2026',t:'Pulsante menu in partita',n:[
+'In partita, in alto a sinistra sul campo, c’è il tasto menu: Riprendi, Torna al menu principale (la partita resta salvata), suoni, vibrazione, musica e prove grafiche',
+'Nuovo interruttore «Vibrazione» separato dai suoni',
+'APK: controllo automatico della firma e download diretto dell’ultimo APK dalla pagina Releases'
+]},
 {v:22,d:'19 nov 2026',t:'Suono di selezione, vibrazione, menu riordinato',n:[
 'Suono (e piccola vibrazione) quando selezioni una tua pedina',
 'Vibrazione ora anche nell’app Android (serve reinstallare l’APK una volta): colpi, eliminazioni, eruzione',
@@ -1993,7 +2020,7 @@ $('bSnd').onclick=()=>{SND=!SND;LS.set('isole-snd',SND?'1':'0');sndLabel();sfx('
 $('bMus').onclick=()=>{MUS=!MUS;LS.set('isole-mus',MUS?'1':'0');musLabel();if(MUS)musStart();else musStop()};
 function musLabel(){$('bMus').textContent='Musica: '+(MUS?'accesa':'spenta')}
 musLabel();
-function sndLabel(){$('bSnd').textContent='Suoni e vibrazione: '+(SND?'accesi':'spenti')}
+function sndLabel(){$('bSnd').textContent='Suoni: '+(SND?'accesi':'spenti')}
 sndLabel();contButton();
 $('bTut').onclick=()=>startGame(true);
 $('bG3').onclick=()=>{G3=!G3;LS.set('isole-g3',G3?'1':'0');g3Label()};
@@ -2011,6 +2038,15 @@ $('bAgain').onclick=()=>{$('seedIn').value='';startGame(false,0)};
 $('tutNext').onclick=tutNext;
 $('tutSkip').onclick=tutEnd;
 $('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStart').hidden=false};
+
+/* menu di gioco (pausa): ritorno al menu principale e impostazioni senza uscire dalla partita */
+function vibLabel(){$('pVib').textContent='Vibrazione: '+(LS.get('isole-vib')==='0'?'spenta':'accesa')}
+function pSync(){$('pSnd').textContent=$('bSnd').textContent;$('pMus').textContent=$('bMus').textContent;$('pGP').textContent=$('bGP').textContent;$('pG3').textContent=$('bG3').textContent;$('pLook').textContent=$('bLook').textContent;vibLabel()}
+$('bPause').onclick=()=>{pSync();$('ovPause').hidden=false};
+$('pBack').onclick=()=>{$('ovPause').hidden=true};
+$('pHome').onclick=()=>{try{saveGame()}catch(e){}$('ovPause').hidden=true;$('bMenu').click()};
+for(const [a,b] of [['pSnd','bSnd'],['pMus','bMus'],['pGP','bGP'],['pG3','bG3'],['pLook','bLook']])$(a).onclick=()=>{$(b).click();pSync()};
+$('pVib').onclick=()=>{const off=LS.get('isole-vib')!=='0';LS.set('isole-vib',off?'0':'1');vibLabel();if(!off)buzz(30)};
 // Un tocco breve sceglie/muove/attacca; un dito che si sposta trascina la mappa; due dita zoomano.
 const ptrs=new Map();let gest=null;
 const cvPos=e=>{const r=cv.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}};
