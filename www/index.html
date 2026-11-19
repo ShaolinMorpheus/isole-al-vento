@@ -692,6 +692,9 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:26,d:'19 nov 2026',t:'Anemometro più fluido',n:[
+'L’anemometro gira più veloce e in modo continuo (i fotogrammi si fondono tra loro); col vento gira velocissimo'
+]},
 {v:25,d:'19 nov 2026',t:'Terreno di Muse: terra, sabbia, rive e dettagli',n:[
 'Il prato unico ha ora zone di terra, sabbia, erba secca, sassi e fango, diverse a ogni partita',
 'I laghi hanno la riva di sabbia e fango intorno',
@@ -1469,8 +1472,10 @@ function volcanoBadge(x,y){
 }
 function stationObj(x,y,tick){
   const cs=lay.cs,k=cs/40,X=cx(x)+cs/2,top=cy(y),fh=lay.fh,by=top+fh*.88,hy=top+fh*.2;
-  const wt=wNow(g).t,sp=wt==='vento'?7:wt==='sereno'?1.2:2.4,a0=tick*sp;
-  if(goReady()){const fr=REDUCE?0:Math.floor(((tick*sp)/2.094*1)%3+3)%3;goDraw('stazione_'+['0','40','80'][fr],X,top+fh*.72,cs);return}
+  const wt=wNow(g).t,sp=wt==='vento'?16:wt==='sereno'?3.2:5.5,a0=tick*sp;
+  if(goReady()){const N=['stazione_0','stazione_40','stazione_80'],p=REDUCE?0:(((tick*sp)/2.094)%3+3)%3,f0=Math.floor(p),fr=p-f0,gy=top+fh*.72;
+    goDraw(N[f0],X,gy,cs);if(fr>.02){ctx.save();ctx.globalAlpha=fr;goDraw(N[(f0+1)%3],X,gy,cs);ctx.restore()} // dissolvenza tra i fotogrammi: rotazione fluida
+    return}
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(X+2,by+1.5,cs*.26,cs*.08,0,0,7);ctx.fill();
   ctx.fillStyle='#b8c9c6';ctx.beginPath();ctx.ellipse(X,by,cs*.24,cs*.075,0,0,7);ctx.fill();
   const cups=[0,1,2].map(i=>{const a=a0+i*2.094;return {a,ex:X+Math.cos(a)*cs*.3,ey:hy+Math.sin(a)*cs*.11}});
