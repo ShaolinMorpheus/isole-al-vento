@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v25 — 19 nov 2026 · Terreno di Muse
+- Zone di terra, sabbia, erba secca, sassi, fango; rive dei laghi; dettagli sparsi (Gruppo 8 di Muse)
+
 ## v24 — 19 nov 2026 · Solo verticale e caselle su prato unico
 - Orientamento bloccato in verticale (manifest Android + blocco web)
 - Terreno «caselle separate su prato unico»

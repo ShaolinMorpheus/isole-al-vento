@@ -692,6 +692,11 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:25,d:'19 nov 2026',t:'Terreno di Muse: terra, sabbia, rive e dettagli',n:[
+'Il prato unico ha ora zone di terra, sabbia, erba secca, sassi e fango, diverse a ogni partita',
+'I laghi hanno la riva di sabbia e fango intorno',
+'Fiori, ciuffi d’erba, sassolini, funghi e foglie sparsi sul prato (grafica di prova)'
+]},
 {v:24,d:'19 nov 2026',t:'Solo verticale e caselle su prato unico',n:[
 'Il gioco resta sempre in verticale (nell’app serve reinstallare l’APK una volta)',
 'Nuovo aspetto «caselle separate su prato unico»: le caselle restano distinte ma sono ritagliate da un solo grande prato sfumato, con laghi e cenere dentro il campo'
@@ -943,7 +948,7 @@ function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sf
   return L;
 }
 function gpLoad(){
-  if(GP.loading)return;GP.loading=true;goLoad();guLoad();geLoad();
+  if(GP.loading)return;GP.loading=true;goLoad();guLoad();geLoad();gtLoad();
   for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
 }
 const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
@@ -953,6 +958,9 @@ const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciam
 function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','viola'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
 function guReady(){return gpReady()&&!!GU.im.esploratore_oro_normale}
 const GE={im:{},names:['eff_goccia','eff_fiocco_a','eff_fiocco_b','eff_foglia_a','eff_foglia_b','eff_cenere','eff_colpo','eff_colpo_critico','eff_taglio','eff_freccia','eff_scintilla','eff_onda_vento','eff_lava_a','eff_lava_b','eff_fumo','eff_cenere_caduta','meteo_pioggia','meteo_nebbia','meteo_gelo','meteo_vento','ui_casella_libera','ui_casella_attacco','ui_casella_pericolo','ui_anello_selezione']};
+const GT={im:{},names:['terreno_terra_a','terreno_terra_b','terreno_terra_c','terreno_sabbia_a','terreno_sabbia_b','terreno_sabbia_c','terreno_erbasecca_a','terreno_erbasecca_b','terreno_erbasecca_c','terreno_fango_a','terreno_fango_b','terreno_sassi_a','terreno_sassi_b','terreno_sassi_c','bordo_sabbia_lago_a','bordo_sabbia_lago_b','dettaglio_fiori_a','dettaglio_fiori_b','dettaglio_fiori_c','dettaglio_ciuffi_a','dettaglio_ciuffi_b','dettaglio_ciuffi_c','dettaglio_sassi_a','dettaglio_sassi_b','dettaglio_sassi_c','dettaglio_funghi_a','dettaglio_funghi_b','dettaglio_foglie_a','dettaglio_foglie_b'],pr:['terreno_prato_c','terreno_prato_d','terreno_prato_e','terreno_prato_f','terreno_prato_g','terreno_prato_h']};
+function gtLoad(){for(const n of GT.names){const im=new Image();im.onload=()=>{GT.im[n]=im};im.src='assets/terreno-unico/'+n+'.png'}
+  for(const n of GT.pr){const im=new Image();im.onload=()=>{GT.im[n]=im};im.src='assets/terreno-unico/'+n+'.jpg'}}
 function geLoad(){for(const n of GE.names){const im=new Image();im.onload=()=>{GE.im[n]=im};im.src='assets/effetti/'+n+'.png'}}
 function geReady(){return gpReady()&&!!GE.im.ui_casella_libera&&!!GE.im.meteo_vento}
 function geSpr(n,x,y,size,rot,al){const im=GE.im[n];if(!im)return;ctx.save();ctx.globalAlpha=al===undefined?1:al;ctx.translate(x,y);if(rot)ctx.rotate(rot);ctx.drawImage(im,-size/2,-size/2,size,size);ctx.restore()}
@@ -1259,12 +1267,39 @@ function groundDraw(c0,gelo,nebbia,seen,noGrid){
     const cnt=Math.round(W*H*1.7);
     for(let i=0;i<cnt;i++){const px=rnd(i*5+1)*W,py=rnd(i*5+2)*H,k=1.5+rnd(i*5+3)*.9,an=rnd(i*5+4)*6.283,v=Math.floor(rnd(i*5+5)*NV),S=cs*k;
       c0.save();c0.translate(cx(0)+px*cs,cy(0)+py*fh);c0.rotate(an);c0.drawImage(GCACHE.get('v'+v),-S/2,-S/2,S,S);c0.restore()}}
+  // 1b) prati alternativi di Muse, zone di terra/sabbia/erba secca, rive dei laghi
+  if(GT.im.terreno_sabbia_a){
+    const sd=((typeof g.seed==='number'?g.seed:0)*2654435761)>>>0,rn=(n)=>{n=((n^sd)^61)^(n>>>16);n=(n+(n<<3))>>>0;n^=n>>>4;n=Math.imul(n,0x27d4eb2d);n^=n>>>15;return(n>>>0)/4294967296};
+    const fc=(nm,S,fe)=>{const k='t'+nm+Math.round(S);let t=GCACHE.get(k);if(!t){const im=GT.im[nm];if(!im)return null;t=featherTile(im,0,0,im.width,S,fe,0,0,0);GCACHE.set(k,t)}return t};
+    const bases=[...BASE,VOL];
+    const free=(px,py,r)=>bases.every(b=>Math.hypot(px-(b.x+.5),py-(b.y+.5))>r);
+    // prati pieni di Muse come chiazze sfumate in più
+    const SZ2=cs*dpr*2.3;for(let i=0;i<Math.round(W*H*.5);i++){const nm=GT.pr[Math.floor(rn(i*7+900)*GT.pr.length)],t=fc(nm,SZ2,.18);if(!t)continue;
+      const S=cs*(1.7+rn(i*7+901)*.9);c0.save();c0.translate(cx(0)+rn(i*7+902)*W*cs,cy(0)+rn(i*7+903)*H*fh);c0.rotate(rn(i*7+904)*6.283);c0.globalAlpha=.8;c0.drawImage(t,-S/2,-S/2,S,S);c0.restore()}
+    // zone di terreno diverse: poche e grandi, lontane da basi e vulcano
+    const zones=[['terreno_sabbia_',3,2],['terreno_terra_',3,2],['terreno_erbasecca_',3,3],['terreno_sassi_',3,1],['terreno_fango_',2,1]];
+    let zi=0;for(const[nm0,nv,cnt]of zones)for(let j=0;j<Math.max(1,Math.round(cnt*W*H/117));j++){zi++;
+      const px=.8+rn(zi*11+1)*(W-1.6),py=.8+rn(zi*11+2)*(H-1.6);if(!free(px,py,2.3))continue;
+      const nm=nm0+'abc'[Math.floor(rn(zi*11+3)*nv)],S=cs*(1.9+rn(zi*11+4)*1.1),t=fc(nm,cs*dpr*2.5,.22);if(!t)continue;
+      c0.save();c0.translate(cx(0)+px*cs,cy(0)+py*fh);c0.rotate(rn(zi*11+5)*6.283);c0.globalAlpha=nm0==='terreno_sassi_'?.75:.92;c0.drawImage(t,-S/2,-S/2,S,S);c0.restore()}
+    // riva di sabbia/fango intorno ai laghi
+    for(const c of cells){if(!c.nm||!c.nm.startsWith('lago'))continue;const h=hh(c.x+5,c.y+9),im=GT.im['bordo_sabbia_lago_'+((h&1)?'a':'b')];if(!im)continue;
+      const S=cs*2.25;c0.save();c0.translate(cx(c.x)+cs/2,cy(c.y)+fh/2);c0.rotate(((h>>1)&3)*Math.PI/2);c0.drawImage(im,-S/2,-S/2,S,S);c0.restore()}
+  }
   // 2) laghi, ghiaccio, cenere, vulcano, basi: sfumati sopra l'erba
   for(const c of cells){const nm=c.nm;if(!nm||nm.startsWith('prato')||nm.startsWith('bosco')||nm.startsWith('monte')||nm.startsWith('stazione'))continue;
     const vul=nm.startsWith('vulcano_'),im=vul?GO.im['terreno_'+nm]:gpPick(nm,cs*dpr);if(!im)continue;
     const k='f'+nm+Math.round(cs);let t=GCACHE.get(k);
     if(!t){const sc=im.width/256,sz=vul?im.width:194*sc;t=featherTile(im,vul?0:(im.width-sz)/2,0,sz,cs*dpr*1.14,nm.startsWith('base')?.44:.36,0,0,0);GCACHE.set(k,t)}
     const S=cs*1.14;c0.drawImage(t,cx(c.x)+cs/2-S/2,cy(c.y)+fh/2-S/2*fh/cs,S,S*fh/cs)}
+  if(GT.im.dettaglio_fiori_a){
+    const sd=((typeof g.seed==='number'?g.seed:0)*40503+7)>>>0,rn=(n)=>{n=((n^sd)^61)^(n>>>16);n=(n+(n<<3))>>>0;n^=n>>>4;n=Math.imul(n,0x27d4eb2d);n^=n>>>15;return(n>>>0)/4294967296};
+    const kinds=['dettaglio_fiori_a','dettaglio_fiori_b','dettaglio_fiori_c','dettaglio_ciuffi_a','dettaglio_ciuffi_b','dettaglio_ciuffi_c','dettaglio_ciuffi_a','dettaglio_sassi_a','dettaglio_sassi_b','dettaglio_sassi_c','dettaglio_funghi_a','dettaglio_funghi_b','dettaglio_foglie_a','dettaglio_foglie_b'];
+    const open=new Set(cells.filter(c=>c.nm&&(c.nm.startsWith('prato')||c.nm.startsWith('cenere'))).map(c=>c.x+','+c.y));
+    for(let i=0;i<Math.round(W*H*.55);i++){const px=rn(i*5+1)*W,py=rn(i*5+2)*H;if(!open.has(Math.floor(px)+','+Math.floor(py)))continue;
+      const im=GT.im[kinds[Math.floor(rn(i*5+3)*kinds.length)]];if(!im)continue;const S=cs*(.62+rn(i*5+4)*.3);
+      c0.save();c0.translate(cx(0)+px*cs,cy(0)+py*fh);c0.scale(rn(i*5+5)<.5?-1:1,1);c0.globalAlpha=.95;c0.drawImage(im,-S/2,-S/2,S,S);c0.restore()}
+  }
   // 3) macchie di luce continue su tutto il campo
   const vn=(a,b)=>{const hs=(i,j)=>(((i*374761393+j*668265263)^(i*j*2246822519))>>>0)%1000/1000;const i=Math.floor(a),j=Math.floor(b),u=a-i,v=b-j,su=u*u*(3-2*u),sv=v*v*(3-2*v);return(hs(i,j)*(1-su)+hs(i+1,j)*su)*(1-sv)+(hs(i,j+1)*(1-su)+hs(i+1,j+1)*su)*sv};
   const st=Math.max(3,Math.round(cs/6));
