@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v24 — 19 nov 2026 · Solo verticale e caselle su prato unico
+- Orientamento bloccato in verticale (manifest Android + blocco web)
+- Terreno «caselle separate su prato unico»
+
 ## v23 — 19 nov 2026 · Menu in partita
 - Tasto menu sul campo: riprendi, menu principale (salvata), suoni/vibrazione/musica/grafica
 - Interruttore vibrazione

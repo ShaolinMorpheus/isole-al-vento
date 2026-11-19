@@ -35,6 +35,12 @@ jobs:
           grep -q VIBRATE "$f" || sed -i 's#<application#<uses-permission android:name="android.permission.VIBRATE" />\n    <application#' "$f"
           grep -n "VIBRATE" "$f"
 
+      - name: Solo in verticale
+        run: |
+          f=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<activity#<activity android:screenOrientation="portrait"#' "$f"
+          grep -n "screenOrientation" "$f"
+
       - name: Icona del gioco (isola con vortice di vento)
         run: |
           find android/app/src/main/res -name 'ic_launcher*' -delete
