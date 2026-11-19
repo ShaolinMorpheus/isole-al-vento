@@ -3,7 +3,7 @@
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
 ## v26 — 19 nov 2026 · Anemometro più fluido
-- Velocità maggiore e dissolvenza tra i 3 fotogrammi
+- Velocità maggiore (la dissolvenza è stata tolta: servono più fotogrammi)
 
 ## v25 — 19 nov 2026 · Terreno di Muse
 - Zone di terra, sabbia, erba secca, sassi, fango; rive dei laghi; dettagli sparsi (Gruppo 8 di Muse)
