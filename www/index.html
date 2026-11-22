@@ -693,7 +693,7 @@ let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
 {v:26,d:'19 nov 2026',t:'Anemometro più fluido',n:[
-'L’anemometro gira più veloce, col vento velocissimo (in attesa di più fotogrammi da Muse)'
+'Anemometro con 24 fotogrammi di Muse (uno ogni 5°): rotazione fluida, più veloce col vento'
 ]},
 {v:25,d:'19 nov 2026',t:'Terreno di Muse: terra, sabbia, rive e dettagli',n:[
 'Il prato unico ha ora zone di terra, sabbia, erba secca, sassi e fango, diverse a ogni partita',
@@ -954,8 +954,8 @@ function gpLoad(){
   if(GP.loading)return;GP.loading=true;goLoad();guLoad();geLoad();gtLoad();
   for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
 }
-const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
-  A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
+const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','stazione_f00','stazione_f01','stazione_f02','stazione_f03','stazione_f04','stazione_f05','stazione_f06','stazione_f07','stazione_f08','stazione_f09','stazione_f10','stazione_f11','stazione_f12','stazione_f13','stazione_f14','stazione_f15','stazione_f16','stazione_f17','stazione_f18','stazione_f19','stazione_f20','stazione_f21','stazione_f22','stazione_f23','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
+  A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,stazione_f00:296,stazione_f01:296,stazione_f02:296,stazione_f03:296,stazione_f04:296,stazione_f05:296,stazione_f06:296,stazione_f07:296,stazione_f08:296,stazione_f09:296,stazione_f10:296,stazione_f11:296,stazione_f12:296,stazione_f13:296,stazione_f14:296,stazione_f15:296,stazione_f16:296,stazione_f17:296,stazione_f18:296,stazione_f19:296,stazione_f20:296,stazione_f21:296,stazione_f22:296,stazione_f23:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
 function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
 const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano'}};
 function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','viola'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
@@ -1473,8 +1473,9 @@ function volcanoBadge(x,y){
 function stationObj(x,y,tick){
   const cs=lay.cs,k=cs/40,X=cx(x)+cs/2,top=cy(y),fh=lay.fh,by=top+fh*.88,hy=top+fh*.2;
   const wt=wNow(g).t,sp=wt==='vento'?16:wt==='sereno'?3.2:5.5,a0=tick*sp;
-  if(goReady()){const N=['stazione_0','stazione_40','stazione_80'],p=REDUCE?0:(((tick*sp)/2.094)%3+3)%3,f0=Math.floor(p),fr=p-f0,gy=top+fh*.72;
-    goDraw(N[f0],X,gy,cs); // 3 fotogrammi: in attesa di quelli nuovi di Muse
+  if(goReady()){const gy=top+fh*.72,ok=!!GO.im.stazione_f23; // 24 fotogrammi da 5° (Muse): rotazione fluida
+    if(ok){const f=REDUCE?0:Math.floor(((tick*sp)/2.0944*24)%24+24)%24;goDraw('stazione_f'+String(f).padStart(2,'0'),X,gy,cs)}
+    else{const f=REDUCE?0:Math.floor(((tick*sp)/2.094)%3+3)%3;goDraw('stazione_'+['0','40','80'][f],X,gy,cs)}
     return}
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(X+2,by+1.5,cs*.26,cs*.08,0,0,7);ctx.fill();
   ctx.fillStyle='#b8c9c6';ctx.beginPath();ctx.ellipse(X,by,cs*.24,cs*.075,0,0,7);ctx.fill();
