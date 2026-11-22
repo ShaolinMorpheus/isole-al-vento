@@ -2,6 +2,11 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v27 — 22 nov 2026 · Nuovo scopo: le stazioni meteo
+- Base nemica non fa più vincere; si vince tenendo le 2 stazioni per 2 round di fila o eliminando tutte le unità
+- Allo scadere dei 28 round vince chi ha controllato di più le stazioni
+- IA orientata alle stazioni; avanzamento mostrato nel pannello round
+
 ## v26 — 19 nov 2026 · Anemometro più fluido
 - 24 fotogrammi di Muse (Gruppo 9) per la rotazione fluida; velocità maggiore
 

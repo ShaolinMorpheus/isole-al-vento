@@ -176,7 +176,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
     <details class="dt"><summary>Come si gioca</summary>
       <ul>
-      <li>Vinci portando una tua unità sulla base del nemico, o eliminando tutte le sue unità.</li>
+      <li>Vinci tenendo entrambe le stazioni meteo per 2 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
       <li>Con la base libera puoi reclutare nuove unità spendendo monete: Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
@@ -432,13 +432,20 @@ function checkElim(g){
     if(!g.units.some(u=>u.o===o)&&g.coins[o]<2){g.over=1-o;g.why=o===0?'Non ti restano unità né monete.':'Il computer non ha più unità né monete.';return}
   }
 }
+const HOLD=2;
+// Scopo: tenere entrambe le stazioni meteo per HOLD round di fila (si controlla a fine round). Occupare la base non fa più vincere.
 function checkCapture(g){
   if(g.over!==null)return;
+  if(!g.hold)g.hold=[0,0];if(!g.sc)g.sc=[0,0];
+  if(!g.holdDone)return;
   for(const o of [0,1]){
-    const b=BASE[1-o];
-    const u=unitAt(g,b.x,b.y);
-    if(u&&u.o===o){g.over=o;g.why=o===0?'Hai occupato la base nemica.':'Il computer ha occupato la tua base.';return}
+    if(g.hold[o]>=HOLD){g.over=o;g.why=o===0?'Hai tenuto entrambe le stazioni meteo per '+HOLD+' round.':'Il computer ha tenuto entrambe le stazioni meteo per '+HOLD+' round.';return}
   }
+}
+function holdTick(g){ // a fine round
+  if(!g.hold)g.hold=[0,0];if(!g.sc)g.sc=[0,0];
+  for(const o of [0,1]){const n=heldBy(g,o);g.sc[o]+=n;g.hold[o]=n===STATIONS.length?g.hold[o]+1:0}
+  g.holdDone=true;
 }
 function canRecruit(g,o,t){
   const b=BASE[o];
@@ -541,16 +548,15 @@ function endTurn(g){
     startTurnOf(g,1-g.first);
   }else{
     windPush(g);
-    checkCapture(g);
-    if(g.over!==null)return;
     erupt(g);
+    if(g.over!==null)return;
+    holdTick(g);checkCapture(g);
     if(g.over!==null)return;
     g.coins[0]+=2+bonusAt(g,0)+heldBy(g,0);g.coins[1]+=2+bonusAt(g,1)+heldBy(g,1);
     if(g.round>=MAXR){
-      const s=o=>g.units.filter(u=>u.o===o).reduce((a,u)=>a+u.hp,0);
-      const a=s(0),b=s(1);
+      const a=g.sc[0],b=g.sc[1];
       g.over=a>b?0:b>a?1:'pari';
-      g.why='Dopo '+MAXR+' round vince chi ha più energia: '+a+' contro '+b+'.';
+      g.why='Dopo '+MAXR+' round vince chi ha controllato di più le stazioni: '+a+' contro '+b+'.';
       return;
     }
     g.round++;g.step=0;g.first=(g.round-1+g.off)%2;
@@ -590,21 +596,21 @@ function distMap(g,target){
 function aiChoose(g,u,noise){
   const nz=noise===true?0.8:(+noise||0);
   const o=u.o,eo=1-o,eb=BASE[eo],mb=BASE[o];
-  const dEnemyBase=distMap(g,eb);
+  const free=STATIONS.filter(q=>{const v=unitAt(g,q.x,q.y);return !(v&&v.o===o&&v!==u)});
+  const tgtS=(free.length?free:STATIONS).slice().sort((a,b)=>md(u,a)-md(u,b))[0],dEnemyBase=distMap(g,tgtS),heldNow=heldBy(g,o);
   const foes=g.units.filter(e=>e.o===eo);
   const known=foes.filter(e=>sees(g,o,e));
-  const threats=foes.filter(e=>md(e,mb)<=6);
+  const threats=foes.filter(e=>STATIONS.some(q=>md(e,q)<=2));
   const rc=reach(g,u);
   let best=null;
   for(const [k,c] of rc){
     const [x,y]=k.split(',').map(Number),p={x,y};
     const base=(()=>{
       let s=0;
-      if(x===eb.x&&y===eb.y)s+=1000;
       if(threats.length){s-=Math.min(...threats.map(e=>md(p,e)))*1.4}
       else s-=dEnemyBase[y][x]*((u.t==='E'||u.t==='K')?1.6:1.4);
       if(tileAt(g,x,y)==='F')s+=1.5;
-      if(STATIONS.some(q=>q.x===x&&q.y===y))s+=2.5;
+      if(STATIONS.some(q=>q.x===x&&q.y===y))s+=(heldNow>=STATIONS.length-1?9:5);
       if(g.round%ERUPT===0){const dv=md(p,VOL);if(dv===1)s-=6;else if(dv===2)s-=2}
       if(x===mb.x&&y===mb.y){if(g.coins[o]>=2&&g.units.filter(v=>v.o===o).length<MAXU)s-=5;else if(threats.length)s+=1}
       let exp=0;
@@ -692,6 +698,12 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:27,d:'22 nov 2026',t:'Nuovo scopo: le stazioni meteo',n:[
+'Occupare la base nemica non fa più vincere',
+'Si vince tenendo entrambe le stazioni meteo per 2 round di fila, oppure eliminando tutte le unità nemiche (e le monete per reclutarne)',
+'Dopo 28 round vince chi ha controllato di più le stazioni (non più chi ha più energia)',
+'Il computer ora punta alle stazioni; in alto compare l’avanzamento «stazioni 1/2 contro 0/2»'
+]},
 {v:26,d:'19 nov 2026',t:'Anemometro più fluido',n:[
 'Anemometro con 24 fotogrammi di Muse (uno ogni 5°): rotazione fluida, più veloce col vento'
 ]},
@@ -1039,7 +1051,7 @@ function renderTop(){
   const n=wNow(g),x=wNext(g),x2=heldBy(g,0)?g.wx[g.round+1]:null;
   const more=x2?`<span title="Poi: ${wName(x2)}" aria-label="Poi: ${wName(x2)}" style="display:flex;align-items:center;gap:3px">›${icon(x2.t,x2.dir)}</span>`:'';
   $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${wName(x)}</b></span>${more}</div>`;
-  $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+'</small>';
+  $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+(g.hold&&(g.hold[0]||g.hold[1])?' · stazioni '+g.hold[0]+'/'+HOLD+' contro '+g.hold[1]+'/'+HOLD:'')+'</small>';
   $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>monete<br>+'+(2+heldBy(g,0))+' a round</small>';
 }
 function terrInfo(x,y){
@@ -1049,8 +1061,8 @@ function terrInfo(x,y){
   let d={P:'Nessun effetto.',F:'Costa 2 passi, −1 ai colpi ricevuti, ripara dal vento.',L:gelo?'Col gelo si attraversa.':'Invalicabile. Col gelo si attraversa.',M:'Invalicabile.',
     V:'Invalicabile. Erutta a fine round '+eruptionRound(g)+(nE===0?' (questo round!)':' (tra '+nE+')')+': −3 a 1 casella, −1 a 2.',
     S:'Chi la occupa a fine round prende +1 moneta e vede un round di meteo in più.',C:'Costa 2 passi, nessun riparo.'}[t];
-  if(x===BASE[0].x&&y===BASE[0].y){n='La tua base';d='Qui compaiono le unità reclutate. Se il nemico la occupa, perdi.'}
-  else if(x===BASE[1].x&&y===BASE[1].y){n='Base nemica';d='Occupala con una tua unità per vincere.'}
+  if(x===BASE[0].x&&y===BASE[0].y){n='La tua base';d='Qui compaiono le unità reclutate. Occuparla non fa vincere.'}
+  else if(x===BASE[1].x&&y===BASE[1].y){n='Base nemica';d='Qui compaiono le sue unità. Occuparla non fa vincere.'}
   return [n,d];
 }
 function renderInfo(){
@@ -1088,7 +1100,7 @@ function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck()}
 
 /* --- tutorial guidato: passi con evidenziazione, alcuni si completano toccando davvero --- */
 const TUT=[
-  {t:'Tu sei giallo, il computer viola. Porta una tua unità sulla base viola, o elimina tutte le sue.',tiles:()=>[BASE[0],BASE[1]]},
+  {t:'Tu sei giallo, il computer viola. Vinci tenendo le due stazioni meteo per 2 round di fila, o eliminando tutte le sue unità.',tiles:()=>[...STATIONS]},
   {t:'Tocca una tua unità gialla per sceglierla.',inter:true,tiles:()=>g.units.filter(u=>u.o===0).map(u=>({x:u.x,y:u.y})),done:()=>!!sel&&sel.o===0},
   {t:'Con l’unità scelta tocca una casella chiara. Boschi e cenere costano 2 passi.',inter:true,done:()=>g.units.some(u=>u.o===0&&u.px!==undefined)},
   {t:'Tocca il nemico cerchiato di rosso per attaccare. Rosso: danno. Arancio: contrattacco.',tiles:()=>g.units.filter(u=>u.o===1&&sees(g,0,u)).map(u=>({x:u.x,y:u.y}))},
