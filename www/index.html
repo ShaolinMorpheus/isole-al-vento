@@ -739,6 +739,9 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:29,d:'22 nov 2026',t:'Pedine visibili dietro agli alberi',n:[
+'Le pedine nascoste dietro ad alberi, montagne o vulcano si vedono comunque, in trasparenza sopra l’oggetto'
+]},
 {v:28,d:'22 nov 2026',t:'Rinforzi a scelta, Facile senza reclutamento',n:[
 'Ogni 3 round (dopo 3 tuoi turni: dal round 4) arriva un rinforzo gratuito: scegli una di due unità (la stessa offerta per te e per il computer, secondo il meteo del round)',
 'Livello Facile: niente reclutamento con le monete, spariscono monete e tasto Recluta',
@@ -1896,6 +1899,12 @@ function draw(ts){
       const k=gh.dead===null?0:Math.min(1,gh.dead/.4);
       drawUnit(gh.u,!vis(gh.u),1-k*.85,1-k);
     }
+  }
+  // unità nascoste da alberi, montagne o vulcano che stanno davanti: si ridisegnano sopra in trasparenza, così si vedono sempre
+  for(const u of g.units){
+    if(!vis(u)||u.path)continue;const ux=Math.round(u.vx),uy=Math.round(u.vy);let occ=false;
+    for(let d=1;d<=2&&!occ;d++){const yy=uy+d;if(yy>=H)break;for(const dx of d===1?[-1,0,1]:[0]){const xx=ux+dx;if(xx<0||xx>=W)continue;const tt=tileAt(g,xx,yy);if(tt==='F'||tt==='M'||tt==='V'||(tt==='S'&&d===1&&dx===0)){occ=true;break}}}
+    if(occ)drawUnit(u,false,1,.62);
   }
   // pericolo eruzione: sopra alberi, montagne e unità, così il segno si vede sempre
   if(started&&g.over===null&&g.hot&&g.hot.length){ // cenere ancora calda
