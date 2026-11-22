@@ -3,7 +3,7 @@
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
 ## v29 — 22 nov 2026 · Pedine visibili dietro agli oggetti
-- Pedine dietro ad alberi/montagne/vulcano ridisegnate in trasparenza sopra l'oggetto
+- Oggetti (alberi, montagne, vulcano) trasparenti quando davanti a una pedina: la pedina resta dietro
 
 ## v28 — 22 nov 2026 · Rinforzi a scelta
 - Rinforzo gratuito a scelta tra 2 unità (stessa offerta per entrambi), ogni 3 round dal round 4
