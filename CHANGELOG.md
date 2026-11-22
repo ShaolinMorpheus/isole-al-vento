@@ -3,7 +3,8 @@
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
 ## v28 — 22 nov 2026 · Rinforzi a scelta
-- Rinforzo gratuito a scelta tra 2 unità (stessa offerta per entrambi), ogni 3 round (2 in Facile)
+- Rinforzo gratuito a scelta tra 2 unità (stessa offerta per entrambi), ogni 3 round dal round 4
+- Si possono attraversare le proprie unità (non fermarcisi sopra)
 - Facile: niente reclutamento con le monete
 
 ## v27 — 22 nov 2026 · Nuovo scopo: le stazioni meteo

@@ -179,7 +179,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
       <li>Vinci tenendo entrambe le stazioni meteo per 2 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
-      <li>Ogni 3 round (2 nel livello Facile) arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
+      <li>Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
       <li>La mappa è grande: pizzica con due dita per ingrandire, trascina per spostarti, oppure usa i pulsanti + e −.</li>
       <li>Il vulcano al centro erutta ogni 4 round: chi è vicino si ferisce e il prato attorno diventa cenere.</li>
       <li>Le due stazioni meteo danno +1 moneta a round a chi le occupa e mostrano un round di meteo in più.</li>
@@ -342,21 +342,21 @@ function stepCost(g,x,y,u){
   return (t==='F'||t==='C')?(u&&u.t==='K'?3:2):1;
 }
 function reach(g,u){
-  const res=new Map([[u.x+','+u.y,0]]);
+  const res=new Map([[u.x+','+u.y,0]]),dist=new Map(res); // si può attraversare un'unità amica, ma non fermarcisi sopra
   if(u.moved||u.done)return res;
   const bud=mvOf(g,u),q=[[u.x,u.y,0]];
   while(q.length){
     q.sort((a,b)=>a[2]-b[2]);
     const [x,y,c]=q.shift();
-    if(c>(res.get(x+','+y)??Infinity))continue;
+    if(c>(dist.get(x+','+y)??Infinity))continue;
     for(const [dx,dy] of Object.values(DIRS)){
       const nx=x+dx,ny=y+dy;
       if(nx<0||ny<0||nx>=W||ny>=H)continue;
       const sc=stepCost(g,nx,ny,u);if(sc===Infinity)continue;
-      if(unitAt(g,nx,ny))continue;
+      const occ=unitAt(g,nx,ny);if(occ&&occ.o!==u.o)continue;
       const nc=c+sc;if(nc>bud)continue;
       const k=nx+','+ny;
-      if(nc<(res.get(k)??Infinity)){res.set(k,nc);q.push([nx,ny,nc])}
+      if(nc<(dist.get(k)??Infinity)){dist.set(k,nc);q.push([nx,ny,nc]);if(!occ)res.set(k,nc)}
     }
   }
   return res;
@@ -397,7 +397,7 @@ function pathTo(g,u,x,y){ // percorso più economico dalla casella attuale a (x,
     for(const [dx,dy] of Object.values(DIRS)){
       const nx=cx0+dx,ny=cy0+dy;
       if(nx<0||ny<0||nx>=W||ny>=H)continue;
-      const sc=stepCost(g,nx,ny,u);if(sc===Infinity||unitAt(g,nx,ny))continue;
+      const sc=stepCost(g,nx,ny,u);if(sc===Infinity)continue;{const occ=unitAt(g,nx,ny);if(occ&&occ.o!==u.o)continue}
       const nc=c+sc;if(nc>bud)continue;const k=nx+','+ny;
       if(nc<(best.get(k)??Infinity)){best.set(k,nc);par.set(k,cx0+','+cy0);q.push([nx,ny,nc])}
     }
@@ -441,11 +441,11 @@ function checkElim(g){
 }
 const HOLD=2;
 /* Rinforzi: ogni RF_EVERY round arriva una scelta tra 2 unità, UGUALE per i due giocatori (dipende da meteo e mappa).
-   Nel livello Facile non c'è reclutamento con le monete: i rinforzi sono l'unico modo e arrivano più spesso. */
+   Nel livello Facile non c'è reclutamento con le monete: i rinforzi sono l'unico modo. */
 function norec(g){const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
-function rfEvery(g){return norec(g)?2:3}
+function rfEvery(g){return 3}
 function rfMake(g){
-  if(g.round<rfEvery(g)||g.round%rfEvery(g)!==0||g.round>=MAXR-1){g.rf=null;return}
+  if(g.round<=rfEvery(g)||(g.round-1)%rfEvery(g)!==0||g.round>=MAXR-1){g.rf=null;return}
   const w=wNow(g).t,W0={sereno:{G:1,A:1,E:1,K:1,W:1},vento:{G:1,A:1,E:1.6,K:1.8,W:1.5},pioggia:{G:2,A:1.4,E:.8,K:.8,W:1},nebbia:{G:1.6,A:.5,E:2,K:1,W:1},gelo:{G:2,A:1,E:.8,K:1.5,W:.8}}[w]||{G:1,A:1,E:1,K:1,W:1};
   let sd=((g.seed*2654435761)^(g.round*40503))>>>0;const rn=()=>{sd=(Math.imul(sd^(sd>>>15),2246822519)+3266489917)>>>0;sd^=sd>>>13;return(sd>>>0)/4294967296};
   const pool=Object.entries(W0),ch=[];
@@ -740,8 +740,9 @@ let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
 {v:28,d:'22 nov 2026',t:'Rinforzi a scelta, Facile senza reclutamento',n:[
-'Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità (la stessa offerta per te e per il computer, secondo il meteo del round)',
-'Livello Facile: niente reclutamento con le monete, solo rinforzi ogni 2 round; spariscono monete e tasto Recluta',
+'Ogni 3 round (dopo 3 tuoi turni: dal round 4) arriva un rinforzo gratuito: scegli una di due unità (la stessa offerta per te e per il computer, secondo il meteo del round)',
+'Livello Facile: niente reclutamento con le monete, spariscono monete e tasto Recluta',
+'Puoi attraversare le tue unità per raggiungere una casella libera dietro di loro, se i passi bastano (i nemici continuano a bloccare)',
 'Il reclutamento con le monete resta nei livelli Normale e Difficile'
 ]},
 {v:27,d:'22 nov 2026',t:'Nuovo scopo: le stazioni meteo',n:[
