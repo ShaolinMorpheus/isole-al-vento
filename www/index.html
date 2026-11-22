@@ -179,7 +179,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
       <li>Vinci tenendo entrambe le stazioni meteo per 2 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
-      <li>Con la base libera puoi reclutare nuove unità spendendo monete: Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
+      <li>Ogni 3 round (2 nel livello Facile) arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
       <li>La mappa è grande: pizzica con due dita per ingrandire, trascina per spostarti, oppure usa i pulsanti + e −.</li>
       <li>Il vulcano al centro erutta ogni 4 round: chi è vicino si ferisce e il prato attorno diventa cenere.</li>
       <li>Le due stazioni meteo danno +1 moneta a round a chi le occupa e mostrano un round di meteo in più.</li>
@@ -232,6 +232,13 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <p id="recNote"></p>
     <div id="recList" style="display:flex;flex-direction:column;gap:8px"></div>
     <button class="btn alt" id="bRecClose" type="button">Chiudi</button>
+  </div>
+</div>
+<div class="ov" id="ovRf" hidden>
+  <div class="card">
+    <h2>Rinforzi in arrivo</h2>
+    <p id="rfNote"></p>
+    <div id="rfList" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
 </div>
 <div class="ov" id="ovEnd" hidden>
@@ -433,6 +440,38 @@ function checkElim(g){
   }
 }
 const HOLD=2;
+/* Rinforzi: ogni RF_EVERY round arriva una scelta tra 2 unità, UGUALE per i due giocatori (dipende da meteo e mappa).
+   Nel livello Facile non c'è reclutamento con le monete: i rinforzi sono l'unico modo e arrivano più spesso. */
+function norec(g){const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
+function rfEvery(g){return norec(g)?2:3}
+function rfMake(g){
+  if(g.round<rfEvery(g)||g.round%rfEvery(g)!==0||g.round>=MAXR-1){g.rf=null;return}
+  const w=wNow(g).t,W0={sereno:{G:1,A:1,E:1,K:1,W:1},vento:{G:1,A:1,E:1.6,K:1.8,W:1.5},pioggia:{G:2,A:1.4,E:.8,K:.8,W:1},nebbia:{G:1.6,A:.5,E:2,K:1,W:1},gelo:{G:2,A:1,E:.8,K:1.5,W:.8}}[w]||{G:1,A:1,E:1,K:1,W:1};
+  let sd=((g.seed*2654435761)^(g.round*40503))>>>0;const rn=()=>{sd=(Math.imul(sd^(sd>>>15),2246822519)+3266489917)>>>0;sd^=sd>>>13;return(sd>>>0)/4294967296};
+  const pool=Object.entries(W0),ch=[];
+  while(ch.length<2){const tot=pool.filter(([k])=>!ch.includes(k)).reduce((a,[,v])=>a+v,0);let r=rn()*tot;for(const[k,v]of pool){if(ch.includes(k))continue;if(r<v){ch.push(k);break}r-=v}}
+  g.rf={r:g.round,ch,done:[false,false]};
+}
+function rfCell(g,o){
+  const b=BASE[o];if(!unitAt(g,b.x,b.y))return b;
+  const seen=new Set([b.x+','+b.y]),q=[b];
+  while(q.length){const c=q.shift();for(const [dx,dy] of [[0,1],[1,0],[-1,0],[0,-1]]){const x=c.x+dx,y=c.y+dy;if(x<0||y<0||x>=W||y>=H||seen.has(x+','+y))continue;seen.add(x+','+y);
+    if(stepCost(g,x,y,null)===Infinity)continue;if(!unitAt(g,x,y))return{x,y};q.push({x,y})}}
+  return null;
+}
+function rfTake(g,o,t){
+  if(!g.rf||g.rf.done[o]||!g.rf.ch.includes(t))return false;
+  g.rf.done[o]=true;
+  if(g.units.filter(u=>u.o===o).length>=MAXU)return false;
+  const c=rfCell(g,o);if(!c)return false;
+  g.units.push({id:g.nid++,t,o,x:c.x,y:c.y,vx:c.x,vy:c.y,hp:UT[t].hp,moved:true,done:true,aid:true});
+  g.lastRec=g.nid-1;return true;
+}
+function rfAI(g,o){
+  if(!g.rf||g.rf.done[o])return;
+  const hold=heldBy(g,o),sc=t=>({E:hold<STATIONS.length?3:1,K:hold<STATIONS.length?2.5:2,G:hold>=STATIONS.length?3:2,A:2.4,W:1.2}[t]+Math.random()*.6);
+  rfTake(g,o,g.rf.ch.slice().sort((a,b)=>sc(b)-sc(a))[0]);
+}
 // Scopo: tenere entrambe le stazioni meteo per HOLD round di fila (si controlla a fine round). Occupare la base non fa più vincere.
 function checkCapture(g){
   if(g.over!==null)return;
@@ -560,7 +599,7 @@ function endTurn(g){
       return;
     }
     g.round++;g.step=0;g.first=(g.round-1+g.off)%2;
-    thaw(g);
+    thaw(g);rfMake(g);
     startTurnOf(g,g.first);
   }
 }
@@ -569,7 +608,7 @@ function endTurn(g){
 // Livelli del computer: più rumore = scelte meno precise.
 // noise: imprecisione delle scelte. skip: probabilità che un'unità salti l'azione. bonus: monete extra a round.
 const AI_LEVELS={
-  facile:{n:'Facile',noise:2,skip:0.4,bonus:0},
+  facile:{n:'Facile',noise:2,skip:0.4,bonus:0,norec:true},
   normale:{n:'Normale',noise:0.8,skip:0,bonus:0},
   difficile:{n:'Difficile',noise:0.1,skip:0,bonus:0.25}
 };
@@ -674,6 +713,8 @@ function aiStep(g,o,lv){
   if(!g.aiRec||g.aiRec!==g.round+'-'+o){
     g.aiRec=g.round+'-'+o;
     if(g.over!==null)return false;
+    rfAI(g,o);
+    if(norec(g))return false;
     const c=g.coins[o];
     // ogni tanto risparmia per un Cavaliere
     const save=c>=3&&c<5&&g.units.filter(u=>u.o===o).length>=3&&Math.random()<.3;
@@ -698,6 +739,11 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:28,d:'22 nov 2026',t:'Rinforzi a scelta, Facile senza reclutamento',n:[
+'Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità (la stessa offerta per te e per il computer, secondo il meteo del round)',
+'Livello Facile: niente reclutamento con le monete, solo rinforzi ogni 2 round; spariscono monete e tasto Recluta',
+'Il reclutamento con le monete resta nei livelli Normale e Difficile'
+]},
 {v:27,d:'22 nov 2026',t:'Nuovo scopo: le stazioni meteo',n:[
 'Occupare la base nemica non fa più vincere',
 'Si vince tenendo entrambe le stazioni meteo per 2 round di fila, oppure eliminando tutte le unità nemiche (e le monete per reclutarne)',
@@ -1094,9 +1140,9 @@ function canUndo(){
 }
 function renderBtns(){
   const pl=g.turn===0&&!busy&&g.over===null&&started;
-  $('bEnd').disabled=!pl;$('bRec').disabled=!pl;$('bUndo').disabled=!(canUndo()||canUndoRec());
+  $('bRec').hidden=norec(g);$('coins').hidden=norec(g);$('bEnd').disabled=!pl;$('bRec').disabled=!pl;$('bUndo').disabled=!(canUndo()||canUndoRec());
 }
-function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck()}
+function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck();rfCheck()}
 
 /* --- tutorial guidato: passi con evidenziazione, alcuni si completano toccando davvero --- */
 const TUT=[
@@ -1108,7 +1154,7 @@ const TUT=[
   {t:'Annulla riporta l’unità dov’era, finché non attacca. Con la nebbia non funziona.',dom:'bUndo',dock:'top'},
   {t:'Qui vedi il meteo di questo round e quello del prossimo. Cambia le regole a ogni round.',dom:'wbox'},
   {t:'Il vento spinge a fine round, la pioggia rallenta, la nebbia nasconde, il gelo apre i laghi.',dom:'wbox'},
-  {t:'Ogni round prendi 2 monete. Recluta compra unità (2–5 monete) se la base è libera: Cavaliere forte, Sciamano spinge.',dom:'bRec',dock:'top'},
+  {t:'Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità, uguali per te e per il computer. Con le monete (2 a round) puoi anche reclutare con «Recluta».'},
   {t:'Il vulcano erutta ogni 4 round e ferisce chi è vicino. Le stazioni danno +1 moneta e più meteo.',tiles:()=>[VOL,...STATIONS]},
   {t:'Quando hai finito tocca Fine turno: poi gioca il computer. Chi muove per primo si alterna.',dom:'bEnd',dock:'top',last:true}
 ];
@@ -1148,6 +1194,19 @@ function toast(t,ms=1400){const e=$('toast');e.textContent=t;e.classList.add('on
 
 function legend(){
   $('wl').innerHTML=Object.keys(WE).map(k=>`<div><b>${WE[k].n}</b>${WE[k].d}</div>`).join('');
+}
+function rfSheet(){
+  const l=$('rfList');l.innerHTML='';const ic={G:'guerriero',A:'arciere',E:'esploratore',K:'cavaliere',W:'sciamano'};
+  for(const t of g.rf.ch){
+    const b=document.createElement('button');b.type='button';b.className='rec';
+    b.innerHTML=(GP.on?`<img class="ui" src="assets/interfaccia/icona_unita_${ic[t]}.png" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp}</div></div>`;
+    b.onclick=()=>{const ok=rfTake(g,0,t);$('ovRf').hidden=true;sfx('recruit');sel=null;inspect=null;toast(ok?UT[t].n+' arriva sulla tua base':'Nessun posto libero: rinforzo perso');saveGame();refreshUI()};
+    l.appendChild(b);
+  }
+  $('rfNote').textContent='Un rinforzo gratuito: scegli una delle due unità. La scelta è la stessa per te e per il computer ('+WE[wNow(g).t].n.toLowerCase()+' in questo round). Compare sulla base e agisce dal turno dopo.';
+}
+function rfCheck(){
+  if(g.rf&&!g.rf.done[0]&&g.turn===0&&!busy&&g.over===null&&started&&$('ovRf').hidden&&$('ovStart').hidden&&$('ovEnd').hidden){rfSheet();$('ovRf').hidden=false}
 }
 function recSheet(){
   const l=$('recList');l.innerHTML='';

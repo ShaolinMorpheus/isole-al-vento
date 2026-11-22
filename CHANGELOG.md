@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v28 — 22 nov 2026 · Rinforzi a scelta
+- Rinforzo gratuito a scelta tra 2 unità (stessa offerta per entrambi), ogni 3 round (2 in Facile)
+- Facile: niente reclutamento con le monete
+
 ## v27 — 22 nov 2026 · Nuovo scopo: le stazioni meteo
 - Base nemica non fa più vincere; si vince tenendo le 2 stazioni per 2 round di fila o eliminando tutte le unità
 - Allo scadere dei 28 round vince chi ha controllato di più le stazioni
