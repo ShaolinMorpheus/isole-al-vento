@@ -132,7 +132,9 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
 
 /* Menu iniziale «Mare dipinto» (pezzi di Muse estratti dalla bozza approvata) */
 body.gpui #ovStart{background:url(assets/menu/sfondo_menu.webp) center/cover no-repeat;padding-top:62px}
-body.gpui #ovStart .card{position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:392px;padding:88px 34px 40px;gap:8px;max-height:100%}
+body.gpui #ovStart{padding:62px 8px 10px}
+body.gpui #ovStart .card{box-sizing:border-box;width:100%;position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:392px;padding:88px 30px 40px;gap:8px;max-height:none}
+body.gpui #ovStart img.tx{max-width:100%;height:auto}
 body.gpui #ovStart .card::before{content:'';position:absolute;inset:0;z-index:-1;border:80px solid transparent;border-image:url(assets/menu/menu_pannello.png) 240 fill/80px stretch;pointer-events:none}
 body.gpui #ovStart .card::after{content:'';position:absolute;left:50%;top:0;width:150px;height:150px;transform:translate(-50%,-50%);background:url(assets/menu/menu_simbolo.png) center/contain no-repeat;pointer-events:none;z-index:2}
 body.gpui #ovStart .card h1{height:80px;font-size:0;margin:-14px 0 -6px;background:url(assets/menu/menu_titolo.png) center/contain no-repeat;flex:none}
@@ -809,6 +811,10 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:47,d:'24 nov 2026',t:'Menu iniziale adattato allo schermo',n:[
+'Il menu iniziale ora si adatta a ogni telefono: se lo schermo e\' piu\' piccolo la scheda si rimpicciolisce con la cornice intera, senza piu\' tagli ai lati o in basso',
+'Tolta la bandiera blu dello sfondo che finiva dietro l\'isoletta'
+]},
 {v:46,d:'24 nov 2026',t:'Isoletta ridisegnata e sfondo a colori naturali',n:[
 'Nuova isoletta con vulcano e due palme, disegnata da zero in pastello e nitida',
 'Sfondo del menu: via la neve e il bianco, montagne di roccia e prati verdi a colori naturali'
@@ -2310,6 +2316,21 @@ $('bLook').onclick=()=>{LOOK=(LOOK+1)%7;LS.set('isole-look',String(LOOK));lookLa
 function lookLabel(){$('bLook').textContent='Terreno (prova): '+LOOKN[LOOK]}
 function g3Label(){$('bG3').textContent='Oggetti 3D (prova): '+(G3?'accesi':'spenti')}
 g3Label();lookLabel();
+
+/* Adatta il menu iniziale allo schermo: scala la scheda (cornice compresa) se e' piu' alta o larga dello spazio disponibile */
+function fitStart(){
+  const o=$('ovStart'),c=o&&o.querySelector('.card');if(!c||o.hidden)return;
+  if(c.querySelector('details[open]'))return;
+  c.style.zoom='1';
+  const cs=getComputedStyle(o),pt=parseFloat(cs.paddingTop)||0,pb=parseFloat(cs.paddingBottom)||0;
+  const h=c.offsetHeight,w=c.offsetWidth;
+  const z=Math.min(1,(o.clientHeight-pt-pb)/h,(o.clientWidth-8)/w);
+  c.style.zoom=z<0.995?String(Math.max(0.5,z)):'1';
+}
+(()=>{let t=0;const go=()=>{cancelAnimationFrame(t);t=requestAnimationFrame(fitStart)};
+  new MutationObserver(go).observe($('ovStart'),{attributes:true,subtree:true,childList:true,characterData:true,attributeFilter:['hidden','open','class','style']});
+  addEventListener('resize',go);addEventListener('orientationchange',go);go();
+  document.querySelectorAll('#ovStart details').forEach(d=>d.addEventListener('toggle',()=>{if(!d.open)go()}))})();
 $('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
 gpLabel();
 $('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;

@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v47 — 24 nov 2026 · Menu adattato allo schermo
+- La scheda del menu iniziale si scala per stare sempre intera (cornice compresa); tolta la bandiera dietro l'isoletta
+
 ## v46 — 24 nov 2026 · Isoletta ridisegnata e sfondo naturale
 - Nuova isoletta con vulcano e palme; sfondo del menu senza neve, a colori naturali
 
