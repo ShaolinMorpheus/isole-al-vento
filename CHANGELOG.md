@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v34 — 23 nov 2026 · Barra vita del guerriero più alta
+- Barra della vita del Guerriero più in alto, si vede l'elmo
+
 ## v33 — 23 nov 2026 · Basi, bandiere e sconfitta in blu
 - Basi, bandiere e schermata di sconfitta di Muse (squadra blu); gemelli oro rifatti
 

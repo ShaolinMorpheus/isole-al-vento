@@ -744,6 +744,9 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:34,d:'23 nov 2026',t:'Barra vita del guerriero più alta',n:[
+'La barra della vita del Guerriero sta un po’ più in alto, così si vede l’elmo'
+]},
 {v:33,d:'23 nov 2026',t:'Basi, bandiere e sconfitta in blu',n:[
 'Con «Grafica di prova»: basi, bandiere e schermata di sconfitta sono i nuovi disegni di Muse (consegna squadra blu); basi e bandiere oro rifatte in coppia',
 'Il viola non c’è più nel gioco (restano da controllare gli sfondi del menu, della vittoria e del pareggio)'
@@ -1710,7 +1713,7 @@ function drawUnit(u,hidden,sc,al){
       if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,-128*k,-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
       ctx.restore();
       ctx.globalAlpha=al===undefined?1:al;
-      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.8-cs*.03,cs*.66);
+      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.8-cs*.03-(u.t==='G'?cs*.07:0),cs*.66);
       ctx.globalAlpha=1;
       if(ast==='done')actMarks(u,x,gy,ast,true);
       if(scaled)ctx.restore();
