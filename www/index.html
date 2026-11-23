@@ -186,13 +186,13 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     </ul>
       <div class="wl" id="wl"></div>
     </details>
-    <details class="dt"><summary>Impostazioni e prove grafiche</summary>
+    <details class="dt"><summary>Impostazioni</summary>
       <div class="dtb">
         <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
         <button class="btn alt" id="bMus" type="button" style="min-height:44px"></button>
-        <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
-        <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
-        <button class="btn alt" id="bLook" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bGP" type="button" hidden style="display:none"></button>
+        <button class="btn alt" id="bG3" type="button" hidden style="display:none"></button>
+        <button class="btn alt" id="bLook" type="button" hidden style="display:none"></button>
       </div>
     </details>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
@@ -205,14 +205,14 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <div class="sc">
       <button class="btn" id="pBack" type="button" style="min-height:48px">Riprendi la partita</button>
       <button class="btn alt" id="pHome" type="button" style="min-height:44px">Torna al menu principale</button>
-      <details class="dt" open><summary>Suoni e grafica</summary>
+      <details class="dt" open><summary>Suoni e vibrazione</summary>
         <div class="dtb">
           <button class="btn alt" id="pSnd" type="button" style="min-height:44px"></button>
           <button class="btn alt" id="pVib" type="button" style="min-height:44px"></button>
           <button class="btn alt" id="pMus" type="button" style="min-height:44px"></button>
-          <button class="btn alt" id="pGP" type="button" style="min-height:44px"></button>
-          <button class="btn alt" id="pG3" type="button" style="min-height:44px"></button>
-          <button class="btn alt" id="pLook" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pGP" type="button" hidden style="display:none"></button>
+          <button class="btn alt" id="pG3" type="button" hidden style="display:none"></button>
+          <button class="btn alt" id="pLook" type="button" hidden style="display:none"></button>
         </div>
       </details>
     </div>
@@ -761,9 +761,12 @@ const LS={
   get(k){try{return localStorage.getItem(k)}catch(e){return null}},
   set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 };
-let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
+let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:39,d:'23 nov 2026',t:'Grafica fissa',n:[
+'Tolti dal menu i tasti «Grafica di prova», «Oggetti 3D» e «Terreno»: ora sono sempre attivi (grafica di Muse, oggetti 3D, terreno a caselle separate su campo unico). Restano suoni, vibrazione e musica'
+]},
 {v:38,d:'23 nov 2026',t:'Corsie libere e Facile più semplice',n:[
 'Ogni mappa ha sempre una strada libera dall’alto al basso a sinistra e una a destra (solo prato, senza boschi, monti o laghi). I numeri mappa ora danno mappe diverse da prima',
 'Facile: i rinforzi propongono solo Guerriero, Arciere ed Esploratore'
@@ -834,7 +837,7 @@ const CHANGELOG=[
 {v:22,d:'19 nov 2026',t:'Suono di selezione, vibrazione, menu riordinato',n:[
 'Suono (e piccola vibrazione) quando selezioni una tua pedina',
 'Vibrazione ora anche nell’app Android (serve reinstallare l’APK una volta): colpi, eliminazioni, eruzione',
-'Menu iniziale riordinato: restano in vista livello, Gioca e Tutorial; «Come si gioca» e «Impostazioni e prove grafiche» si aprono a tendina',
+'Menu iniziale riordinato: restano in vista livello, Gioca e Tutorial; «Come si gioca» e «Impostazioni» si aprono a tendina',
 'Il menu non esce più dal riquadro: scorre dentro la cornice'
 ]},
 {v:21,d:'19 nov 2026',t:'Più spazio al campo, vita con numero, pedine animate',n:[
@@ -978,7 +981,7 @@ function buildSeg(){
   $('stats').textContent=statsText();
 }
 /* --- suoni e vibrazione (sintetizzati, nessun file) --- */
-let G3=LS.get('isole-g3')==='1';
+let G3=true; // fisso: oggetti 3D accesi
 let SND=LS.get('isole-snd')!=='0',AC=null;
 function buzz(pat){ // vibrazione: plugin nativo Capacitor (app Android) oppure API del browser
   if(REDUCE||LS.get('isole-vib')==='0')return;
@@ -1065,7 +1068,7 @@ const lay={cs:40,dz:8,fh:32,th:8,ox:0,oy:0,cw:0,ch:0,dpr:1};
 const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
 
 /* --- Grafica di prova: blocchi del terreno disegnati da Muse (PNG 256×256: faccia 194 px + fronte 62 px) --- */
-const GP={on:LS.get('isole-gp')==='1',mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
+const GP={on:true,mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
   names:['prato_a','prato_b','stazione_a','stazione_b','bosco_a','bosco_b','lago_a','lago_b','ghiaccio_a','ghiaccio_b','monte_a','monte_b','cenere_a','cenere_b','base_oro','base_blu']};
 function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sfuoca e sfarfalla
   const L=[im];let s=256;

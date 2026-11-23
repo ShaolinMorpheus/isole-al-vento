@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v39 — 23 nov 2026 · Grafica fissa
+- Grafica di prova, Oggetti 3D e Terreno sempre attivi e tolti dai menu
+
 ## v38 — 23 nov 2026 · Corsie libere e Facile più semplice
 - Mappe con una corsia libera a sinistra e una a destra; Facile: rinforzi solo Guerriero, Arciere, Esploratore
 
