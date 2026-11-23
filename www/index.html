@@ -8,7 +8,7 @@
 :root{
   --sea:#0e2433; --sea2:#15384c; --panel:#10222f; --line:#2a4a5d;
   --ink:#eaf3f2; --muted:#9db8bd;
-  --gold:#f2b84b; --violet:#9a86ee; --coral:#ef6a5a; --mint:#59cdb7;
+  --gold:#f2b84b; --violet:#6f9fe0; --coral:#ef6a5a; --mint:#59cdb7;
   --disp:Fredoka,"Trebuchet MS",system-ui,sans-serif;
   --body:Nunito,system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
@@ -744,6 +744,10 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:31,d:'23 nov 2026',t:'Pedine stanche e colore squadra blu',n:[
+'Le pedine stanche usano il disegno «stanca» di Muse, senza più il filtro grigio',
+'Il colore della squadra avversaria nell’interfaccia e sul segno della base passa da viola a blu'
+]},
 {v:30,d:'23 nov 2026',t:'Nuovi personaggi e squadra blu',n:[
 'Con «Grafica di prova» accesa: tutte le pedine sono i nuovi disegni di Muse (consegna personaggi), oro per te e BLU per il computer',
 '4 nuove unità: Lanciere (resistente, contrattacca a piena forza), Guaritore (a inizio turno cura di 2 i vicini), Balestriere (3 caselle di gittata, ma 1 solo passo), Alfiere (i vicini fanno 1 passo in più)',
@@ -1601,7 +1605,7 @@ function drawObject(x,y,t,tick){
 }
 function baseFlag(o,tick){
   if(goReady()){const b0=BASE[o];goFlag('bandiera_'+(o===0?'oro_':'viola_')+'1',cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs,tick,o*2);return}
-  const b=BASE[o],cs=lay.cs,k=cs/40,col=o===0?'#f2b84b':'#9a86ee',dark=o===0?'#a8741f':'#5f4cae',X=cx(b.x)+cs/2,top=cy(b.y),fh=lay.fh;
+  const b=BASE[o],cs=lay.cs,k=cs/40,col=o===0?'#f2b84b':'#6f9fe0',dark=o===0?'#a8741f':'#5f4cae',X=cx(b.x)+cs/2,top=cy(b.y),fh=lay.fh;
   const pw=cs*.36,py=top+fh*.66;
   rr(X-pw,py+3*k,pw*2,fh*.2,4*k);ctx.fillStyle=dark;ctx.fill();
   rr(X-pw,py,pw*2,fh*.2,4*k);ctx.fillStyle=col;ctx.fill();
@@ -1617,7 +1621,7 @@ function baseFlag(o,tick){
 }
 // Segno colorato sulla faccia della casella-base.
 function drawBaseMark(o){
-  const b=BASE[o],col=o===0?'#f2b84b':'#9a86ee';
+  const b=BASE[o],col=o===0?'#f2b84b':'#6f9fe0';
   ctx.lineWidth=3;ctx.strokeStyle=col;rr(...faceR(b.x,b.y,2),6);ctx.stroke();
   ctx.fillStyle=col;ctx.globalAlpha=.22;rr(...faceR(b.x,b.y,2),6);ctx.fill();ctx.globalAlpha=1;
 }
@@ -1670,7 +1674,7 @@ function hpBar(u,x,hy,hw){ // barra della vita con il valore dentro
 function drawUnit(u,hidden,sc,al){
   if(hidden)return;
   const cs=lay.cs,o=uoff.get(u.id),x=gcx(u.vx)+(o?o.x:0),y=gcy(u.vy)+(o?o.y:0),r=cs*.34;
-  const col=u.o===0?'#f2b84b':'#9a86ee',dk=u.o===0?'#a8741f':'#5f4cae';
+  const col=u.o===0?'#f2b84b':'#6f9fe0',dk=u.o===0?'#a8741f':'#5f4cae';
   const mine=u.o===0&&g.turn===0&&g.over===null&&started&&!busy&&!strikes.some(k=>k.from===u.id||k.to===u.id);
   const ast=mine?actState(u):null,tired=ast==='done';
   const bob=(sel===u&&!REDUCE&&g.turn===0&&g.over===null&&started)?Math.abs(Math.sin(tick*4.5))*cs*.05:0;
@@ -1693,7 +1697,7 @@ function drawUnit(u,hidden,sc,al){
       const lift=bob*1.4+hop-(tired?cs*.04:0);
       ctx.globalAlpha=al===undefined?1:al;
       ctx.save();ctx.translate(x,gy);if(lean)ctx.rotate(lean);ctx.scale(1,sy);
-      if(tired)ctx.filter='grayscale(.85) brightness(.82)';
+      // la posa stanca è già disegnata da Muse: nessun filtro
       ctx.drawImage(im,-128*k,-(h-24)*k-lift,256*k,h*k);
       ctx.filter='none';
       if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,-128*k,-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
@@ -1746,7 +1750,7 @@ function spawnAnim(e){
   if(e.k==='die'){
     const u=e.u;if(u.hv===undefined)u.hv=0;
     ghosts.push({u,dead:0,age:0});
-    if(!REDUCE){impact(gcx(u.vx),gcy(u.vy),u.o===0?'#f2b84b':'#9a86ee',true,0,true);shake=Math.max(shake,.7)}
+    if(!REDUCE){impact(gcx(u.vx),gcy(u.vy),u.o===0?'#f2b84b':'#6f9fe0',true,0,true);shake=Math.max(shake,.7)}
     return;
   }
   const ranged=e.dist>1;
@@ -1777,7 +1781,7 @@ function stepAnims(dt){
     }
     if(l>=tHit&&!s.hit){
       s.hit=true;
-      impact(gcx(s.tx),gcy(s.ty),s.o===0?'#f2b84b':'#9a86ee',!!s.gh,Math.atan2(dy,dx),s.ranged);
+      impact(gcx(s.tx),gcy(s.ty),s.o===0?'#f2b84b':'#6f9fe0',!!s.gh,Math.atan2(dy,dx),s.ranged);
       if(s.gh){s.gh.dead=0;if(!REDUCE)shake=Math.max(shake,.9)}
       if(!REDUCE){
         const ix=gcx(s.tx),iy=gcy(s.ty);
@@ -1878,7 +1882,7 @@ function draw(ts){
   // stazioni occupate: bordo del colore di chi le tiene
   for(const st of STATIONS){
     const u=unitAt(g,st.x,st.y);if(!u)continue;
-    ctx.strokeStyle=u.o===0?'#f2b84b':'#9a86ee';ctx.lineWidth=2.5;rr(...faceR(st.x,st.y,2),7);ctx.stroke();
+    ctx.strokeStyle=u.o===0?'#f2b84b':'#6f9fe0';ctx.lineWidth=2.5;rr(...faceR(st.x,st.y,2),7);ctx.stroke();
   }
   // unità: tween
   for(const u of g.units){

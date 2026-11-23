@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v31 — 23 nov 2026 · Pedine stanche e colore blu
+- Posa stanca di Muse senza filtro grigio; colore avversario dell'interfaccia blu
+
 ## v30 — 23 nov 2026 · Nuovi personaggi e squadra blu
 - Pedine di Muse (9 unità, oro/blu, normale/stanca) con «Grafica di prova»; il computer è blu
 - Nuove unità: Lanciere, Guaritore, Balestriere, Alfiere (rinforzi, reclutamento, computer)
