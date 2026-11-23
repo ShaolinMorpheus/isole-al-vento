@@ -1,0 +1,7 @@
+terreno_base_blu.png
+terreno_base_oro.png
+bandiera_blu_1.png
+bandiera_blu_2.png
+bandiera_oro_1.png
+bandiera_oro_2.png
+sfondo_sconfitta.webp
