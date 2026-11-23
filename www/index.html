@@ -795,6 +795,9 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:41,d:'23 nov 2026',t:'Suono sui tasti dei menu',n:[
+'Ogni tasto del menu iniziale, del menu di gioco e delle schermate di fine partita e rinforzi fa un piccolo suono'
+]},
 {v:40,d:'23 nov 2026',t:'Nuovo menu iniziale «Mare dipinto»',n:[
 'Il menu iniziale ha la grafica approvata di Muse: sfondo dipinto con isola oro e isola blu, pannello con cornice di legno e corda, vulcano sul bordo, bottoni oro, difficoltà e sezioni in vetro di mare. I testi li scrive il gioco'
 ]},
@@ -1029,7 +1032,7 @@ function sfx(k){
   try{
     AC=AC||new (window.AudioContext||window.webkitAudioContext)();
     if(AC.state==='suspended')AC.resume();
-    const T={sel:[[587,.045,'triangle',.08],[880,.07,'sine',.07]],move:[[330,.05,'triangle',.07]],hit:[[180,.09,'square',.09],[110,.12,'square',.08]],kill:[[220,.08,'square',.09],[140,.1,'square',.09],[80,.2,'sawtooth',.08]],
+    const T={sel:[[587,.045,'triangle',.08],[880,.07,'sine',.07]],tap:[[660,.035,'triangle',.07],[990,.05,'sine',.05]],move:[[330,.05,'triangle',.07]],hit:[[180,.09,'square',.09],[110,.12,'square',.08]],kill:[[220,.08,'square',.09],[140,.1,'square',.09],[80,.2,'sawtooth',.08]],
       recruit:[[392,.07,'triangle',.08],[523,.1,'triangle',.08]],erupt:[[70,.5,'sawtooth',.14],[55,.6,'sawtooth',.12]],
       win:[[523,.12,'triangle',.1],[659,.12,'triangle',.1],[784,.25,'triangle',.1]],lose:[[330,.18,'triangle',.1],[262,.18,'triangle',.1],[196,.4,'triangle',.1]],turn:[[262,.06,'sine',.06]]}[k];
     let t=AC.currentTime;
@@ -2285,6 +2288,7 @@ $('bAgain').onclick=()=>{$('seedIn').value='';startGame(false,0)};
 $('tutNext').onclick=tutNext;
 $('tutSkip').onclick=tutEnd;
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#ovStart button,#ovStart summary,#ovPause button,#ovEnd button,#ovRf button'))sfx('tap')},true);
 $('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStart').hidden=false};
 
 /* menu di gioco (pausa): ritorno al menu principale e impostazioni senza uscire dalla partita */

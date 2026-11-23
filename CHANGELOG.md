@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v41 — 23 nov 2026 · Suono sui tasti dei menu
+- Piccolo suono a ogni tasto dei menu
+
 ## v40 — 23 nov 2026 · Nuovo menu iniziale
 - Menu iniziale con i pezzi di Muse (menu-v3), margine pannello 200 px
 
