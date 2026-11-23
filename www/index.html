@@ -1713,7 +1713,7 @@ function drawUnit(u,hidden,sc,al){
       if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,-128*k,-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
       ctx.restore();
       ctx.globalAlpha=al===undefined?1:al;
-      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.8-cs*.03-(u.t==='G'?cs*.16:0),cs*.66);
+      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.8-cs*.03-(u.t==='G'?cs*.11:0),cs*.66);
       ctx.globalAlpha=1;
       if(ast==='done')actMarks(u,x,gy,ast,true);
       if(scaled)ctx.restore();
