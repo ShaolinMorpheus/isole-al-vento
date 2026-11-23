@@ -176,7 +176,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
     <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
     <details class="dt"><summary>Come si gioca</summary>
       <ul>
-      <li>Vinci tenendo entrambe le stazioni meteo per 2 round di fila, o eliminando tutte le unità nemiche.</li>
+      <li>Vinci tenendo entrambe le stazioni meteo per 3 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
       <li>Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Lanciere, Arciere, Balestriere, Esploratore, Cavaliere, Sciamano (spinge i nemici), Guaritore (cura i vicini) e Alfiere (dà 1 passo in più ai vicini).</li>
@@ -256,7 +256,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
 (()=>{
 'use strict';
 /* ====================== REGOLE (nessun disegno qui dentro) ====================== */
-const W=9,H=13,MID=6,CX=4,MAXR=28,MAXU=8;
+const W=9,H=13,MID=6,CX=4,MAXR=36,MAXU=8;
 const DIRS={N:[0,-1],E:[1,0],S:[0,1],O:[-1,0]};
 const DIRN={N:'Nord',E:'Est',S:'Sud',O:'Ovest'};
 const UT={
@@ -443,7 +443,7 @@ function checkElim(g){
     if(!g.units.some(u=>u.o===o)&&g.coins[o]<2){g.over=1-o;g.why=o===0?'Non ti restano unità né monete.':'Il computer non ha più unità né monete.';return}
   }
 }
-const HOLD=2;
+const HOLD=3;
 /* Rinforzi: ogni RF_EVERY round arriva una scelta tra 2 unità, UGUALE per i due giocatori (dipende da meteo e mappa).
    Nel livello Facile non c'è reclutamento con le monete: i rinforzi sono l'unico modo. */
 function norec(g){const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
@@ -744,6 +744,10 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:35,d:'23 nov 2026',t:'Partita più lunga, tutorial più chiaro',n:[
+'Per vincere devi tenere le due stazioni per 3 round di fila (prima 2); la partita dura fino a 36 round (prima 28)',
+'Tutorial: nuovo primo passo che indica i tuoi personaggi color oro (evidenziati) e dice che il computer ha quelli blu'
+]},
 {v:34,d:'23 nov 2026',t:'Barra vita del guerriero più alta',n:[
 'La barra della vita del Guerriero sta un po’ più in alto, così si vede l’elmo'
 ]},
@@ -1176,8 +1180,9 @@ function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck();rfCheck()}
 
 /* --- tutorial guidato: passi con evidenziazione, alcuni si completano toccando davvero --- */
 const TUT=[
-  {t:'Tu sei oro, il computer è l’altra squadra. Vinci tenendo le due stazioni meteo per 2 round di fila, o eliminando tutte le sue unità.',tiles:()=>[...STATIONS]},
-  {t:'Tocca una tua unità gialla per sceglierla.',inter:true,tiles:()=>g.units.filter(u=>u.o===0).map(u=>({x:u.x,y:u.y})),done:()=>!!sel&&sel.o===0},
+  {t:'I tuoi personaggi sono quelli color oro, indicati qui dal riquadro. Il computer ha quelli blu.',tiles:()=>g.units.filter(u=>u.o===0).map(u=>({x:u.x,y:u.y}))},
+  {t:'Vinci tenendo le due stazioni meteo per 3 round di fila, o eliminando tutte le unità blu.',tiles:()=>[...STATIONS]},
+  {t:'Tocca una tua unità color oro per sceglierla.',inter:true,tiles:()=>g.units.filter(u=>u.o===0).map(u=>({x:u.x,y:u.y})),done:()=>!!sel&&sel.o===0},
   {t:'Con l’unità scelta tocca una casella chiara. Boschi e cenere costano 2 passi.',inter:true,done:()=>g.units.some(u=>u.o===0&&u.px!==undefined)},
   {t:'Tocca il nemico cerchiato di rosso per attaccare. Rosso: danno. Arancio: contrattacco.',tiles:()=>g.units.filter(u=>u.o===1&&sees(g,0,u)).map(u=>({x:u.x,y:u.y}))},
   {t:'Pizzica con due dita per ingrandire, trascina per spostarti. Anche i pulsanti + e − ingrandiscono.',dom:'zoomBox'},

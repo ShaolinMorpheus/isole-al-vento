@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v35 — 23 nov 2026 · Partita più lunga
+- Stazioni da tenere 3 round di fila, massimo 36 round
+- Tutorial: i tuoi personaggi sono quelli color oro, evidenziati
+
 ## v34 — 23 nov 2026 · Barra vita del guerriero più alta
 - Barra della vita del Guerriero più in alto, si vede l'elmo
 
