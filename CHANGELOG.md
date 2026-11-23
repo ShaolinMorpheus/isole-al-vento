@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v46 — 24 nov 2026 · Isoletta ridisegnata e sfondo naturale
+- Nuova isoletta con vulcano e palme; sfondo del menu senza neve, a colori naturali
+
 ## v45 — 24 nov 2026 · Grafica pastello in tutti i menu
 - Cornice a pali con corda ritorta, bottoni, campi, pannelli e schede in tavolozza pastello; nuova isoletta; sfondi schiariti; testi più leggibili
 
