@@ -2,6 +2,11 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v30 — 23 nov 2026 · Nuovi personaggi e squadra blu
+- Pedine di Muse (9 unità, oro/blu, normale/stanca) con «Grafica di prova»; il computer è blu
+- Nuove unità: Lanciere, Guaritore, Balestriere, Alfiere (rinforzi, reclutamento, computer)
+- Ancora da allineare al blu: basi, bandiere, interfaccia
+
 ## v29 — 22 nov 2026 · Pedine visibili dietro agli oggetti
 - Oggetti (alberi, montagne, vulcano) trasparenti quando davanti a una pedina: la pedina resta dietro
 

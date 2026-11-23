@@ -179,7 +179,7 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
       <li>Vinci tenendo entrambe le stazioni meteo per 2 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
       <li>Il meteo del round dopo è annunciato in alto. Col vento, i cerchi tratteggiati mostrano dove finiranno le unità.</li>
-      <li>Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Arciere, Esploratore, Cavaliere (veloce e forte) e Sciamano (spinge i nemici).</li>
+      <li>Ogni 3 round arriva un rinforzo gratuito: scegli una di due unità, la stessa offerta per te e per il computer. Con la base libera puoi anche reclutare spendendo monete (non nel livello Facile): Guerriero, Lanciere, Arciere, Balestriere, Esploratore, Cavaliere, Sciamano (spinge i nemici), Guaritore (cura i vicini) e Alfiere (dà 1 passo in più ai vicini).</li>
       <li>La mappa è grande: pizzica con due dita per ingrandire, trascina per spostarti, oppure usa i pulsanti + e −.</li>
       <li>Il vulcano al centro erutta ogni 4 round: chi è vicino si ferisce e il prato attorno diventa cenere.</li>
       <li>Le due stazioni meteo danno +1 moneta a round a chi le occupa e mostrano un round di meteo in più.</li>
@@ -264,7 +264,11 @@ const UT={
   G:{n:'Guerriero',hp:10,atk:4,mv:2,rg:1,cost:3,d:'Resistente, colpisce da vicino'},
   A:{n:'Arciere',hp:6,atk:4,mv:2,rg:2,cost:3,d:'Colpisce da 2 caselle'},
   K:{n:'Cavaliere',hp:8,atk:5,mv:4,rg:1,cost:5,d:'Veloce e forte, ma il bosco e la cenere lo frenano (3 passi)'},
-  W:{n:'Sciamano',hp:6,atk:2,mv:2,rg:2,cost:4,d:'Da 2 caselle spinge il nemico di una; contro un ostacolo fa +1'}
+  W:{n:'Sciamano',hp:6,atk:2,mv:2,rg:2,cost:4,d:'Da 2 caselle spinge il nemico di una; contro un ostacolo fa +1'},
+  L:{n:'Lanciere',hp:9,atk:3,mv:2,rg:1,cost:3,d:'Resistente: contrattacca con tutta la forza'},
+  H:{n:'Guaritore',hp:6,atk:1,mv:3,rg:1,cost:4,d:'A inizio turno cura di 2 vita le unità amiche vicine'},
+  B:{n:'Balestriere',hp:5,atk:5,mv:1,rg:3,cost:5,d:'Colpisce da 3 caselle, ma si muove di una sola'},
+  R:{n:'Alfiere',hp:7,atk:2,mv:3,rg:1,cost:4,d:'Le unità amiche vicine a lui fanno 1 passo in più'}
 };
 const WE={
   sereno:{n:'Sereno',d:'Nessun effetto.'},
@@ -332,7 +336,7 @@ const tileAt=(g,x,y)=>g.map[y][x];
 const unitAt=(g,x,y)=>g.units.find(u=>u.x===x&&u.y===y);
 const wNow=g=>g.wx[g.round-1];
 const wNext=g=>g.wx[g.round];
-function mvOf(g,u){let v=UT[u.t].mv;if(wNow(g).t==='pioggia')v=Math.max(1,v-1);return v}
+function mvOf(g,u){let v=UT[u.t].mv;if(u.t!=='R'&&g.units.some(a=>a.o===u.o&&a.t==='R'&&a!==u&&md(a,u)<=1))v+=1;if(wNow(g).t==='pioggia')v=Math.max(1,v-1);return v}
 function rgOf(g,u){let v=UT[u.t].rg;if(wNow(g).t==='nebbia')v=Math.min(v,1);return v}
 function atkOf(g,u){let v=UT[u.t].atk;if(wNow(g).t==='pioggia'&&UT[u.t].rg>1)v=Math.max(1,v-1);return v}
 function stepCost(g,x,y,u){
@@ -386,7 +390,7 @@ function hitOf(g,a,d,ax,ay){
   const info=pushInfo(g,a,d,ax,ay),bump=info&&info.bump?1:0;
   return {dm:dmgOf(g,a,d)+bump,bump,push:info&&info.x!==undefined?{x:info.x,y:info.y}:null};
 }
-function counterOf(g,d,a){let c=Math.max(1,atkOf(g,d)-1);if(tileAt(g,a.x,a.y)==='F')c-=1;return Math.max(1,c)}
+function counterOf(g,d,a){let c=Math.max(1,atkOf(g,d)-(d.t==='L'?0:1));if(tileAt(g,a.x,a.y)==='F')c-=1;return Math.max(1,c)}
 function addFx(g,x,y,txt,col,delay){g.fx.push({x,y,txt,col,life:1,delay:delay||0})}
 function pathTo(g,u,x,y){ // percorso più economico dalla casella attuale a (x,y), con le stesse regole di reach()
   const bud=mvOf(g,u),best=new Map([[u.x+','+u.y,0]]),par=new Map(),q=[[u.x,u.y,0]];
@@ -446,7 +450,7 @@ function norec(g){const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
 function rfEvery(g){return 3}
 function rfMake(g){
   if(g.round<=rfEvery(g)||(g.round-1)%rfEvery(g)!==0||g.round>=MAXR-1){g.rf=null;return}
-  const w=wNow(g).t,W0={sereno:{G:1,A:1,E:1,K:1,W:1},vento:{G:1,A:1,E:1.6,K:1.8,W:1.5},pioggia:{G:2,A:1.4,E:.8,K:.8,W:1},nebbia:{G:1.6,A:.5,E:2,K:1,W:1},gelo:{G:2,A:1,E:.8,K:1.5,W:.8}}[w]||{G:1,A:1,E:1,K:1,W:1};
+  const w=wNow(g).t,W0={sereno:{G:1,A:1,E:1,K:1,W:1,L:1,H:1,B:1,R:1},vento:{G:1,A:1,E:1.6,K:1.8,W:1.5,L:1,H:1,B:.6,R:1.5},pioggia:{G:2,A:1.4,E:.8,K:.8,W:1,L:1.6,H:1.5,B:.5,R:1},nebbia:{G:1.6,A:.5,E:2,K:1,W:1,L:1.2,H:1,B:.3,R:1.2},gelo:{G:2,A:1,E:.8,K:1.5,W:.8,L:1.5,H:1.4,B:.8,R:1}}[w]||{G:1,A:1,E:1,K:1,W:1,L:1,H:1,B:1,R:1};
   let sd=((g.seed*2654435761)^(g.round*40503))>>>0;const rn=()=>{sd=(Math.imul(sd^(sd>>>15),2246822519)+3266489917)>>>0;sd^=sd>>>13;return(sd>>>0)/4294967296};
   const pool=Object.entries(W0),ch=[];
   while(ch.length<2){const tot=pool.filter(([k])=>!ch.includes(k)).reduce((a,[,v])=>a+v,0);let r=rn()*tot;for(const[k,v]of pool){if(ch.includes(k))continue;if(r<v){ch.push(k);break}r-=v}}
@@ -576,6 +580,7 @@ function heldBy(g,o){return STATIONS.filter(s=>{const u=unitAt(g,s.x,s.y);return
 // g.turn = a chi tocca adesso (0 giocatore, 1 computer); g.step = 0 primo a muovere, 1 secondo.
 function startTurnOf(g,o){
   g.turn=o;g.lastRec=0;
+  g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<UT[u.t].hp){const n=Math.min(2,UT[u.t].hp-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
   g.units.forEach(u=>{if(u.o===o){u.moved=false;u.done=false;u.aid=false;u.px=undefined;u.py=undefined}});
 }
 function endTurn(g){
@@ -659,9 +664,9 @@ function aiChoose(g,u,noise){
       }
       const urg=Math.max(0.12,1-(g.round-1)/10);
       s-=exp*(u.hp<=exp?1.8*urg:0.45*urg);
-      if(UT[u.t].rg===2&&known.length){
+      if(UT[u.t].rg>=2&&known.length){
         const dn=Math.min(...known.map(e=>md(p,e)));
-        if(dn===2)s+=1.5;
+        if(dn===UT[u.t].rg)s+=1.5;
       }
       s-=c*0.05;
       s+=Math.random()*nz;
@@ -719,7 +724,7 @@ function aiStep(g,o,lv){
     // ogni tanto risparmia per un Cavaliere
     const save=c>=3&&c<5&&g.units.filter(u=>u.o===o).length>=3&&Math.random()<.3;
     if(c>=2&&!save&&!canRecruit(g,o,'E')){
-      const pool=[['G',.28],['A',.28],['E',.14],['K',.16],['W',.14]].filter(([k])=>UT[k].cost<=c);
+      const pool=[['G',.28],['A',.28],['E',.14],['K',.16],['W',.14],['L',.16],['H',.08],['B',.1],['R',.08]].filter(([k])=>UT[k].cost<=c);
       let r=Math.random()*pool.reduce((a,[,w])=>a+w,0),t=pool[0][0];
       for(const [k,w] of pool){if(r<w){t=k;break}r-=w}
       if(!canRecruit(g,o,t)&&doRecruit(g,o,t))return {recruit:t};
@@ -739,6 +744,12 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:30,d:'23 nov 2026',t:'Nuovi personaggi e squadra blu',n:[
+'Con «Grafica di prova» accesa: tutte le pedine sono i nuovi disegni di Muse (consegna personaggi), oro per te e BLU per il computer',
+'4 nuove unità: Lanciere (resistente, contrattacca a piena forza), Guaritore (a inizio turno cura di 2 i vicini), Balestriere (3 caselle di gittata, ma 1 solo passo), Alfiere (i vicini fanno 1 passo in più)',
+'Entrano nei rinforzi (secondo il meteo), nel reclutamento e nel computer',
+'Basi, bandiere e colori dell’interfaccia sono ancora viola: da allineare al blu'
+]},
 {v:29,d:'22 nov 2026',t:'Pedine visibili dietro agli alberi',n:[
 'Quando una pedina sta dietro ad albero, montagna o vulcano, è l’oggetto a diventare trasparente: la pedina resta dietro ma si vede'
 ]},
@@ -1019,8 +1030,9 @@ function gpLoad(){
 const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','stazione_f00','stazione_f01','stazione_f02','stazione_f03','stazione_f04','stazione_f05','stazione_f06','stazione_f07','stazione_f08','stazione_f09','stazione_f10','stazione_f11','stazione_f12','stazione_f13','stazione_f14','stazione_f15','stazione_f16','stazione_f17','stazione_f18','stazione_f19','stazione_f20','stazione_f21','stazione_f22','stazione_f23','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
   A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,stazione_f00:296,stazione_f01:296,stazione_f02:296,stazione_f03:296,stazione_f04:296,stazione_f05:296,stazione_f06:296,stazione_f07:296,stazione_f08:296,stazione_f09:296,stazione_f10:296,stazione_f11:296,stazione_f12:296,stazione_f13:296,stazione_f14:296,stazione_f15:296,stazione_f16:296,stazione_f17:296,stazione_f18:296,stazione_f19:296,stazione_f20:296,stazione_f21:296,stazione_f22:296,stazione_f23:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
 function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
-const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano'}};
-function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','viola'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
+const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294,lanciere:300,guaritore:280,balestriere:270,alfiere:320},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano',L:'lanciere',H:'guaritore',B:'balestriere',R:'alfiere'}};
+function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','blu'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
+function ICO(t){return ['G','A','E','K','W'].includes(t)?'interfaccia/icona_unita_'+GU.T[t]+'.png':'pedine/'+GU.T[t]+'_oro_normale.png'}
 function guReady(){return gpReady()&&!!GU.im.esploratore_oro_normale}
 const GE={im:{},names:['eff_goccia','eff_fiocco_a','eff_fiocco_b','eff_foglia_a','eff_foglia_b','eff_cenere','eff_colpo','eff_colpo_critico','eff_taglio','eff_freccia','eff_scintilla','eff_onda_vento','eff_lava_a','eff_lava_b','eff_fumo','eff_cenere_caduta','meteo_pioggia','meteo_nebbia','meteo_gelo','meteo_vento','ui_casella_libera','ui_casella_attacco','ui_casella_pericolo','ui_anello_selezione']};
 const GT={im:{},names:['terreno_terra_a','terreno_terra_b','terreno_terra_c','terreno_sabbia_a','terreno_sabbia_b','terreno_sabbia_c','terreno_erbasecca_a','terreno_erbasecca_b','terreno_erbasecca_c','terreno_fango_a','terreno_fango_b','terreno_sassi_a','terreno_sassi_b','terreno_sassi_c','bordo_sabbia_lago_a','bordo_sabbia_lago_b','dettaglio_fiori_a','dettaglio_fiori_b','dettaglio_fiori_c','dettaglio_ciuffi_a','dettaglio_ciuffi_b','dettaglio_ciuffi_c','dettaglio_sassi_a','dettaglio_sassi_b','dettaglio_sassi_c','dettaglio_funghi_a','dettaglio_funghi_b','dettaglio_foglie_a','dettaglio_foglie_b'],pr:['terreno_prato_c','terreno_prato_d','terreno_prato_e','terreno_prato_f','terreno_prato_g','terreno_prato_h']};
@@ -1150,7 +1162,7 @@ function refreshUI(){renderTop();renderInfo();renderBtns();tutCheck();rfCheck()}
 
 /* --- tutorial guidato: passi con evidenziazione, alcuni si completano toccando davvero --- */
 const TUT=[
-  {t:'Tu sei giallo, il computer viola. Vinci tenendo le due stazioni meteo per 2 round di fila, o eliminando tutte le sue unità.',tiles:()=>[...STATIONS]},
+  {t:'Tu sei oro, il computer è l’altra squadra. Vinci tenendo le due stazioni meteo per 2 round di fila, o eliminando tutte le sue unità.',tiles:()=>[...STATIONS]},
   {t:'Tocca una tua unità gialla per sceglierla.',inter:true,tiles:()=>g.units.filter(u=>u.o===0).map(u=>({x:u.x,y:u.y})),done:()=>!!sel&&sel.o===0},
   {t:'Con l’unità scelta tocca una casella chiara. Boschi e cenere costano 2 passi.',inter:true,done:()=>g.units.some(u=>u.o===0&&u.px!==undefined)},
   {t:'Tocca il nemico cerchiato di rosso per attaccare. Rosso: danno. Arancio: contrattacco.',tiles:()=>g.units.filter(u=>u.o===1&&sees(g,0,u)).map(u=>({x:u.x,y:u.y}))},
@@ -1200,10 +1212,10 @@ function legend(){
   $('wl').innerHTML=Object.keys(WE).map(k=>`<div><b>${WE[k].n}</b>${WE[k].d}</div>`).join('');
 }
 function rfSheet(){
-  const l=$('rfList');l.innerHTML='';const ic={G:'guerriero',A:'arciere',E:'esploratore',K:'cavaliere',W:'sciamano'};
+  const l=$('rfList');l.innerHTML='';const ic=GU.T;
   for(const t of g.rf.ch){
     const b=document.createElement('button');b.type='button';b.className='rec';
-    b.innerHTML=(GP.on?`<img class="ui" src="assets/interfaccia/icona_unita_${ic[t]}.png" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp}</div></div>`;
+    b.innerHTML=(GP.on?`<img class="ui" src="assets/${ICO(t)}" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp}</div></div>`;
     b.onclick=()=>{const ok=rfTake(g,0,t);$('ovRf').hidden=true;sfx('recruit');sel=null;inspect=null;toast(ok?UT[t].n+' arriva sulla tua base':'Nessun posto libero: rinforzo perso');saveGame();refreshUI()};
     l.appendChild(b);
   }
@@ -1215,10 +1227,10 @@ function rfCheck(){
 function recSheet(){
   const l=$('recList');l.innerHTML='';
   let why='';
-  for(const t of ['G','A','E','K','W']){
+  for(const t of ['G','L','A','B','E','K','W','H','R']){
     const r=canRecruit(g,0,t);if(r&&!why)why=r;
     const b=document.createElement('button');b.type='button';b.className='rec';b.disabled=!!r;
-    b.innerHTML=(GP.on?`<img class="ui" src="assets/interfaccia/icona_unita_${{G:'guerriero',A:'arciere',E:'esploratore',K:'cavaliere',W:'sciamano'}[t]}.png" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
+    b.innerHTML=(GP.on?`<img class="ui" src="assets/${ICO(t)}" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
     b.onclick=()=>{if(doRecruit(g,0,t)){g.lastRec=g.units[g.units.length-1].id;sfx('recruit');$('ovRec').hidden=true;sel=null;inspect=null;toast(UT[t].n+' reclutato');refreshUI()}};
     l.appendChild(b);
   }
@@ -1623,6 +1635,10 @@ function drawGlyph(t,x,y,r,col){
     for(let i=0;i<=44;i++){const a=i/44*Math.PI*3.3,rad=r*(.06+.58*i/44);const px=Math.cos(a)*rad,py=Math.sin(a)*rad;if(i)ctx.lineTo(px,py);else ctx.moveTo(px,py)}
     ctx.stroke();
   }
+  else if(t==='L'){ctx.beginPath();ctx.moveTo(0,r*.7);ctx.lineTo(0,-r*.5);ctx.stroke();ctx.beginPath();ctx.moveTo(-r*.22,-r*.2);ctx.lineTo(0,-r*.7);ctx.lineTo(r*.22,-r*.2);ctx.closePath();ctx.fill()}
+  else if(t==='H'){ctx.beginPath();ctx.moveTo(0,-r*.6);ctx.lineTo(0,r*.6);ctx.moveTo(-r*.6,0);ctx.lineTo(r*.6,0);ctx.stroke()}
+  else if(t==='B'){ctx.beginPath();ctx.moveTo(-r*.5,0);ctx.lineTo(r*.62,0);ctx.stroke();ctx.beginPath();ctx.moveTo(-r*.2,-r*.55);ctx.lineTo(-r*.05,0);ctx.lineTo(-r*.2,r*.55);ctx.stroke();ctx.beginPath();ctx.moveTo(r*.62,0);ctx.lineTo(r*.32,-r*.22);ctx.lineTo(r*.32,r*.22);ctx.closePath();ctx.fill()}
+  else if(t==='R'){ctx.beginPath();ctx.moveTo(-r*.35,r*.7);ctx.lineTo(-r*.35,-r*.6);ctx.stroke();ctx.beginPath();ctx.moveTo(-r*.35,-r*.6);ctx.lineTo(r*.55,-r*.3);ctx.lineTo(-r*.35,0);ctx.closePath();ctx.fill()}
   else{ctx.beginPath();ctx.moveTo(-r*.5,r*.15);ctx.lineTo(0,-r*.4);ctx.lineTo(r*.5,r*.15);ctx.stroke();ctx.beginPath();ctx.moveTo(-r*.5,r*.62);ctx.lineTo(0,r*.07);ctx.lineTo(r*.5,r*.62);ctx.stroke()}
   ctx.restore();
 }
@@ -1664,7 +1680,7 @@ function drawUnit(u,hidden,sc,al){
   ctx.globalAlpha=(tired?.55:1)*(al===undefined?1:al);
   if(ast&&ast!=='done'&&!(sel===u))actMarks(u,x,gy,ast,false);
   if(guReady()){ // pedina disegnata da Muse (prova): l'ombra è già nel disegno
-    const tn=GU.T[u.t],pz=tired?'stanca':'normale',im=GU.im[tn+'_'+(u.o===0?'oro':'viola')+'_'+pz];
+    const tn=GU.T[u.t],pz=tired?'stanca':'normale',im=GU.im[tn+'_'+(u.o===0?'oro':'blu')+'_'+pz];
     if(im){
       const k=cs/256*1.06,h=GU.H[tn],walking=!!(u.path&&u.path.length)&&!REDUCE;
       let hop=0,lean=0,sy=1;
