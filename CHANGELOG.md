@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v42 — 24 nov 2026 · Menu iniziale rifatto
+- Pezzi Muse menu-v4 e cornice v6; bottoni a 9 parti
+
 ## v41 — 23 nov 2026 · Suono sui tasti dei menu
 - Piccolo suono a ogni tasto dei menu
 
