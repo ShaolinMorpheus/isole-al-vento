@@ -1,0 +1,2 @@
+menu_pannello.png
+controllo/prova_pannello_v2.png
