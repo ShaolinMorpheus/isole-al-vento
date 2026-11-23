@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v32 — 23 nov 2026 · Barra vita sopra la pedina
+- La barra della vita sta fuori dalla sagoma, sopra la testa
+
 ## v31 — 23 nov 2026 · Pedine stanche e colore blu
 - Posa stanca di Muse senza filtro grigio; colore avversario dell'interfaccia blu
 

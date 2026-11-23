@@ -744,6 +744,9 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:32,d:'23 nov 2026',t:'Barra vita sopra la pedina',n:[
+'Con «Grafica di prova»: la barra della vita sta sopra la testa dei personaggi, fuori dalla sagoma, e non la copre più'
+]},
 {v:31,d:'23 nov 2026',t:'Pedine stanche e colore squadra blu',n:[
 'Le pedine stanche usano il disegno «stanca» di Muse, senza più il filtro grigio',
 'Il colore della squadra avversaria nell’interfaccia e sul segno della base passa da viola a blu'
@@ -1703,7 +1706,7 @@ function drawUnit(u,hidden,sc,al){
       if(o&&o.fl>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=o.fl*.55*(al===undefined?1:al);ctx.drawImage(im,-128*k,-(h-24)*k-lift,256*k,h*k);ctx.globalCompositeOperation='source-over'}
       ctx.restore();
       ctx.globalAlpha=al===undefined?1:al;
-      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.35+cs*.02,cs*.66);
+      hpBar(u,x,gy-(h-24)*k*sy-lift-Math.max(9,Math.round(cs*.22))*.8-cs*.03,cs*.66);
       ctx.globalAlpha=1;
       if(ast==='done')actMarks(u,x,gy,ast,true);
       if(scaled)ctx.restore();
