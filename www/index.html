@@ -140,20 +140,20 @@ body.gpui #ovStart .card.menu .sc{gap:9px;padding:2px 0}
 body.gpui #ovStart .card p{color:#d9eef2;text-align:center;font-size:14px}
 body.gpui #ovStart .card p.st{color:#b4dbe2;font-size:13px}
 body.gpui #ovStart .seg{gap:8px}
-body.gpui #ovStart .sg{border:0;border-radius:0;min-height:50px;background:url(assets/menu/menu_difficolta_normale.png) 0 0/100% 100% no-repeat;color:#0d3b47;font-size:16px}
+body.gpui #ovStart .sg{border:0;border-radius:0;min-height:50px;flex:none;background:url(assets/menu/menu_difficolta_normale.png) 0 0/100% 100% no-repeat;color:#0d3b47;font-size:16px}
 body.gpui #ovStart .sg:active{background-image:url(assets/menu/menu_difficolta_premuto.png)}
 body.gpui #ovStart .sg[aria-pressed=true]{background-image:url(assets/menu/menu_difficolta_selezionato.png);color:#3a2503}
 body.gpui #ovStart .btn{border:0;border-radius:0;padding:0 14px;background:none;min-height:0}
-body.gpui #ovStart .btn:not(.alt){box-sizing:border-box;min-height:72px;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_oro_normale.png) 60 fill/20px stretch;padding:0 0 4px;background:none;color:#3a2503;font-size:21px;line-height:1.15;animation:none}
+body.gpui #ovStart .btn:not(.alt){box-sizing:border-box;min-height:76px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_oro_normale.png) 60 fill/20px stretch;padding:0 0 4px;background:none;color:#3a2503;font-size:21px;line-height:1.15;animation:none}
 body.gpui #ovStart .btn:not(.alt):active{border-image-source:url(assets/menu/menu_bottone_oro_premuto.png)}
 body.gpui #ovStart .btn:not(.alt)[disabled]{border-image-source:url(assets/menu/menu_bottone_oro_disattivo.png)}
 body.gpui #ovStart .btn.pulse:not(.alt){border-image-source:url(assets/menu/menu_bottone_oro_pulsante.png)}
-body.gpui #ovStart .btn.alt{box-sizing:border-box;min-height:60px;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_vetro_normale.png) 60 fill/20px stretch;padding:0 0 3px;background:none;color:#0d3b47;font-size:19px;line-height:1.15}
+body.gpui #ovStart .btn.alt{box-sizing:border-box;min-height:64px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_vetro_normale.png) 60 fill/20px stretch;padding:0 0 3px;background:none;color:#0d3b47;font-size:19px;line-height:1.15}
 body.gpui #ovStart .btn.alt:active{border-image-source:url(assets/menu/menu_bottone_vetro_premuto.png)}
 body.gpui #ovStart .btn.alt[disabled]{border-image-source:url(assets/menu/menu_bottone_vetro_disattivo.png)}
 body.gpui #ovStart #bTut{align-self:center;width:62%}
-body.gpui #ovStart #seedIn{height:54px;min-height:0!important;border:0!important;border-radius:0!important;background:url(assets/menu/menu_campo_mappa.png) 0 0/100% 100% no-repeat!important;color:#d9eef2!important;font-size:16px}
-body.gpui #ovStart .dt{background:none;border:0;border-radius:0;padding:0}
+body.gpui #ovStart #seedIn{flex:none;height:54px;min-height:0!important;border:0!important;border-radius:0!important;background:url(assets/menu/menu_campo_mappa.png) 0 0/100% 100% no-repeat!important;color:#d9eef2!important;font-size:16px}
+body.gpui #ovStart .dt{flex:none;background:none;border:0;border-radius:0;padding:0}
 body.gpui #ovStart .dt summary{height:54px;padding:0 18px;box-sizing:border-box;background:url(assets/menu/menu_sezione.png) 0 0/100% 100% no-repeat;color:#e4f4f7;font-size:16px}
 body.gpui #ovStart .dt[open] summary{background-image:url(assets/menu/menu_sezione_aperta.png)}
 body.gpui #ovStart .dt summary::after{content:'';width:22px;height:22px;background:#e4f4f7;-webkit-mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;transition:transform .2s}
@@ -796,6 +796,9 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:43,d:'23 nov 2026',t:'Correzione bottoni del menu',n:[
+'Sul telefono i bottoni del menu risultavano schiacciati con il testo che usciva: ora hanno l’altezza giusta, anche «Continua partita» su due righe'
+]},
 {v:42,d:'24 nov 2026',t:'Menu iniziale rifatto (set v4 + cornice v6)',n:[
 'Il menu iniziale usa i pezzi nuovi di Muse (v4): sfondo con la mappa di gioco, bottoni oro e in vetro di mare che si allungano senza deformarsi, simbolo con arco e vulcano senza rettangolo, sezioni con riga aperta; cornice del pannello v6 con le legature lungo tutti i lati'
 ]},

@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v43 — 23 nov 2026 · Correzione bottoni del menu
+- Altezza minima dei bottoni forzata (erano schiacciati sul telefono)
+
 ## v42 — 24 nov 2026 · Menu iniziale rifatto
 - Pezzi Muse menu-v4 e cornice v6; bottoni a 9 parti
 
