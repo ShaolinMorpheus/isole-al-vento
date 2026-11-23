@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v38 — 23 nov 2026 · Corsie libere e Facile più semplice
+- Mappe con una corsia libera a sinistra e una a destra; Facile: rinforzi solo Guerriero, Arciere, Esploratore
+
 ## v37 — 23 nov 2026 · Normale più facile da battere
 - Computer in Normale meno preciso (più errori, a volte salta un'unità); Facile più morbido; Difficile invariato
 
