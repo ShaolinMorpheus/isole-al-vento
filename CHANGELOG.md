@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v33 — 23 nov 2026 · Basi, bandiere e sconfitta in blu
+- Basi, bandiere e schermata di sconfitta di Muse (squadra blu); gemelli oro rifatti
+
 ## v32 — 23 nov 2026 · Barra vita sopra la pedina
 - La barra della vita sta fuori dalla sagoma, sopra la testa
 

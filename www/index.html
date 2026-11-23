@@ -744,6 +744,10 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:33,d:'23 nov 2026',t:'Basi, bandiere e sconfitta in blu',n:[
+'Con «Grafica di prova»: basi, bandiere e schermata di sconfitta sono i nuovi disegni di Muse (consegna squadra blu); basi e bandiere oro rifatte in coppia',
+'Il viola non c’è più nel gioco (restano da controllare gli sfondi del menu, della vittoria e del pareggio)'
+]},
 {v:32,d:'23 nov 2026',t:'Barra vita sopra la pedina',n:[
 'Con «Grafica di prova»: la barra della vita sta sopra la testa dei personaggi, fuori dalla sagoma, e non la copre più'
 ]},
@@ -1024,7 +1028,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
 
 /* --- Grafica di prova: blocchi del terreno disegnati da Muse (PNG 256×256: faccia 194 px + fronte 62 px) --- */
 const GP={on:LS.get('isole-gp')==='1',mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
-  names:['prato_a','prato_b','stazione_a','stazione_b','bosco_a','bosco_b','lago_a','lago_b','ghiaccio_a','ghiaccio_b','monte_a','monte_b','cenere_a','cenere_b','base_oro','base_viola']};
+  names:['prato_a','prato_b','stazione_a','stazione_b','bosco_a','bosco_b','lago_a','lago_b','ghiaccio_a','ghiaccio_b','monte_a','monte_b','cenere_a','cenere_b','base_oro','base_blu']};
 function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sfuoca e sfarfalla
   const L=[im];let s=256;
   while(s>32){s/=2;const c=document.createElement('canvas');c.width=c.height=s;const q=c.getContext('2d');q.imageSmoothingQuality='high';q.drawImage(L[L.length-1],0,0,s,s);L.push(c)}
@@ -1034,8 +1038,8 @@ function gpLoad(){
   if(GP.loading)return;GP.loading=true;goLoad();guLoad();geLoad();gtLoad();
   for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
 }
-const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','stazione_f00','stazione_f01','stazione_f02','stazione_f03','stazione_f04','stazione_f05','stazione_f06','stazione_f07','stazione_f08','stazione_f09','stazione_f10','stazione_f11','stazione_f12','stazione_f13','stazione_f14','stazione_f15','stazione_f16','stazione_f17','stazione_f18','stazione_f19','stazione_f20','stazione_f21','stazione_f22','stazione_f23','bandiera_oro_1','bandiera_oro_2','bandiera_viola_1','bandiera_viola_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
-  A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,stazione_f00:296,stazione_f01:296,stazione_f02:296,stazione_f03:296,stazione_f04:296,stazione_f05:296,stazione_f06:296,stazione_f07:296,stazione_f08:296,stazione_f09:296,stazione_f10:296,stazione_f11:296,stazione_f12:296,stazione_f13:296,stazione_f14:296,stazione_f15:296,stazione_f16:296,stazione_f17:296,stazione_f18:296,stazione_f19:296,stazione_f20:296,stazione_f21:296,stazione_f22:296,stazione_f23:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_viola_1:320,bandiera_viola_2:320}};
+const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','stazione_f00','stazione_f01','stazione_f02','stazione_f03','stazione_f04','stazione_f05','stazione_f06','stazione_f07','stazione_f08','stazione_f09','stazione_f10','stazione_f11','stazione_f12','stazione_f13','stazione_f14','stazione_f15','stazione_f16','stazione_f17','stazione_f18','stazione_f19','stazione_f20','stazione_f21','stazione_f22','stazione_f23','bandiera_oro_1','bandiera_oro_2','bandiera_blu_1','bandiera_blu_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
+  A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,stazione_f00:296,stazione_f01:296,stazione_f02:296,stazione_f03:296,stazione_f04:296,stazione_f05:296,stazione_f06:296,stazione_f07:296,stazione_f08:296,stazione_f09:296,stazione_f10:296,stazione_f11:296,stazione_f12:296,stazione_f13:296,stazione_f14:296,stazione_f15:296,stazione_f16:296,stazione_f17:296,stazione_f18:296,stazione_f19:296,stazione_f20:296,stazione_f21:296,stazione_f22:296,stazione_f23:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_blu_1:320,bandiera_blu_2:320}};
 function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
 const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294,lanciere:300,guaritore:280,balestriere:270,alfiere:320},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano',L:'lanciere',H:'guaritore',B:'balestriere',R:'alfiere'}};
 function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','blu'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
@@ -1087,7 +1091,7 @@ function gpName(t,x,y,gelo){
   const v=((((x*73856093)^(y*19349663))>>>3)&1)?'b':'a';
   if(t==='P'){
     if(x===BASE[0].x&&y===BASE[0].y)return 'base_oro';
-    if(x===BASE[1].x&&y===BASE[1].y)return 'base_viola';
+    if(x===BASE[1].x&&y===BASE[1].y)return 'base_blu';
     return 'prato_'+v;
   }
   if(t==='S')return 'stazione_'+v;
@@ -1607,7 +1611,7 @@ function drawObject(x,y,t,tick){
   else if(t==='S')stationObj(x,y,tick);
 }
 function baseFlag(o,tick){
-  if(goReady()){const b0=BASE[o];goFlag('bandiera_'+(o===0?'oro_':'viola_')+'1',cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs,tick,o*2);return}
+  if(goReady()){const b0=BASE[o];goFlag('bandiera_'+(o===0?'oro_':'blu_')+'1',cx(b0.x)+lay.cs/2,cy(b0.y)+lay.fh*.72,lay.cs,tick,o*2);return}
   const b=BASE[o],cs=lay.cs,k=cs/40,col=o===0?'#f2b84b':'#6f9fe0',dark=o===0?'#a8741f':'#5f4cae',X=cx(b.x)+cs/2,top=cy(b.y),fh=lay.fh;
   const pw=cs*.36,py=top+fh*.66;
   rr(X-pw,py+3*k,pw*2,fh*.2,4*k);ctx.fillStyle=dark;ctx.fill();
