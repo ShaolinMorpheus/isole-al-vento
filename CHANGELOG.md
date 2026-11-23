@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v44 — 24 nov 2026 · Menu con lettere dipinte (set v5)
+- Scritte fisse del menu come immagini dipinte di Muse; pezzi rifiniti; sfondo nitido
+
 ## v43 — 23 nov 2026 · Correzione bottoni del menu
 - Altezza minima dei bottoni forzata (erano schiacciati sul telefono)
 

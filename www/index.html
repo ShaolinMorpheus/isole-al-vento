@@ -132,14 +132,19 @@ body.gpui #ovStart .card h1{font-size:0;flex:none;height:118px;margin:-4px 0 0;b
 
 /* Menu iniziale «Mare dipinto» (pezzi di Muse estratti dalla bozza approvata) */
 body.gpui #ovStart{background:url(assets/menu/sfondo_menu.webp) center/cover no-repeat;padding-top:62px}
-body.gpui #ovStart .card{position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:410px;padding:88px 36px 40px;gap:8px;max-height:100%}
+body.gpui #ovStart .card{position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:392px;padding:88px 34px 40px;gap:8px;max-height:100%}
 body.gpui #ovStart .card::before{content:'';position:absolute;inset:0;z-index:-1;border:66px solid transparent;border-image:url(assets/menu/menu_pannello.png) 200 fill/66px stretch;pointer-events:none}
 body.gpui #ovStart .card::after{content:'';position:absolute;left:50%;top:0;width:150px;height:150px;transform:translate(-50%,-50%);background:url(assets/menu/menu_simbolo.png) center/contain no-repeat;pointer-events:none;z-index:2}
-body.gpui #ovStart .card h1{height:auto;font-size:40px;line-height:1.05;margin:-6px 0 0;background:none;text-align:center;color:#f7c452;text-shadow:0 2px 0 #9a5f14,0 4px 8px rgba(0,0,0,.45)}
+body.gpui #ovStart .card h1{height:80px;font-size:0;margin:-14px 0 -6px;background:url(assets/menu/menu_titolo.png) center/contain no-repeat;flex:none}
 body.gpui #ovStart .card.menu .sc{gap:9px;padding:2px 0}
 body.gpui #ovStart .card p{color:#d9eef2;text-align:center;font-size:14px}
 body.gpui #ovStart .card p.st{color:#b4dbe2;font-size:13px}
 body.gpui #ovStart .seg{gap:8px}
+body.gpui #ovStart img.tx{display:block;pointer-events:none;flex:none}
+body.gpui #ovStart .sg{display:flex;align-items:center;justify-content:center}
+body.gpui #ovStart .sg img.tx{transform:translateY(-1.5px)}
+body.gpui #ovStart .dt summary img.tx{margin-right:0}
+body.gpui #ovStart .dt summary{display:flex;align-items:center;justify-content:space-between}
 body.gpui #ovStart .sg{border:0;border-radius:0;min-height:50px;flex:none;background:url(assets/menu/menu_difficolta_normale.png) 0 0/100% 100% no-repeat;color:#0d3b47;font-size:16px}
 body.gpui #ovStart .sg:active{background-image:url(assets/menu/menu_difficolta_premuto.png)}
 body.gpui #ovStart .sg[aria-pressed=true]{background-image:url(assets/menu/menu_difficolta_selezionato.png);color:#3a2503}
@@ -154,7 +159,7 @@ body.gpui #ovStart .btn.alt[disabled]{border-image-source:url(assets/menu/menu_b
 body.gpui #ovStart #bTut{align-self:center;width:62%}
 body.gpui #ovStart #seedIn{flex:none;height:54px;min-height:0!important;border:0!important;border-radius:0!important;background:url(assets/menu/menu_campo_mappa.png) 0 0/100% 100% no-repeat!important;color:#d9eef2!important;font-size:16px}
 body.gpui #ovStart .dt{flex:none;background:none;border:0;border-radius:0;padding:0}
-body.gpui #ovStart .dt summary{height:54px;padding:0 18px;box-sizing:border-box;background:url(assets/menu/menu_sezione.png) 0 0/100% 100% no-repeat;color:#e4f4f7;font-size:16px}
+body.gpui #ovStart .dt summary{overflow:visible;height:54px;padding:0 18px;box-sizing:border-box;background:url(assets/menu/menu_sezione.png) 0 0/100% 100% no-repeat;color:#e4f4f7;font-size:16px}
 body.gpui #ovStart .dt[open] summary{background-image:url(assets/menu/menu_sezione_aperta.png)}
 body.gpui #ovStart .dt summary::after{content:'';width:22px;height:22px;background:#e4f4f7;-webkit-mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;transition:transform .2s}
 body.gpui #ovStart .dt[open] summary::after{transform:rotate(180deg)}
@@ -203,10 +208,10 @@ body.gpui #ovStart .tl{color:#f4cf7a}
     <div class="seg" id="seg" role="group" aria-label="Livello del computer"></div>
     <p class="st" id="stats"></p>
     <button class="btn" id="bCont" type="button" style="min-height:48px" hidden>Continua partita</button>
-    <button class="btn" id="bPlay" type="button" style="min-height:48px">Gioca contro il computer</button>
+    <button class="btn" id="bPlay" type="button" style="min-height:48px" aria-label="Gioca contro il computer"><img class="tx" src="assets/menu/menu_t_gioca.png" alt="" style="width:300px;transform:translateY(-3px)"></button>
     <input id="seedIn" type="text" inputmode="numeric" maxlength="9" placeholder="Mappa n. (vuoto = a caso)" aria-label="Numero della mappa" style="min-height:40px;border-radius:12px;border:1px solid #2c4a5c;background:#0f2433;color:#e8f1f4;text-align:center;font:inherit;padding:0 10px">
-    <button class="btn alt" id="bTut" type="button" style="min-height:44px">Tutorial</button>
-    <details class="dt"><summary>Come si gioca</summary>
+    <button class="btn alt" id="bTut" type="button" style="min-height:44px" aria-label="Tutorial"><img class="tx" src="assets/menu/menu_t_tutorial.png" alt="" style="width:140px;transform:translateY(-2px)"></button>
+    <details class="dt"><summary aria-label="Come si gioca"><img class="tx" src="assets/menu/menu_t_comesigioca.png" alt="" style="width:233px;height:40px;margin-left:-66px"></summary>
       <ul>
       <li>Vinci tenendo entrambe le stazioni meteo per 3 round di fila, o eliminando tutte le unità nemiche.</li>
       <li>Ogni turno muovi e attacca con le tue unità, poi tocca Fine turno. Chi muove per primo si alterna a ogni round.</li>
@@ -796,6 +801,9 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:44,d:'24 nov 2026',t:'Menu iniziale con lettere dipinte (set v5)',n:[
+'Il menu iniziale usa il set v5 di Muse: titolo, «Gioca contro il computer», «Tutorial», Facile/Normale/Difficile e «Come si gioca» sono scritte dipinte a mano; pezzi con contorno scuro dipinto e cornice rifinita. Restano scritti dal gioco i testi che cambiano (Continua partita, mappa, impostazioni, motto)'
+]},
 {v:43,d:'23 nov 2026',t:'Correzione bottoni del menu',n:[
 'Sul telefono i bottoni del menu risultavano schiacciati con il testo che usciva: ora hanno l’altezza giusta, anche «Continua partita» su due righe'
 ]},
@@ -1018,7 +1026,7 @@ function buildSeg(){
   const el=$('seg');el.innerHTML='';
   for(const k of Object.keys(AI_LEVELS)){
     const b=document.createElement('button');b.type='button';b.className='sg';
-    b.textContent=AI_LEVELS[k].n;b.setAttribute('aria-pressed',String(k===level));
+    b.setAttribute('aria-label',AI_LEVELS[k].n);b.innerHTML='<img class="tx" alt="" src="assets/menu/menu_t_'+k+'_'+(k===level?'oro':'vetro')+'.png" style="width:90px;height:40px">';b.setAttribute('aria-pressed',String(k===level));
     b.onclick=()=>{level=k;LS.set('isole-level',k);buildSeg()};
     el.appendChild(b);
   }
