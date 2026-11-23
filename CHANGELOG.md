@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v36 — 23 nov 2026 · Nuova icona dell'app
+- Icona di Muse (vulcano, bandiere oro e blu) per tutte le densità Android
+
 ## v35 — 23 nov 2026 · Partita più lunga
 - Stazioni da tenere 3 round di fila, massimo 36 round
 - Tutorial: i tuoi personaggi sono quelli color oro, evidenziati
