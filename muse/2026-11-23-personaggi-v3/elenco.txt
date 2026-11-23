@@ -1,0 +1,2 @@
+guerriero_blu_normale.png
+guerriero_blu_stanca.png
