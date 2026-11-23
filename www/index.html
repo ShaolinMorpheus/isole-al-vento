@@ -613,8 +613,8 @@ function endTurn(g){
 // Livelli del computer: più rumore = scelte meno precise.
 // noise: imprecisione delle scelte. skip: probabilità che un'unità salti l'azione. bonus: monete extra a round.
 const AI_LEVELS={
-  facile:{n:'Facile',noise:2,skip:0.4,bonus:0,norec:true},
-  normale:{n:'Normale',noise:0.8,skip:0,bonus:0},
+  facile:{n:'Facile',noise:2.6,skip:0.45,bonus:0,norec:true},
+  normale:{n:'Normale',noise:1.8,skip:0.25,bonus:0},
   difficile:{n:'Difficile',noise:0.1,skip:0,bonus:0.25}
 };
 // Distanza di cammino da ogni casella fino a target (monti, vulcano e laghi aggirati, boschi e cenere costano 2).
@@ -744,6 +744,10 @@ const LS={
 let LOOK=LS.get('isole-look')===null?5:(+LS.get('isole-look')||0);
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:37,d:'23 nov 2026',t:'Normale più facile da battere',n:[
+'Chi ha provato il gioco diceva che in Normale non si riesce a vincere. Ora il computer in Normale sbaglia di più e a volte salta il turno di un’unità; Facile ancora più morbido. Difficile è rimasto uguale',
+'Prova al computer: un giocatore con qualche errore vinceva il 12% delle partite contro il vecchio Normale, ora circa la metà'
+]},
 {v:36,d:'23 nov 2026',t:'Nuova icona dell’app',n:[
 'Nuova icona (consegna di Muse, v3): vulcano in eruzione sull’isola ad anello, bandiera oro a sinistra e blu a destra, della stessa dimensione. Si vede dopo aver installato l’ultimo APK'
 ]},

@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v37 — 23 nov 2026 · Normale più facile da battere
+- Computer in Normale meno preciso (più errori, a volte salta un'unità); Facile più morbido; Difficile invariato
+
 ## v36 — 23 nov 2026 · Nuova icona dell'app
 - Icona di Muse v3 (vulcano, bandiere oro e blu pari) per tutte le densità Android
 
