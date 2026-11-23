@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v40 — 23 nov 2026 · Nuovo menu iniziale
+- Menu iniziale con i pezzi di Muse (menu-v3), margine pannello 200 px
+
 ## v39 — 23 nov 2026 · Grafica fissa
 - Grafica di prova, Oggetti 3D e Terreno sempre attivi e tolti dai menu
 
