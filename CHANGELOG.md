@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v45 — 24 nov 2026 · Grafica pastello in tutti i menu
+- Cornice a pali con corda ritorta, bottoni, campi, pannelli e schede in tavolozza pastello; nuova isoletta; sfondi schiariti; testi più leggibili
+
 ## v44 — 24 nov 2026 · Menu con lettere dipinte (set v5)
 - Scritte fisse del menu come immagini dipinte di Muse; pezzi rifiniti; sfondo nitido
 
