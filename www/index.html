@@ -540,7 +540,7 @@ function newLevel(def,opt){
   useBoard({board});
   const seed=def.seed||1,lv=AI_LEVELS[def.lvl||'normale']?def.lvl||'normale':'normale';
   const g={seed,off:0,bonus:[0,(def.rules&&def.rules.eBonus!==undefined)?def.rules.eBonus:AI_LEVELS[lv].bonus],board,map,wx:genWeather(seed,def.weather),round:1,turn:0,first:0,step:0,coins:def.coins?def.coins.slice():[3,3],units:[],over:null,why:'',nid:1,fx:[],log:[],trail:[],windN:0,thawN:0,erupted:false,eruptN:0,ev:[],
-    lvl:lv,goal:G,rules:Object.assign({norec:false},def.rules),ai:Object.assign({mode:'stations'},def.ai),aiOv:def.aiOv||null,allow:opt.allow||def.allow||null,upg:opt.upg||null,waves:(def.waves||[]).map(x=>Object.assign({},x,{done:false})),camp:{id:def.id,name:def.name}};
+    lvl:lv,goal:G,rules:Object.assign({norec:false},def.rules),ai:Object.assign({mode:'stations'},def.ai),aiOv:def.aiOv||null,allow:opt.allow||def.allow||null,upg:opt.upg||null,waves:(def.waves||[]).map(x=>Object.assign({},x,{done:false})),camp:{id:def.id,name:def.name,diff:def.diff===undefined?1:def.diff}};
   for(const [t,x,y,ex] of (def.p||[])){const u=mkUnit(g,t,0,x,y,ex);g.units.push(u);if(ex&&ex.vip){g.vipId=u.id;g.vipName=ex.name||UT[t].n}}
   for(const [t,x,y,ex] of (def.e||[])){const u=mkUnit(g,t,1,x,y,ex);g.units.push(u);if(ex&&ex.boss){g.bossId=u.id;g.bossName=ex.name||UT[t].n}}
   return g;
@@ -1035,6 +1035,15 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:58,d:'25 nov 2026',t:'Difficolta\' della campagna',n:[
+'Nella scheda di ogni livello puoi scegliere la difficolta\': Facile, Medio o Alta. La scelta resta salvata per i livelli successivi',
+'Facile: avversario piu\' lento e distratto, nemici un po\' piu\' fragili, tue unita\' con +1 vita, qualche moneta in piu\' e 2 round extra. Medio: avversario piu\' mite del normale e un piccolo aiuto in monete. Alta: avversario normale (mai il «difficile»), pensata per non essere un muro',
+'La ricompensa in perle cambia con la difficolta\': ×0,6 in Facile, ×1 in Medio, ×1,5 in Alta. Le stelle valgono uguale; sul livello vedi in quale difficolta\' l\'hai vinto',
+'Insane: c\'e\' gia\' ma e\' bloccata (lucchetto), si sbloccherà piu\' avanti',
+'Nuove imprese: vinci un livello in Alta e vincili tutti in Alta',
+'Livelli 1-7, 2-1, 2-6 e 3-1 resi piu\' alla portata (stazioni da tenere per 2 round, qualche nemico in meno)',
+'Corretto: i messaggi brevi nei menu della campagna ora si vedono (prima restavano nascosti dietro la schermata)'
+]},
 {v:57,d:'25 nov 2026',t:'Scheda livello compatta',n:[
 'La scheda di un livello ora sta tutta nello schermo: titolo in alto con la X per chiudere, mappa piccola accanto a obiettivo e stelle, e il tasto «Inizia» (o «Riprendi» / «Ricomincia») sempre visibile in basso, senza dover scorrere'
 ]},
@@ -2952,6 +2961,7 @@ window.Isole={setLook:(n)=>{LOOK=n;LS.set('isole-look',String(n))},
 })();
 </script>
 <script src="campagna-livelli.js"></script>
+<script src="campagna-diff.js"></script>
 <script src="campagna.js"></script>
 <script>
 /* Aggiornamento automatico: se su GitHub Pages c'è una versione nuova, la ricarica quando sei nel menu (mai durante una partita). */

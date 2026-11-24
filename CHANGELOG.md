@@ -2,6 +2,14 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v58 — 25 nov 2026 · Difficoltà della campagna
+- Nella scheda di ogni livello: Facile / Medio / Alta (scelta salvata). Insane c'è ma è bloccata col lucchetto
+- Facile: avversario più lento, nemici un po' più fragili, +1 vita alle tue unità, più monete e 2 round extra. Medio: avversario più mite del normale, qualche moneta in più. Alta: avversario normale (mai il «difficile»)
+- Perle: ×0,6 Facile, ×1 Medio, ×1,5 Alta; stelle uguali; si vede la difficoltà con cui hai vinto il livello
+- Nuove imprese per la difficoltà Alta
+- Livelli 1-7, 2-1, 2-6 e 3-1 più alla portata
+- Corretto: i messaggi brevi nei menu della campagna ora si vedono
+
 ## v57 — 25 nov 2026 · Scheda livello compatta
 - La scheda di un livello sta tutta nello schermo: titolo con X per chiudere, mappa piccola accanto a obiettivo e stelle, tasto «Inizia» (o «Riprendi» / «Ricomincia») sempre visibile in basso, senza scorrere
 

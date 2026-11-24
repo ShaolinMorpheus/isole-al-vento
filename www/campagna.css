@@ -175,3 +175,17 @@ body.gpui #ovStart .btn[hidden]{display:none!important}
 .shWarn{color:#ffd0c4}
 #ovCmSheet .shFoot{flex:none;margin-top:2px}
 #ovCmSheet .shFoot .cmBtn{min-height:50px}
+
+/* ---- scelta difficoltà nella scheda del livello ---- */
+.shDiff{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.shD{height:36px;min-width:0;padding:0 2px;border-radius:11px;border:2px solid rgba(255,240,190,.38);background:rgba(10,52,66,.55);color:#e8f6f8;font:600 13px var(--disp);display:flex;align-items:center;justify-content:center;gap:3px}
+.shD[aria-pressed=true]{background:linear-gradient(#ffe9a6,#f1bf4f);border-color:#fff3c4;color:#4a2f06;box-shadow:0 1px 0 rgba(255,255,255,.5) inset}
+.shD.lock{background:#161b22;border-color:#3a4552;color:#7b8794}
+.shD.lock svg{width:15px;height:15px;flex:none}
+.shChip.ok{color:#bff5c4}
+
+/* messaggio breve sopra le schermate della campagna */
+#cmNote{position:fixed;left:50%;top:76px;transform:translate(-50%,-8px);z-index:70;max-width:86vw;padding:9px 16px;border-radius:14px;background:rgba(8,20,28,.94);border:2px solid rgba(255,240,190,.6);color:#fff;font:600 14.5px/1.25 var(--disp);text-align:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+#cmNote.on{opacity:1;transform:translate(-50%,0)}
+.shD.lock:active{animation:shk .25s}
+@keyframes shk{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}

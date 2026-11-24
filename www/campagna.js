@@ -2,8 +2,8 @@
    Il motore di gioco resta in index.html: qui si parla con lui solo tramite window.IAV. I livelli arrivano da campagna-livelli.js (mappe logiche). */
 (()=>{
 'use strict';
-const IAV=window.IAV,LV=window.CAMP_LEVELS||[],WORLDS=window.CAMP_WORLDS||[];
-if(!IAV||!LV.length||!WORLDS.length)return;
+const IAV=window.IAV,LV=window.CAMP_LEVELS||[],WORLDS=window.CAMP_WORLDS||[],DF=window.CAMP_DIFF;
+if(!IAV||!LV.length||!WORLDS.length||!DF)return;
 const $=id=>document.getElementById(id);
 const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!==undefined)e.innerHTML=h;return e};
 const UT=IAV.UT,UN={G:'guerriero',A:'arciere',E:'esploratore',K:'cavaliere',W:'sciamano',L:'lanciere',H:'guaritore',B:'balestriere',R:'alfiere'};
@@ -13,12 +13,12 @@ const KEY='isole-camp';
 
 /* ------------------------------------------------ progressi (salvati sul telefono) */
 const STAT0={wins:0,plays:0,kills:0,lost:0,perfect:0,boss:0,erupt:0,fast:0,aids:0,daily:0,upg:0,wx:{}};
-function defState(){return {v:1,lv:{},perle:0,boost:{sereno:2,cura:2,rinforzo:1},up:{},ach:{},stats:Object.assign({},STAT0,{wx:{}}),daily:{last:'',streak:0,done:''},wd:{},ads:0}}
+function defState(){return {v:1,lv:{},perle:0,boost:{sereno:2,cura:2,rinforzo:1},up:{},ach:{},diff:1,stats:Object.assign({},STAT0,{wx:{}}),daily:{last:'',streak:0,done:''},wd:{},ads:0}}
 function load(){
   let o=null;try{o=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
   const d=defState();if(!o||typeof o!=='object')return d;
   const s=Object.assign(d,o);s.stats=Object.assign({},STAT0,o.stats||{});s.stats.wx=Object.assign({},(o.stats||{}).wx||{});
-  s.boost=Object.assign({sereno:0,cura:0,rinforzo:0},o.boost||{});s.daily=Object.assign({last:'',streak:0,done:''},o.daily||{});
+  s.boost=Object.assign({sereno:0,cura:0,rinforzo:0},o.boost||{});if(![0,1,2].includes(s.diff))s.diff=1;s.daily=Object.assign({last:'',streak:0,done:''},o.daily||{});
   return s;
 }
 let S=load();
@@ -38,8 +38,15 @@ const unitOpen=t=>'GAE'.includes(t)||(firstLevelOf(t)&&done(firstLevelOf(t).id))
 const upgCount=()=>Object.values(S.up).reduce((a,b)=>a+b,0);
 // Potenziamenti dell'Arsenale: 3 livelli per unità, cumulativi (vita e attacco in più). Valgono solo nella campagna.
 const UPB=[{hp:0,atk:0},{hp:1,atk:0},{hp:1,atk:1},{hp:3,atk:1}],UPC=[40,100,200];
-function upgMap(){const m={};for(const t of Object.keys(UN)){const k=S.up[t]||0;if(k)m[t]=UPB[k]}return m}
+function upgMap(d){const m={},pb=DF.pbonus[d===undefined?1:d]||{hp:0,atk:0};for(const t of Object.keys(UN)){const k=S.up[t]||0,b=UPB[k],hp=b.hp+pb.hp,atk=b.atk+pb.atk;if(hp||atk)m[t]={hp,atk}}return m}
+const DN=DF.names,dOf=rec=>rec&&rec.done?(rec.d===undefined?1:rec.d):-1;
 
+/* messaggio breve sopra a tutte le schermate della campagna (il «toast» del gioco sta sotto e qui non si vedrebbe) */
+let noteT=0;
+function note(msg,ms){
+  let n=$('cmNote');if(!n){n=el('div');n.id='cmNote';n.setAttribute('role','status');document.body.appendChild(n)}
+  n.textContent=msg;n.classList.add('on');clearTimeout(noteT);noteT=setTimeout(()=>n.classList.remove('on'),ms||1800);
+}
 /* ------------------------------------------------ icone */
 const star=on=>`<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z" fill="${on?'#ffd24a':'#35596b'}" stroke="${on?'#a8741f':'#9fb6c0'}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
 const pearl='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#d9eeff" stroke="#5a8bb0" stroke-width="1.6"/><ellipse cx="9" cy="8.5" rx="3.2" ry="2" fill="#fff" opacity=".9"/><circle cx="14.5" cy="14.5" r="3" fill="#b9d8f2" opacity=".8"/></svg>';
@@ -150,7 +157,7 @@ function renderMap(b){
       const n=el('button','cmNode'+(dn?' done':'')+(un?'':' lock')+(cur?' cur':'')+(boss?' boss':''));n.type='button';n.dataset.id=l.id;
       n.style.left=pts[i].x+'%';n.style.top=pts[i].y+'px';
       n.innerHTML=(boss?crown:'')+`<div class="md">${un?l.n:lockI}</div>`+(un?`<div class="st">${[1,2,3].map(k=>star(k<=starsOf(l.id))).join('')}</div>`:'')+(un||boss?`<div class="nm">${l.name}</div>`:'');
-      n.onclick=()=>{if(!open){IAV.toast(gateText(W),2200);return}if(!un){IAV.toast('Completa prima il livello '+(i?ws[i-1].id:'precedente'),1800);return}openSheet(l)};
+      n.onclick=()=>{if(!open){note(gateText(W),2200);return}if(!un){note('Completa prima il livello '+(i?ws[i-1].id:'precedente'),1800);return}openSheet(l)};
       path.appendChild(n);
     });
     sec.appendChild(path);
@@ -192,17 +199,18 @@ function openSheet(l){
   const sv=IAV.saveInfo(),same=sv&&sv.id===l.id;
   const wx=[...new Set((l.weather&&l.weather.pool)||['sereno','vento','pioggia','nebbia','gelo'])];
   const en=(l.e||[]).length,wv=(l.waves||[]).reduce((a,w)=>a+w.u.length,0);
-  const ai={facile:'Facile',normale:'Normale',difficile:'Difficile'}[l.lvl]||'Normale';
+  const d=S.diff,best=dOf(rec),mult=DF.mult[d];
   const card=el('div','card menu shCard');
   const starRows=[['Vinci il livello']].concat((l.stars||[]).map(x=>[x.txt])).map((x,i)=>`<div class="shStar${i<rec.s?'':' off'}">${star(i<rec.s)}<span>${x[0]}</span></div>`).join('');
   card.innerHTML=`<div class="shHead"><div class="shNum${boss?' boss':''}">${l.id}</div><div class="shTt"><h2>${l.name}</h2><small>Mondo ${W.id} · ${W.name}</small></div><button type="button" class="shClose" id="shX" aria-label="Chiudi">×</button></div>
   <div class="sc shBody">
   <p class="shDesc">${l.desc}</p>
+  <div class="shDiff" role="group" aria-label="Difficoltà">${[0,1,2].map(i=>`<button type="button" class="shD" data-d="${i}" aria-pressed="${i===d}">${DN[i]}</button>`).join('')}<button type="button" class="shD lock" id="shIns" aria-disabled="true" aria-label="Insane, bloccata">${lockI}${DN[3]}</button></div>
   <div class="shMid"><canvas class="shMap" id="shMap"></canvas><div class="shSide"><div class="shGoalT">${ico('flag').replace('<svg','<svg style="width:18px;height:18px;flex:none"')}<b>${g[0]}</b></div><div class="shStars">${starRows}</div></div></div>
   <div class="shNote">${g[1]} Limite: ${l.rounds} round · campo ${l.map[0].length}×${l.map.length}.</div>
-  <div class="shChips"><span class="shChip">Nemico: ${ai}${en?' · '+en+' unità':''}${wv?' + '+wv+' a ondate':''}</span>${wx.map(t=>`<span class="shChip" title="${WXN[t]}">${wxIcon(t)}${WXN[t]}</span>`).join('')}</div>
+  <div class="shChips"><span class="shChip">${en?en+' nemici':'Solo ondate'}${en&&wv?' + '+wv+' a ondate':wv?' · '+wv+' unità':''}</span>${best>=0?`<span class="shChip ok">✓ Vinto in ${DN[best]}</span>`:''}${wx.map(t=>`<span class="shChip" title="${WXN[t]}">${wxIcon(t)}${WXN[t]}</span>`).join('')}</div>
   <div class="shUnR"><span class="shSave">Unità:</span><div class="shUn">${(l.allow||[]).map(t=>`<img src="${IAV.unitImg(t)}" alt="${UT[t].n}" title="${UT[t].n}">`).join('')}</div></div>
-  <div class="shSave">Primo successo: fino a ${levelReward(l)} perle${l.reward&&l.reward.bonus?' (compreso il bonus boss)':''}.</div>
+  <div class="shSave">Primo successo: fino a ${Math.max(1,Math.round(levelReward(l)*mult))} perle${l.reward&&l.reward.bonus?' (compreso il bonus boss)':''}${mult!==1?' · ricompensa ×'+mult:''}.</div>
   ${(sv&&!same)?`<div class="shSave shWarn">Hai una partita in corso (${sv.id}): iniziare questo livello la cancella.</div>`:''}
   </div>
   <div class="cmRow shFoot">${same?'<button type="button" class="cmBtn" id="shRes">Riprendi</button><button type="button" class="cmBtn alt" id="shGo">Ricomincia</button>':'<button type="button" class="cmBtn" id="shGo">Inizia</button>'}</div>`;
@@ -210,11 +218,13 @@ function openSheet(l){
   drawMini(card.querySelector('#shMap'),l);
   card.querySelector('#shX').onclick=()=>{sheet.hidden=true};
   card.querySelector('#shGo').onclick=()=>{sheet.hidden=true;startLevel(l)};
+  card.querySelectorAll('.shD[data-d]').forEach(b=>{b.onclick=()=>{S.diff=+b.dataset.d;save();openSheet(l)}});
+  card.querySelector('#shIns').onclick=()=>note('Insane è bloccata: arriverà più avanti.',1900);
   const r=card.querySelector('#shRes');if(r)r.onclick=()=>{sheet.hidden=true;root.hidden=true;IAV.resume()};
 }
-function startLevel(l){
-  root.hidden=true;sheet.hidden=true;
-  IAV.startLevel(JSON.parse(JSON.stringify(l)),{upg:upgMap(),allow:l.allow||null});
+function startLevel(l,d){
+  d=d===undefined?S.diff:d;root.hidden=true;sheet.hidden=true;
+  IAV.startLevel(DF.apply(l,d),{upg:upgMap(d),allow:l.allow||null});
 }
 
 /* ------------------------------------------------ Arsenale: unità, potenziamenti e scorte di aiuti */
@@ -232,7 +242,7 @@ function renderArsenal(b){
     r.innerHTML=(BOOST[k].img?`<img src="${BOOST[k].img}" alt="">`:`<img src="${IAV.unitImg('G')}" alt="">`)+`<div class="tx"><b>${BOOST[k].n}</b><span>${BOOST[k].d}</span></div><div class="n">×${S.boost[k]}</div>`;
     bx.appendChild(r);
   }
-  if(ADS.on()){const v=el('button','cmBtn alt','▶ Guarda un video: +1 aiuto');v.type='button';v.style.marginTop='9px';v.style.width='100%';v.onclick=()=>ADS.rewarded('aiuto in regalo',ok=>{if(!ok)return;const k=['sereno','cura','rinforzo'][Math.floor(Math.random()*3)];S.boost[k]++;save();IAV.toast('Hai ricevuto: '+BOOST[k].n,1800);renderAll()});bx.appendChild(v)}
+  if(ADS.on()){const v=el('button','cmBtn alt','▶ Guarda un video: +1 aiuto');v.type='button';v.style.marginTop='9px';v.style.width='100%';v.onclick=()=>ADS.rewarded('aiuto in regalo',ok=>{if(!ok)return;const k=['sereno','cura','rinforzo'][Math.floor(Math.random()*3)];S.boost[k]++;save();note('Hai ricevuto: '+BOOST[k].n,1800);renderAll()});bx.appendChild(v)}
   b.appendChild(bx);
   const hd=el('div','cmP','<h3>Potenziamenti</h3><p>Spendi le perle per rendere le unità più forti. Valgono solo in campagna.</p>');b.appendChild(hd);
   for(const t of Object.keys(UN)){
@@ -241,7 +251,7 @@ function renderArsenal(b){
     const first=firstLevelOf(t);
     row.innerHTML=`<img class="sp" src="${IAV.unitImg(t)}" alt=""><div class="tx"><b>${T.n}</b><span>Vita ${T.hp+bn.hp} · Attacco ${T.atk+bn.atk} · Passi ${T.mv} · Gittata ${T.rg}</span><div class="arPips">${[1,2,3].map(i=>`<i class="${i<=k?'on':''}"></i>`).join('')}</div><span>${open?(nx?'Prossimo: '+(nx.hp-bn.hp?'+'+(nx.hp-bn.hp)+' vita ':'')+(nx.atk-bn.atk?'+'+(nx.atk-bn.atk)+' attacco':''):'Potenziata al massimo'):'Si sblocca completando il livello '+first.id}</span></div>`;
     if(open&&nx){const bt=el('button','cmBtn',`${pearl.replace('<svg','<svg style="width:18px;height:18px"')}${UPC[k]}`);bt.type='button';bt.disabled=S.perle<UPC[k];
-      bt.onclick=()=>{if(S.perle<UPC[k])return;S.perle-=UPC[k];S.up[t]=k+1;S.stats.upg=upgCount();save();IAV.sfx('recruit');IAV.toast(T.n+' potenziato',1400);renderAll()};row.appendChild(bt)}
+      bt.onclick=()=>{if(S.perle<UPC[k])return;S.perle-=UPC[k];S.up[t]=k+1;S.stats.upg=upgCount();save();IAV.sfx('recruit');note(T.n+' potenziato',1400);renderAll()};row.appendChild(bt)}
     b.appendChild(row);
   }
 }
@@ -270,6 +280,8 @@ const ACH=[
   ['er10','Amico del vulcano','Assisti a 10 eruzioni',()=>S.stats.erupt,10,25,'flame'],
   ['er30','Signore del fuoco','Assisti a 30 eruzioni',()=>S.stats.erupt,30,50,'flame'],
   ['fast','Lampo','Vinci un livello in 6 round o meno',()=>S.stats.fast,1,20,'bolt'],
+  ['alta1','Sfida accettata','Vinci un livello in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,1,20,'bolt'],
+  ['alta24','Maestro del vento','Vinci tutti i livelli in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,LV.length,150,'crown'],
   ['aid5','Un aiutino','Usa 5 aiuti',()=>S.stats.aids,5,10,'pearl'],
   ['up3','Fabbro','Compra 3 potenziamenti',upgCount,3,15,'hammer'],
   ['up10','Armaiolo','Compra 10 potenziamenti',upgCount,10,40,'hammer'],
@@ -288,7 +300,7 @@ function renderGoals(b){
     const v=Math.min(a.val(),a.goal),got=!!S.ach[a.id],rdy=!got&&v>=a.goal;
     const row=el('div','cmP acRow'+(got?' done':''));
     row.innerHTML=`<div class="ic">${ico(got?'trophy':a.ic)}</div><div class="tx"><b>${a.n}</b><span>${a.d}</span><div class="acBar"><i style="width:${Math.round(v/a.goal*100)}%"></i></div><span>${v}/${a.goal}</span></div>`;
-    if(rdy){const bt=el('button','cmBtn',`${pearl.replace('<svg','<svg style="width:18px;height:18px"')}+${a.rew}`);bt.type='button';bt.onclick=()=>{S.ach[a.id]=1;S.perle+=a.rew;save();IAV.sfx('recruit');IAV.toast('Impresa completata: +'+a.rew+' perle',1600);renderAll()};row.appendChild(bt)}
+    if(rdy){const bt=el('button','cmBtn',`${pearl.replace('<svg','<svg style="width:18px;height:18px"')}+${a.rew}`);bt.type='button';bt.onclick=()=>{S.ach[a.id]=1;S.perle+=a.rew;save();IAV.sfx('recruit');note('Impresa completata: +'+a.rew+' perle',1600);renderAll()};row.appendChild(bt)}
     else row.appendChild(el('div','acRew',got?'✓':pearl+a.rew));
     b.appendChild(row);
   }
@@ -338,7 +350,7 @@ function renderDaily(b){
   const info=el('div','cmP','<h3>Serie di giorni</h3><p>Se giochi ogni giorno la serie sale e il premio cresce. Il settimo giorno ricevi anche un aiuto di ogni tipo. Se salti un giorno, si riparte dal primo.</p>');b.appendChild(info);
 }
 function dailyReward(n){const i=((n-1)%7)+1;return {perle:[15,20,25,30,35,40,60][i-1],boost:i===7}}
-function startDaily(){root.hidden=true;IAV.startLevel(dailyDef(todayStr()),{upg:upgMap(),allow:null})}
+function startDaily(){root.hidden=true;IAV.startLevel(dailyDef(todayStr()),{upg:upgMap(1),allow:null})}
 
 /* ------------------------------------------------ aiuti durante il livello */
 IAV.onAid=()=>{
@@ -350,11 +362,11 @@ IAV.onAid=()=>{
     const r=el('div','cmP arBoost');r.style.margin='0';
     r.innerHTML=(BOOST[k].img?`<img src="${BOOST[k].img}" alt="">`:`<img src="${IAV.unitImg('G')}" alt="">`)+`<div class="tx"><b>${BOOST[k].n}</b><span>${BOOST[k].d}</span></div>`;
     const bt=el('button','cmBtn',used[k]?'Usato':'Usa ×'+S.boost[k]);bt.type='button';bt.style.cssText='flex:none;min-width:84px';bt.disabled=!!used[k]||S.boost[k]<1;
-    bt.onclick=()=>{const res=IAV.useBoost(k);if(res.ok){S.boost[k]--;S.stats.aids++;save();aid.hidden=true;renderAll()}else IAV.toast(res.msg,1700)};
+    bt.onclick=()=>{const res=IAV.useBoost(k);if(res.ok){S.boost[k]--;S.stats.aids++;save();aid.hidden=true;renderAll()}else note(res.msg,1700)};
     r.appendChild(bt);list.appendChild(r);
   }
   sc.appendChild(list);
-  if(ADS.on()){const v=el('button','cmBtn alt','▶ Guarda un video: +1 aiuto');v.type='button';v.onclick=()=>ADS.rewarded('aiuto in regalo',ok=>{if(!ok)return;const k=['sereno','cura','rinforzo'][Math.floor(Math.random()*3)];S.boost[k]++;save();IAV.toast('Hai ricevuto: '+BOOST[k].n,1600);aid.hidden=true;IAV.onAid()});sc.appendChild(v)}
+  if(ADS.on()){const v=el('button','cmBtn alt','▶ Guarda un video: +1 aiuto');v.type='button';v.onclick=()=>ADS.rewarded('aiuto in regalo',ok=>{if(!ok)return;const k=['sereno','cura','rinforzo'][Math.floor(Math.random()*3)];S.boost[k]++;save();note('Hai ricevuto: '+BOOST[k].n,1600);aid.hidden=true;IAV.onAid()});sc.appendChild(v)}
   const x=el('button','cmBtn alt','Chiudi');x.type='button';x.onclick=()=>{aid.hidden=true};sc.appendChild(x);
   aid.innerHTML='';aid.appendChild(card);aid.hidden=false;
 };
@@ -375,13 +387,15 @@ IAV.onFinish=(g,o)=>{
   const box=$('campEnd'),win=o===0,id=g.camp.id;
   if(id==='daily')return finishDaily(g,win,box);
   const l=byId[id];if(!l)return;
+  const dd=g.camp.diff===undefined?1:g.camp.diff;
   const st=g.st||{lost:0,kills:0,erupt:0,burn:0},ev=evalStars(l,g,win),prev=S.lv[id]||{s:0,done:0};
   S.stats.plays++;S.stats.kills+=st.kills||0;S.stats.lost+=st.lost||0;S.stats.erupt+=st.erupt||0;
   let perle=0,first=false,unlockedU=[],note=[],drop=null;
   if(win){
     first=!prev.done;const newS=Math.max(0,ev.s-prev.s);
     perle=newS*10+(first?20+((l.reward&&l.reward.bonus)||0):0)+((!first&&!newS)?3:0);
-    S.lv[id]={s:Math.max(prev.s,ev.s),done:1,bestR:Math.min(prev.bestR||99,g.round),plays:(prev.plays||0)+1};
+    perle=Math.max(1,Math.round(perle*DF.mult[dd]));
+    S.lv[id]={s:Math.max(prev.s,ev.s),done:1,d:Math.max(prev.done?(prev.d===undefined?1:prev.d):0,dd),bestR:Math.min(prev.bestR||99,g.round),plays:(prev.plays||0)+1};
     S.stats.wins++;if(!(st.lost>0))S.stats.perfect++;if(l.goal.t==='boss'&&first)S.stats.boss++;if(g.round<=6)S.stats.fast++;
     const wt=(g.wx[Math.min(g.round,g.wx.length)-1]||{}).t;if(wt)S.stats.wx[wt]=(S.stats.wx[wt]||0)+1;
     if(first)for(const t of Object.keys(UN))if(!'GAE'.includes(t)&&firstLevelOf(t)&&firstLevelOf(t).id===id)unlockedU.push(t);
@@ -397,7 +411,7 @@ IAV.onFinish=(g,o)=>{
   if(win){h+=`<div class="ceRow">${tick}<span>Livello completato</span></div>`;(l.stars||[]).forEach((c,i)=>{h+=`<div class="ceRow${ev.ok[i]?'':' no'}">${ev.ok[i]?tick:cross}<span>${c.txt}</span></div>`})}
   else h+=`<div class="ceRow no">${cross}<span>Riprova: puoi cambiare strategia. Ogni livello ha un modo per vincere.</span></div>`;
   h+=`</div>`;
-  if(win)h+=`<div class="ceRew">${pearl}+${perle}</div>`;
+  if(win)h+=`<div class="ceRew">${pearl}+${perle}</div>`+(dd!==1?`<div class="ceNote">Difficoltà ${DN[dd]}: perle ×${DF.mult[dd]}</div>`:'');
   for(const t of unlockedU)h+=`<div class="ceNote"><img src="${IAV.unitImg(t)}" alt="">Nuova unità: <b>${UT[t].n}</b> (ora anche nell’Arsenale)</div>`;
   if(drop)h+=`<div class="ceNote">Tre stelle! Ricevi un aiuto: <b>${BOOST[drop].n}</b></div>`;
   for(const n of note)h+=`<div class="ceNote">${n}</div>`;
