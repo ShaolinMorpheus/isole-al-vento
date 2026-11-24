@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v51 — 24 nov 2026 · Mappe più ricche e pedine ferme
+- Mappe con meno zone vuote (boschi, monti e laghi dove c'era solo prato), simmetriche e con le corsie libere
+- Solo la pedina selezionata fa l'animazione su e giù; le altre stanno ferme
+
 ## v50 — 24 nov 2026 · Tornano le prove grafiche
 - Tasti «Grafica di prova», «Oggetti 3D», «Terreno (prova)» di nuovo nelle Impostazioni e nel menu di gioco (valgono le scelte salvate)
 - Mare attorno al campo: ora è una prova a parte, spenta di base (il campo torna com'era)

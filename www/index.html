@@ -388,6 +388,28 @@ function lanes(m){
   }
   return true;
 }
+// Meno zone vuote: dove un riquadro 4x4 ha meno di 4 elementi (bosco, monte, lago, stazione, vulcano) ne aggiunge, sempre in coppia
+// simmetrica (uguale per i due giocatori), lontano dalle basi, e solo se restano la mappa collegata e le due corsie libere.
+function densify(m,r){
+  const MINF=4,far=(x,y)=>Math.min(md({x,y},BASE[0]),md({x,y},BASE[1]))>2;
+  const cnt=(x0,y0)=>{let n=0;for(let y=y0;y<y0+4;y++)for(let x=x0;x<x0+4;x++)if(m[y][x]!=='P')n++;return n};
+  for(let pass=0;pass<4;pass++){
+    let any=false;
+    for(let y0=0;y0<=H-4;y0++)for(let x0=0;x0<=W-4;x0++){
+      let need=MINF-cnt(x0,y0);if(need<=0)continue;
+      const c=[];
+      for(let y=y0;y<y0+4;y++)for(let x=x0;x<x0+4;x++)if(m[y][x]==='P'&&far(x,y)&&m[H-1-y][W-1-x]==='P')c.push([x,y]);
+      for(let i=c.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[c[i],c[j]]=[c[j],c[i]]}
+      for(const [x,y] of c){
+        if(need<=0)break;
+        const v=r(),t=v<.66?'F':v<.85?'L':'M';
+        m[y][x]=t;m[H-1-y][W-1-x]=t;
+        if(connected(m)&&lanes(m)){need--;any=true}else{m[y][x]='P';m[H-1-y][W-1-x]='P'}
+      }
+    }
+    if(!any)break;
+  }
+}
 function genMap(seed){
   for(let k=0;k<80;k++){
     const r=rng(seed*31+k+1);
@@ -401,7 +423,7 @@ function genMap(seed){
     }
     for(let y=0;y<MID;y++)for(let x=0;x<W;x++)m[H-1-y][W-1-x]=m[y][x];
     m[VOL.y][VOL.x]='V';for(const s of STATIONS)m[s.y][s.x]='S';
-    if(connected(m)&&lanes(m))return m;
+    if(connected(m)&&lanes(m)){densify(m,r);return m}
   }
   for(let k=0;k<80;k++){ // se non si trova la mappa con corsie libere, almeno una mappa collegata
     const r=rng(seed*31+k+1);
@@ -846,6 +868,11 @@ let LOOK=LS.get('isole-look')===null?6:(+LS.get('isole-look')||0);
 let SEAON=LS.get('isole-mare')==='1'; // mare attorno al campo (prova, spento di base)
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:51,d:'24 nov 2026',t:'Mappe piu\' ricche e pedine ferme',n:[
+'Mappe con meno zone vuote: dove c\'era troppo prato compaiono boschi, monti e laghi, sempre uguali per i due giocatori e con i passaggi a sinistra e a destra liberi',
+'Le pedine stanno ferme: si muove su e giu\' solo quella selezionata (restano il passo quando cammina e gli anelli); lo sciamano resta sollevato senza oscillare',
+'Le partite salvate restano con la loro mappa'
+]},
 {v:50,d:'24 nov 2026',t:'Tornano le prove grafiche',n:[
 'Tornano i tasti «Grafica di prova», «Oggetti 3D» e «Terreno (prova)» nelle Impostazioni e nel menu di gioco, con le scelte che avevi salvato',
 'Il mare con spiaggia e onde e\' diventato una prova a parte («Mare attorno al campo (prova)»), spenta di base: il campo torna com\'era prima'
@@ -1935,13 +1962,11 @@ function drawUnit(u,hidden,sc,al){
     if(im){
       const k=cs/256*1.06,h=GU.H[tn],walking=!!(u.path&&u.path.length)&&!REDUCE;
       let hop=0,lean=0,sy=1;
-      if(!REDUCE){ // animazioni a codice: respiro, saltello se può muoversi, passo quando cammina, lo sciamano levita
-        sy=1+.014*Math.sin(tick*2.2+u.id*1.7);
-        if(ast==='ready')hop=Math.abs(Math.sin(tick*3.2+u.id))*cs*.055;
+      if(!REDUCE){ // le pedine stanno ferme: si muove (su e giù) solo quella selezionata, o chi cammina
         if(walking){hop=Math.abs(Math.sin(tick*13))*cs*(u.t==='K'?.12:.09);lean=Math.sin(tick*13)*.05}
-        if(u.t==='W')hop+=cs*.035+Math.sin(tick*2+u.id)*cs*.015;
+        if(u.t==='W')hop+=cs*.035; // lo sciamano resta sollevato da terra, senza oscillare
       }
-      const lift=bob*1.4+hop-(tired?cs*.04:0);
+      const lift=bob*1.9+hop-(tired?cs*.04:0);
       ctx.globalAlpha=al===undefined?1:al;
       ctx.save();ctx.translate(x,gy);if(lean)ctx.rotate(lean);ctx.scale(1,sy);
       // la posa stanca è già disegnata da Muse: nessun filtro
