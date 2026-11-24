@@ -33,13 +33,14 @@ body{margin:0;background:var(--sea);color:var(--ink);font:600 15px/1.35 var(--bo
 #app{box-sizing:border-box;height:100%;display:flex;flex-direction:column;gap:4px;padding-block:4px;max-width:640px;margin:0 auto}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.top{display:grid;grid-template-columns:1fr 138px;gap:5px;align-items:stretch}
-.wbox{min-height:0;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px 10px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:1px 8px;min-width:0}
+.top{display:grid;grid-template-columns:1fr 124px;gap:5px;align-items:stretch}
+.wbox{min-height:0;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px 9px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:1px 6px;min-width:0}
 .wbox .wnow{grid-column:1;grid-row:1}.wbox .wnext{grid-column:2;grid-row:1;margin:0}.wbox .wd{grid-column:1/-1;grid-row:2}
-.wnow{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:15px;line-height:1.1}
+.wnow{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:600;font-size:14px;line-height:1.1;white-space:nowrap;min-width:0}
+.wnow span{overflow:hidden;text-overflow:ellipsis}
 .wnow svg{width:22px;height:22px;flex:none;color:var(--gold)}
 .wd{font-size:11.5px;line-height:1.2;color:var(--muted);font-weight:600}
-.wnext{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted)}
+.wnext{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);white-space:nowrap}
 .wnext svg{width:14px;height:14px;color:var(--mint)}
 .wnext b{color:var(--ink)}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 10px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:0;font-variant-numeric:tabular-nums}
@@ -48,6 +49,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .stat .c small{display:inline;font:600 10px var(--body);color:var(--muted);white-space:nowrap;margin-left:3px}
 .stat .c small br{display:none}
 #stage{position:relative;flex:1;min-height:0;border-radius:16px;background:radial-gradient(120% 90% at 50% 20%,var(--sea2),var(--sea));overflow:hidden;border:1px solid var(--line)}
+body.gpui #stage::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:15px;box-shadow:inset 0 0 30px rgba(6,45,66,.38)}
+body.gpui #stage>button,body.gpui #stage>#zoomBox,body.gpui #stage>#toast{z-index:3}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
 #toast.on{opacity:1}
@@ -840,6 +843,12 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:49,d:'24 nov 2026',t:'Mare, spiaggia e onde attorno all\'isola',n:[
+'Il campo di gioco ora e\' un\'isola in mezzo al mare: acque basse, schiuma che si muove, spiaggia sottile attorno alla mappa e onde dipinte che scorrono',
+'Il mare segue il meteo: col vento le onde corrono nella direzione del vento, col sereno compaiono riflessi di sole, con gelo e nebbia l\'acqua cambia colore; ogni tanto passano ombre di nuvole',
+'Scheda meteo in alto sistemata: col vento il titolo non va piu\' a capo e il testo non si taglia; le monete sono su una riga sola',
+'Bordi del campo piu\' morbidi, con una leggera ombreggiatura'
+]},
 {v:48,d:'24 nov 2026',t:'Caricamento pulito e piu\' veloce',n:[
 'Schermata di caricamento con barra: il gioco compare solo quando immagini e font sono pronti, senza piu\' pezzi che arrivano uno alla volta',
 'Font inclusi nel gioco (prima venivano scaricati da internet) e immagini dei menu molto piu\' leggere (da 6,8 MB a 0,6 MB)',
@@ -1272,9 +1281,9 @@ function wName(w){return w.t==='vento'?'Vento verso '+DIRN[w.dir]:WE[w.t].n}
 function renderTop(){
   const n=wNow(g),x=wNext(g),x2=heldBy(g,0)?g.wx[g.round+1]:null;
   const more=x2?`<span title="Poi: ${wName(x2)}" aria-label="Poi: ${wName(x2)}" style="display:flex;align-items:center;gap:3px">›${icon(x2.t,x2.dir)}</span>`:'';
-  $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${wName(x)}</b></span>${more}</div>`;
+  $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${x.t==='vento'?'Vento':wName(x)}</b></span>${more}</div>`;
   $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+(g.hold&&(g.hold[0]||g.hold[1])?' · stazioni '+g.hold[0]+'/'+HOLD+' contro '+g.hold[1]+'/'+HOLD:'')+'</small>';
-  $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>monete<br>+'+(2+heldBy(g,0))+' a round</small>';
+  $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>+'+(2+heldBy(g,0))+' a round</small>';
 }
 function terrInfo(x,y){
   const t=tileAt(g,x,y),gelo=wNow(g).t==='gelo';
@@ -1427,7 +1436,7 @@ function size(){
   cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);
   ctx.setTransform(d,0,0,d,0,0);
   const prev={cs:lay.cs,ox:lay.ox,oy:lay.oy,cw:lay.cw,ch:lay.ch};
-  const pad=3;
+  const pad=8;
   cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2)/(H+(GP.on?.12:.38)))));
   lay.cw=r.width;lay.ch=r.height;lay.dpr=d;
   if(cam.ready&&cam.z>1&&prev.cw>0){ // mantiene al centro ciò che si stava guardando
@@ -1472,11 +1481,79 @@ const PAL={
 };
 const TUFT=[[.2,.3],[.72,.6],[.45,.8],[.82,.22],[.3,.62]];
 // Base dell'isola: terra tra le caselle, fronte di roccia e ombra sul mare.
+/* Mare attorno all'isola: onde, riflessi, ombre di nuvole spinte dal vento, spiaggia e schiuma che si muove */
+const SEA={d:0,A:null,B:null,T:256,x:0,y:0,vx:6,vy:2.4,cl:0};
+function seaTile(d,seed,n,lmin,lmax,al,lw,blots,dark){
+  const T=SEA.T,c=document.createElement('canvas');c.width=c.height=Math.round(T*d);const q=c.getContext('2d');q.scale(d,d);
+  let sd=seed;const R=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296};
+  const O=[-T,0,T];
+  for(let i=0;i<blots;i++){const x=R()*T,y=R()*T,r=46+R()*70,lt=R()<.55;
+    for(const ox of O)for(const oy of O){const X=x+ox,Y=y+oy;if(X<-r||Y<-r||X>T+r||Y>T+r)continue;
+      const gr=q.createRadialGradient(X,Y,0,X,Y,r);
+      gr.addColorStop(0,lt?'rgba(210,248,244,'+(dark?.05:.09)+')':'rgba(8,70,95,'+(dark?.09:.06)+')');gr.addColorStop(1,'rgba(0,0,0,0)');
+      q.fillStyle=gr;q.fillRect(X-r,Y-r,2*r,2*r)}}
+  q.lineCap='round';
+  for(let i=0;i<n;i++){const x=R()*T,y=R()*T,l=lmin+R()*(lmax-lmin),a=al*(.5+R()*.8),h=R()<.7;
+    q.strokeStyle=h?'rgba(235,252,250,'+a.toFixed(3)+')':'rgba(8,80,105,'+(a*.8).toFixed(3)+')';q.lineWidth=lw*(.7+R()*.6);
+    for(const ox of O)for(const oy of O){const X=x+ox,Y=y+oy;if(X<-l||Y<-l||X>T+l||Y>T+l)continue;
+      q.beginPath();q.moveTo(X,Y);q.quadraticCurveTo(X+l*.5,Y-l*.28,X+l,Y+l*.04);q.stroke();
+      if(h&&l>lmin+(lmax-lmin)*.5){q.beginPath();q.moveTo(X+l*.2,Y+4);q.quadraticCurveTo(X+l*.55,Y+4-l*.16,X+l*.85,Y+5);q.globalAlpha=.55;q.stroke();q.globalAlpha=1}}}
+  return ctx.createPattern(c,'repeat');
+}
+function seaPat(pat,ox,oy,al){
+  const T=SEA.T,d=lay.dpr;ctx.save();ctx.globalAlpha=al;
+  ctx.translate(((ox%T)+T)%T-T,((oy%T)+T)%T-T);ctx.scale(1/d,1/d);ctx.fillStyle=pat;
+  ctx.fillRect(0,0,(lay.cw+2*SEA.T)*d,(lay.ch+2*SEA.T)*d);ctx.restore();
+}
+function drawSea(dt,w){
+  const cw=lay.cw,ch=lay.ch,cs=lay.cs;
+  if(SEA.d!==lay.dpr){SEA.d=lay.dpr;SEA.A=seaTile(SEA.d,7,46,16,40,.30,2,10,false);SEA.B=seaTile(SEA.d,31,22,30,62,.20,3.2,12,true)}
+  // corrente delle onde: col vento vanno nella sua direzione e più veloci
+  let tx=6,ty=2.4;if(w.t==='vento'){const [dx,dy]=DIRS[w.dir];tx=dx*26;ty=dy*26}else if(w.t==='nebbia'){tx=2.5;ty=1}
+  if(REDUCE){tx=0;ty=0}
+  SEA.vx+=(tx-SEA.vx)*Math.min(1,dt*1.5);SEA.vy+=(ty-SEA.vy)*Math.min(1,dt*1.5);
+  SEA.x+=SEA.vx*dt;SEA.y+=SEA.vy*dt;SEA.cl+=(SEA.vx*.5+3)*dt;
+  const mx=lay.ox+cs*W/2,my=lay.oy+cs*H/2,R=Math.max(cw,ch)*.9;
+  const g0=ctx.createRadialGradient(mx,my,cs*3,mx,my,R);
+  g0.addColorStop(0,'#62c0c2');g0.addColorStop(.4,'#46a6b6');g0.addColorStop(1,'#276f88');
+  ctx.fillStyle=g0;ctx.fillRect(-12,-12,cw+24,ch+24);
+  seaPat(SEA.B,lay.ox*.7-SEA.x*.55,lay.oy*.7-SEA.y*.55+30,w.t==='vento'?1:.9);
+  seaPat(SEA.A,lay.ox*.9+SEA.x,lay.oy*.9+SEA.y,1);
+  // riflessi di sole sul mare (solo col sereno)
+  if(w.t==='sereno'&&!REDUCE){
+    ctx.save();ctx.lineCap='round';
+    for(let i=0;i<16;i++){const ph=tick*.9+i*2.17,k=Math.sin(ph);if(k<.2)continue;
+      const X=((i*.6180339+.11)%1)*cw,Y=((i*.4142136+.07+Math.floor(ph/6.28)*.31)%1)*ch,r=2+3*k;
+      ctx.strokeStyle='rgba(255,255,240,'+(.55*k).toFixed(2)+')';ctx.lineWidth=1.3;
+      ctx.beginPath();ctx.moveTo(X-r,Y);ctx.lineTo(X+r,Y);ctx.moveTo(X,Y-r*.7);ctx.lineTo(X,Y+r*.7);ctx.stroke()}
+    ctx.restore();
+  }
+  // ombre di nuvole che passano
+  for(let i=0;i<3;i++){
+    const X=(((i*.43+SEA.cl*.0021*(1+i*.35))%1.5)-.25)*cw,Y=(.16+i*.33)*ch+Math.sin(tick*.12+i*2)*cs*.4,rx=cw*(.36+i*.07);
+    ctx.save();ctx.translate(X,Y);ctx.scale(1,.5);
+    const gr=ctx.createRadialGradient(0,0,0,0,0,rx);gr.addColorStop(0,'rgba(8,55,78,.13)');gr.addColorStop(1,'rgba(8,55,78,0)');
+    ctx.fillStyle=gr;ctx.fillRect(-rx,-rx,2*rx,2*rx);ctx.restore();
+  }
+  if(w.t==='gelo'){ctx.fillStyle='rgba(215,240,250,.20)';ctx.fillRect(-12,-12,cw+24,ch+24)}
+  else if(w.t==='nebbia'){ctx.fillStyle='rgba(205,222,228,.22)';ctx.fillRect(-12,-12,cw+24,ch+24)}
+}
+
 function drawPlinth(){
-  if(gpReady()){ // niente strati di terra e roccia: una semplice cornice verde scura con ombra
-    const cs=lay.cs,bh=cs*H+5;
-    ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(lay.ox+cs*W/2,lay.oy+bh+2,cs*W*.52,cs*.14,0,0,7);ctx.fill();
-    rr(lay.ox-4,lay.oy-4,cs*W+8,bh+1,9);ctx.fillStyle='#2a5230';ctx.fill();
+  if(gpReady()){ // l'isola nel mare: acque basse, schiuma, spiaggia e una sottile cornice d'erba scura
+    const cs=lay.cs,bh=cs*H+5,x0=lay.ox-4,y0=lay.oy-4,wd=cs*W+8,hh=bh+1,sw=REDUCE?0:Math.sin(tick*1.3);
+    ctx.save();ctx.lineJoin='round';
+    ctx.fillStyle='rgba(5,45,66,.34)';rr(x0+1,y0+8,wd,hh,cs*.3);ctx.fill();
+    for(let i=3;i>=0;i--){const pd=cs*(.08+.1*i)+sw*1.6;ctx.strokeStyle='rgba(175,236,228,'+(.2-.04*i).toFixed(2)+')';ctx.lineWidth=cs*.2;rr(x0-pd,y0-pd,wd+2*pd,hh+2*pd,cs*.3+pd);ctx.stroke()}
+    ctx.lineCap='round';ctx.lineWidth=2.4;ctx.setLineDash([cs*.62,cs*.4]);
+    ctx.strokeStyle='rgba(255,255,255,.62)';ctx.lineDashOffset=REDUCE?0:-tick*11;let pf=cs*.15+sw*1.8;rr(x0-pf,y0-pf,wd+2*pf,hh+2*pf,cs*.3+pf);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,.32)';ctx.lineDashOffset=REDUCE?0:tick*8+40;pf=cs*.29-sw*1.8;rr(x0-pf,y0-pf,wd+2*pf,hh+2*pf,cs*.3+pf);ctx.stroke();
+    ctx.setLineDash([]);
+    rr(x0-6,y0-6,wd+12,hh+12,13);ctx.fillStyle='#8fcfc4';ctx.fill();
+    const sg=ctx.createLinearGradient(0,y0-5,0,y0+hh+5);sg.addColorStop(0,'#f6e8bd');sg.addColorStop(1,'#e8d09a');
+    rr(x0-4.5,y0-4.5,wd+9,hh+9,12);ctx.fillStyle=sg;ctx.fill();ctx.strokeStyle='rgba(168,124,66,.5)';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.restore();
+    rr(x0,y0,wd,hh,9);ctx.fillStyle='#2a5230';ctx.fill();
     return;
   }
   const cs=lay.cs,x0=lay.ox-5,wd=cs*W+10,y0=lay.oy-5,bh=cs*H+5,th=lay.th;
@@ -2032,6 +2109,7 @@ function draw(ts){
   // nebbia: si vede solo a 2 caselle dalle proprie unità
   const seen=new Set();
   if(nebbia)for(const u of g.units)if(u.o===0)for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.abs(xx)+Math.abs(yy)<=2)seen.add((u.x+xx)+','+(u.y+yy));
+  drawSea(dt/1000,w);
   drawPlinth();
   if(!(GP.on&&(LOOK===5?groundOne(gelo,nebbia,seen):LOOK===6&&groundCells(gelo,nebbia,seen))))
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)drawBlock(x,y,tileAt(g,x,y),gelo,tick,nebbia&&!seen.has(x+','+y));

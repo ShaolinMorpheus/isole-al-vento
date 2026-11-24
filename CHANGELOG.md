@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v49 — 24 nov 2026 · Mare, spiaggia e onde attorno all'isola
+- Campo di gioco come isola nel mare: acque basse, schiuma animata, spiaggia, onde che scorrono (col vento nella sua direzione), riflessi di sole, ombre di nuvole, colori diversi con gelo e nebbia
+- Scheda meteo e monete in alto sistemate (niente testo a capo o tagliato col vento)
+
 ## v48 — 24 nov 2026 · Caricamento pulito e più veloce
 - Schermata di caricamento con barra, font inclusi, immagini dei menu in WebP, cache sul telefono (service worker)
 
