@@ -2,6 +2,16 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v56 — 25 nov 2026 · La Campagna
+- Nuovo tasto «Campagna»: 3 mondi, 24 livelli (campi da 7×9 a 13×17) con mappa, meteo e obiettivo propri
+- Obiettivi: tieni le stazioni, elimina tutti, resisti alle ondate, porta il messaggero alla meta, sconfiggi il boss (uno per mondo)
+- 3 stelle per livello (vittoria + due sfide bonus); servono stelle per aprire i mondi 2 e 3
+- Perle di ricompensa e Arsenale: 3 potenziamenti per unità, validi solo in campagna; nuove unità sbloccabili completando i livelli
+- Aiuti in partita (Cielo sereno, Cura, Rinforzo), 31 Imprese, Sfida del giorno con serie di giorni
+- Salvataggio della campagna separato dalla partita veloce (che resta invariata)
+- Spazio pubblicitario pronto ma spento («Pubblicità (prova)» nelle impostazioni mostra striscia e finto video)
+- Corretto: «Continua partita» non resta più visibile senza una partita da riprendere
+
 ## v55 — 24 nov 2026 · Terreno a caselle separate di base
 - Il terreno predefinito è «a caselle separate» (la variante scelta); le altre restano nel tasto «Terreno (prova)»
 

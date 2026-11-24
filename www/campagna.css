@@ -1,0 +1,154 @@
+/* Isole al Vento - campagna: schermate (mappa dei mondi, Arsenale, Imprese, Sfida del giorno, scheda livello, risultati).
+   Usa gli stessi pannelli e bottoni del gioco; nessun disegno del terreno qui dentro. */
+#ovCamp{position:fixed;inset:0;z-index:24;display:flex;flex-direction:column;overflow:hidden;background:#2f7f93;color:#fff;font-family:var(--body)}
+#ovCamp[hidden]{display:none}
+#ovCamp::before{content:'';position:absolute;inset:0;z-index:0;background:url(assets/menu/sfondo_menu.webp) center top/cover no-repeat;filter:saturate(.9) brightness(.82);pointer-events:none}
+#ovCamp>*{position:relative;z-index:1}
+.cmTop{flex:none;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 6px;max-width:520px;width:100%;box-sizing:border-box;margin:0 auto}
+.cmBack{flex:none;width:42px;height:42px;border-radius:13px;border:1.5px solid rgba(255,240,190,.8);background:rgba(10,52,66,.72);display:flex;align-items:center;justify-content:center;padding:0;color:#fff}
+.cmBack svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.cmTt{flex:1;min-width:0;font:600 22px/1.1 var(--disp);text-shadow:0 2px 4px rgba(8,50,64,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmChip{flex:none;display:flex;align-items:center;gap:5px;padding:0 11px;height:38px;border-radius:19px;background:rgba(10,52,66,.8);border:1.5px solid rgba(255,240,190,.75);font:600 17px var(--disp);color:#ffe9a6;font-variant-numeric:tabular-nums}
+.cmChip svg{width:20px;height:20px;flex:none}
+.cmBody{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:4px 10px 16px;max-width:520px;width:100%;box-sizing:border-box;margin:0 auto}
+.cmTabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:7px 8px calc(env(safe-area-inset-bottom,0px) + 7px);background:linear-gradient(rgba(8,44,58,.0),rgba(8,44,58,.85) 30%);max-width:520px;width:100%;box-sizing:border-box;margin:0 auto}
+.cmTab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:54px;border-radius:14px;border:1.5px solid rgba(255,240,190,.5);background:rgba(10,52,66,.78);color:#d8eef2;font:600 12.5px var(--disp);padding:3px 2px}
+.cmTab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.cmTab[aria-selected=true]{background:linear-gradient(#ffe9a0,#f2c258);color:#4a2f06;border-color:#fff3c8;box-shadow:0 2px 0 #a8741f}
+.cmTab i{position:absolute;right:9px;top:3px;min-width:17px;height:17px;border-radius:9px;background:#ef6a5a;color:#fff;font:800 11px/17px var(--body);text-align:center;font-style:normal;border:1.5px solid #fff}
+.cmTab i[hidden]{display:none}
+/* pannelli e bottoni nello stile del gioco */
+.cmP{position:relative;isolation:isolate;box-sizing:border-box;padding:12px 14px;margin:0 0 10px;color:#fff;text-shadow:0 1px 3px rgba(12,70,88,.6)}
+.cmP::before{content:'';position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:16px solid transparent;border-image:url(assets/interfaccia/ui_pannello_stat.webp) 48 fill/16px stretch}
+.cmP h3{margin:0 0 2px;font:600 18px/1.15 var(--disp)}
+.cmP p{margin:0;font-size:13.5px;line-height:1.3;color:#eaf7f9}
+.cmBtn{box-sizing:border-box;min-height:46px;padding:0 14px 3px;border:12px solid transparent;background:none;border-radius:0;font:600 17px/1.1 var(--disp);color:#2a1d02;border-image:url(assets/interfaccia/ui_bottone_oro_normale.webp) 36 fill/12px stretch;display:flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+.cmBtn:active{border-image-source:url(assets/interfaccia/ui_bottone_oro_premuto.webp)}
+.cmBtn.alt{color:#0d3b47;border-image-source:url(assets/interfaccia/ui_bottone_chiaro_normale.webp)}
+.cmBtn.alt:active{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_premuto.webp)}
+.cmBtn[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_oro_disattivo.webp);color:#6f868c;opacity:1}
+.cmBtn.alt[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_disattivo.webp)}
+.cmBtn small{font:700 11.5px var(--body);opacity:.8}
+.cmRow{display:flex;gap:8px}.cmRow>*{flex:1;min-width:0}
+/* mappa dei mondi */
+.cmW{position:relative;margin:0 0 14px;border-radius:22px;overflow:hidden;isolation:isolate}
+.cmW::before{content:'';position:absolute;inset:0;z-index:-2;background:url(assets/menu/sfondo_menu.webp) center/cover no-repeat;filter:var(--wf,none)}
+.cmW::after{content:'';position:absolute;inset:0;z-index:-1;background:var(--wg,none)}
+.cmW.w1{--wf:saturate(1.05) brightness(.96);--wg:linear-gradient(rgba(255,244,190,.1),rgba(20,70,60,.16))}
+.cmW.w2{--wf:hue-rotate(125deg) saturate(.7) brightness(1.0);--wg:linear-gradient(rgba(220,236,246,.38),rgba(90,120,150,.3))}
+.cmW.w3{--wf:hue-rotate(-140deg) saturate(1.1) brightness(.82);--wg:linear-gradient(rgba(70,20,10,.24),rgba(255,110,40,.22))}
+.cmWH{margin:10px 10px 0}
+.cmWH .cmWS{position:absolute;right:12px;top:11px;display:flex;align-items:center;gap:3px;font:600 15px var(--disp);color:#ffe9a6}
+.cmWH .cmWS svg{width:17px;height:17px}
+.cmWH h3{padding-right:62px}
+.cmPath{position:relative;margin:0 6px}
+.cmPath svg.cmLine{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cmNode{position:absolute;width:66px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;padding:0;border:0;background:none;color:#fff}
+.cmNode .md{position:relative;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:600 23px var(--disp);color:#4a2f06;background:radial-gradient(circle at 35% 28%,#fff6c8,#f4c75a 55%,#d9962b);border:4px solid #fff3c4;box-shadow:0 4px 0 #a8741f,0 7px 10px rgba(10,40,50,.45)}
+.cmNode.done .md{background:radial-gradient(circle at 35% 28%,#e8fff3,#74d3a8 55%,#2f9d86);color:#0b4033;border-color:#e5fff4;box-shadow:0 4px 0 #1c7766,0 7px 10px rgba(10,40,50,.45)}
+.cmNode.lock .md{background:radial-gradient(circle at 35% 28%,#e5eef0,#a5b8bd 60%,#7b9097);color:#4d6168;border-color:#d4e0e3;box-shadow:0 4px 0 #5c7077,0 6px 8px rgba(10,40,50,.4)}
+.cmNode.lock .md svg{width:26px;height:26px}
+.cmNode.cur .md{animation:cmPulse 1.5s ease-in-out infinite}
+@keyframes cmPulse{0%,100%{transform:scale(1);box-shadow:0 4px 0 #a8741f,0 0 0 0 rgba(255,236,150,.8),0 7px 10px rgba(10,40,50,.45)}50%{transform:scale(1.08);box-shadow:0 4px 0 #a8741f,0 0 0 11px rgba(255,236,150,0),0 7px 10px rgba(10,40,50,.45)}}
+.cmNode.boss{width:84px}.cmNode.boss .md{width:76px;height:76px;font-size:26px;background:radial-gradient(circle at 35% 28%,#ffd9cf,#ef7a62 55%,#b9422f);color:#fff;border-color:#ffe3da;box-shadow:0 5px 0 #7d2a1d,0 8px 12px rgba(10,40,50,.5);text-shadow:0 2px 3px rgba(80,10,0,.6)}
+.cmNode.boss.done .md{background:radial-gradient(circle at 35% 28%,#fff0c4,#f0c14e 55%,#c98a1d);color:#4a2f06;text-shadow:none;border-color:#fff3c4;box-shadow:0 5px 0 #8f5e10,0 8px 12px rgba(10,40,50,.5)}
+.cmNode.boss.lock .md{background:radial-gradient(circle at 35% 28%,#e5eef0,#a5b8bd 60%,#7b9097);color:#4d6168;text-shadow:none}
+.cmNode .crown{position:absolute;left:50%;top:-17px;width:34px;height:24px;transform:translateX(-50%)}
+.cmNode .st{display:flex;gap:1px;margin-top:5px;filter:drop-shadow(0 1px 1px rgba(8,40,52,.6))}
+.cmNode .st svg{width:17px;height:17px}
+.cmNode .nm{margin-top:2px;font:600 12px/1.1 var(--disp);text-shadow:0 1px 3px rgba(8,40,52,.9);text-align:center;max-width:100px}
+.cmDec{position:absolute;pointer-events:none;filter:drop-shadow(0 4px 3px rgba(8,40,52,.35))}
+.cmGate{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(8,36,50,.5);padding:20px;text-align:center}
+.cmGate .cmP{margin:0;max-width:300px}
+.cmCont{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.cmCont .cmBtn{flex:1}
+/* scheda livello */
+#ovCmSheet,#ovAid,#ovAd{z-index:30}
+.shHead{display:flex;align-items:center;gap:10px}
+.shNum{flex:none;min-width:46px;height:46px;border-radius:50%;padding:0 4px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font:600 18px var(--disp);color:#4a2f06;background:radial-gradient(circle at 35% 28%,#fff6c8,#f4c75a 55%,#d9962b);border:3px solid #fff3c4}
+.shNum.boss{background:radial-gradient(circle at 35% 28%,#ffd9cf,#ef7a62 55%,#b9422f);color:#fff;border-color:#ffe3da}
+.shHead h2{font-size:22px!important;line-height:1.1}
+.shHead small{display:block;font:700 12.5px var(--body);opacity:.85}
+.shMap{position:static;inset:auto;flex:none;display:block;margin:2px auto;border-radius:10px;border:2px solid rgba(255,240,190,.7);background:#2c6b57;image-rendering:auto;max-width:100%}
+.shGoal{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:12px;background:rgba(10,52,66,.55);font-size:13.5px;line-height:1.3}
+.shGoal b{font:600 15px var(--disp);color:#ffe9a6;display:block}
+.shStars{display:flex;flex-direction:column;gap:5px}
+.shStar{display:flex;align-items:center;gap:8px;font-size:13.5px;line-height:1.25}
+.shStar svg{flex:none;width:22px;height:22px}
+.shStar.off{opacity:.9}
+.shChips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.shChip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px 2px 5px;border-radius:14px;background:rgba(10,52,66,.55);font:700 12.5px var(--body)}
+.shChip img{width:22px;height:22px;object-fit:contain}
+.shUn{display:flex;gap:4px;flex-wrap:wrap}
+.shUn img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(8,40,52,.7))}
+.shSave{font-size:12.5px;color:#ffe9a6}
+/* arsenale */
+.arRow{display:flex;gap:10px;align-items:center}
+.arRow img.sp{flex:none;width:58px;height:66px;object-fit:contain;filter:drop-shadow(0 3px 2px rgba(8,40,52,.45))}
+.arRow .tx{flex:1;min-width:0}
+.arRow .tx b{font:600 17px var(--disp);display:block}
+.arRow .tx span{display:block;font-size:12.5px;color:#eaf7f9;line-height:1.25}
+.arPips{display:flex;gap:4px;margin:4px 0 3px}
+.arPips i{width:20px;height:7px;border-radius:4px;background:rgba(10,52,66,.65);border:1px solid rgba(255,240,190,.55)}
+.arPips i.on{background:linear-gradient(#ffe9a0,#f2b84b);border-color:#fff3c8}
+.arRow .cmBtn{flex:none;min-width:92px;min-height:44px;font-size:15px}
+.arLock{opacity:.62;filter:grayscale(.5)}
+.arBoost{display:flex;align-items:center;gap:10px}
+.arBoost img,.arBoost svg.ic{flex:none;width:42px;height:42px;object-fit:contain}
+.arBoost .tx{flex:1;min-width:0}.arBoost .tx b{display:block;font:600 16px var(--disp)}.arBoost .tx span{font-size:12.5px;line-height:1.25;display:block}
+.arBoost .n{flex:none;font:600 22px var(--disp);color:#ffe9a6;min-width:34px;text-align:center}
+/* imprese */
+.acRow{display:flex;gap:10px;align-items:center}
+.acRow .ic{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#fff6c8,#f4c75a 55%,#d9962b);border:3px solid #fff3c4;color:#4a2f06}
+.acRow .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.acRow.done .ic{background:radial-gradient(circle at 35% 28%,#e8fff3,#74d3a8 55%,#2f9d86);border-color:#e5fff4;color:#0b4033}
+.acRow .tx{flex:1;min-width:0}.acRow .tx b{display:block;font:600 16px var(--disp)}.acRow .tx span{display:block;font-size:12.5px;line-height:1.25}
+.acBar{height:9px;border-radius:5px;background:rgba(10,52,66,.65);border:1px solid rgba(255,240,190,.5);margin-top:5px;overflow:hidden}
+.acBar i{display:block;height:100%;background:linear-gradient(#ffe9a0,#f2b84b)}
+.acRow .cmBtn{flex:none;min-width:84px;min-height:42px;font-size:15px}
+.acRew{font:600 15px var(--disp);color:#ffe9a6;display:flex;align-items:center;gap:3px;justify-content:center;flex:none;min-width:84px}
+.acRew svg{width:17px;height:17px}
+/* sfida del giorno */
+.dyDays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0}
+.dyD{position:relative;border-radius:11px;padding:6px 0 5px;text-align:center;background:rgba(10,52,66,.6);border:1.5px solid rgba(255,240,190,.4);font:600 11.5px var(--disp);line-height:1.2}
+.dyD b{display:block;font-size:14px;color:#ffe9a6}
+.dyD.on{background:linear-gradient(#ffe9a0,#f2c258);color:#4a2f06;border-color:#fff3c8}.dyD.on b{color:#4a2f06}
+.dyD.cur{box-shadow:0 0 0 2px #fff}
+/* risultati */
+#campEnd{display:flex;flex-direction:column;gap:9px}
+#campEnd[hidden]{display:none}
+.ceStars{display:flex;justify-content:center;gap:6px;margin:0 0 2px}
+.ceStars svg{width:60px;height:60px;filter:drop-shadow(0 3px 3px rgba(8,40,52,.5))}
+.ceStars svg:nth-child(2){margin-top:-12px}
+.ceStars svg.pop{animation:cePop .6s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes cePop{0%{transform:scale(.1) rotate(-50deg);opacity:0}70%{transform:scale(1.25) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+.ceRows{display:flex;flex-direction:column;gap:4px;font-size:13.5px}
+.ceRow{display:flex;gap:7px;align-items:center;line-height:1.25}.ceRow svg{flex:none;width:18px;height:18px}
+.ceRow.no{opacity:.75}
+.ceRew{display:flex;align-items:center;justify-content:center;gap:5px;font:600 22px var(--disp);color:#ffe9a6}
+.ceRew svg{width:24px;height:24px}
+.ceNote{text-align:center;font-size:13.5px;color:#fff}
+.ceNote img{width:44px;height:50px;object-fit:contain;vertical-align:middle;margin-right:4px}
+.ceBtns{display:flex;flex-direction:column;gap:6px}
+/* pubblicità: striscia in prova e finto video */
+.adBan{flex:none;display:flex;align-items:center;justify-content:center;height:50px;margin:0 auto;width:min(100%,320px);border-radius:6px;background:repeating-linear-gradient(45deg,#e9eef0,#e9eef0 10px,#dbe3e6 10px,#dbe3e6 20px);color:#4d6168;font:700 12px var(--body);border:1px solid #9fb2b8}
+.adBan[hidden]{display:none}
+#ovCamp .adBan{margin:0 auto 2px}
+#ovStart .adBan{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 2px);transform:translateX(-50%);z-index:5}
+#ovAd{background:#0b1620}
+#ovAd .adBox{width:min(92%,340px);text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+#ovAd .adVid{width:100%;aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#2b4a63,#4d2b63);display:flex;align-items:center;justify-content:center;font:600 54px var(--disp);color:#fff}
+#ovAd p{margin:0;color:#c9dbe2;font-size:13.5px}
+body.adson #ovStart{padding-bottom:70px!important}
+@media (prefers-reduced-motion:reduce){.cmNode.cur .md{animation:none}.ceStars svg.pop{animation:none}}
+
+/* ---- menu principale: tasto Campagna e nota «partita veloce» ---- */
+#bCamp{position:relative;flex-direction:column;gap:1px;line-height:1.1}
+#bCamp .cb{font-size:25px;letter-spacing:.5px;color:#2a1d02;text-shadow:0 1px 0 rgba(255,244,200,.6)}
+#bCamp .cs{font-size:12.5px;font-weight:600;color:#5a3d0a}
+#bCamp .cbd{position:absolute;right:6px;top:2px;min-width:22px;height:22px;border-radius:11px;background:#e5483b;color:#fff;font:700 13px/22px var(--disp,system-ui);text-align:center;font-style:normal;box-shadow:0 0 0 2px #fff5;animation:cbdp 1.4s ease-in-out infinite}
+@keyframes cbdp{50%{transform:scale(1.14)}}
+body:not(.gpui) #bCamp{display:flex;align-items:center;justify-content:center;min-height:62px}
+#ovStart p.qk{margin:2px 0 -2px;font:600 13px var(--disp,system-ui);letter-spacing:.4px;text-transform:uppercase;opacity:.9}
+/* un tasto con l'attributo hidden deve sparire anche con la grafica dei menu (prima «Continua partita» restava visibile senza salvataggio) */
+body.gpui #ovStart .btn[hidden]{display:none!important}

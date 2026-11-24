@@ -215,6 +215,15 @@ body.gpui .btn[disabled]{color:#6f868c!important}
 body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.webp) 180 fill/60px stretch}
 body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-shadow:0 1px 3px rgba(12,70,88,.6)}
 
+#goalBar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;padding:3px 12px;border-radius:12px;background:rgba(10,52,66,.78);border:1px solid rgba(255,236,170,.55);box-sizing:border-box;font-size:13px;line-height:1.2}
+#goalBar[hidden]{display:none}
+#goalBar b{font-family:var(--disp);font-weight:600;font-size:14px;color:#ffe9a6}
+#goalBar span{color:#e8f6f8;white-space:nowrap;font-weight:700;font-size:12.5px}
+#goalBar i{font-style:normal;margin-right:5px}
+#bAid{position:absolute;left:8px;top:54px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,236,170,.7);background:rgba(120,78,10,.86);display:flex;align-items:center;justify-content:center;padding:0;color:#ffe9a6}
+#bAid[hidden]{display:none}
+#bAid svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round}
+#bAid span{position:absolute;right:-5px;top:-6px;min-width:18px;height:18px;border-radius:9px;background:#ef6a5a;color:#fff;font:800 11px/18px var(--body);text-align:center;border:1.5px solid #fff}
 @media (prefers-reduced-motion:reduce){.btn.pulse,body.gpui .btn.pulse:not(.alt),body.gpui #ovStart .btn.pulse:not(.alt){animation:none}body.gpui .btn.pulse:not(.alt){filter:drop-shadow(0 0 8px rgba(255,226,130,.85))}#toast{transition:none}}
 </style></head><body>
 <div id="boot"><img id="bootImg" src="assets/menu/menu_simbolo.png" alt=""><div class="bt">Isole al Vento</div><div class="bb"><i id="bootBar"></i></div><div class="bp" id="bootTxt">Preparo il gioco…</div></div>
@@ -240,7 +249,9 @@ setTimeout(finish,25000);
     <div class="wbox" id="wbox"></div>
     <div class="stat"><div class="r" id="rnd"></div><div class="c" id="coins"></div></div>
   </div>
+  <div id="goalBar" hidden></div>
   <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div>
+    <button type="button" id="bAid" aria-label="Aiuti" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M18 6l-3.6 3.6M6 18l3.6-3.6M18 18l-3.6-3.6"/></svg><span id="aidN"></span></button>
     <button type="button" id="bPause" aria-label="Menu di gioco"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <div id="zoomBox" role="group" aria-label="Zoom della mappa">
       <button type="button" id="zIn" aria-label="Ingrandisci"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -266,11 +277,14 @@ setTimeout(finish,25000);
   <div class="row"><button class="btn" id="tutNext" type="button">Avanti</button></div>
 </div>
 
+<link rel="stylesheet" href="campagna.css">
 <div class="ov" id="ovStart">
   <div class="card menu">
     <h1>Isole al Vento</h1>
     <div class="sc">
     <p>Due isole, un solo cielo. Il meteo cambia ogni turno e cambia le regole.</p>
+    <button class="btn" id="bCamp" type="button" aria-label="Campagna"><span class="cb">Campagna</span><span class="cs" id="campSub"></span><i class="cbd" id="campBadge" hidden>1</i></button>
+    <p class="qk">Partita veloce contro il computer</p>
     <div class="seg" id="seg" role="group" aria-label="Livello del computer"></div>
     <p class="st" id="stats"></p>
     <button class="btn" id="bCont" type="button" style="min-height:48px" hidden>Continua partita</button>
@@ -298,6 +312,7 @@ setTimeout(finish,25000);
         <button class="btn alt" id="bLook" type="button" style="min-height:44px"></button>
         <button class="btn alt" id="bSea" type="button" style="min-height:44px"></button>
         <button class="btn alt" id="bPsz" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bAds" type="button" style="min-height:44px"></button>
       </div>
     </details>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
@@ -357,6 +372,7 @@ setTimeout(finish,25000);
     <button class="btn" id="bAgain" type="button" style="min-height:48px">Nuova partita</button>
     <button class="btn alt" id="bSame" type="button" style="min-height:44px">Rigioca questa mappa</button>
     <button class="btn alt" id="bMenu" type="button" style="min-height:44px">Cambia livello</button>
+    <div id="campEnd" hidden></div>
   </div>
 </div>
 
@@ -364,7 +380,7 @@ setTimeout(finish,25000);
 (()=>{
 'use strict';
 /* ====================== REGOLE (nessun disegno qui dentro) ====================== */
-const W=9,H=13,MID=6,CX=4,MAXR=36,MAXU=8;
+let W=9,H=13,MID=6,CX=4,MAXR=36,MAXU=8;
 const DIRS={N:[0,-1],E:[1,0],S:[0,1],O:[-1,0]};
 const DIRN={N:'Nord',E:'Est',S:'Sud',O:'Ovest'};
 const UT={
@@ -387,9 +403,17 @@ const WE={
 };
 function rng(seed){let a=(seed>>>0)||1;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const md=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
-const BASE=[{x:CX,y:H-1},{x:CX,y:0}];
+let BASE=[{x:CX,y:H-1},{x:CX,y:0}];
 // Vulcano al centro, due stazioni meteo opposte (simmetriche rispetto al centro).
-const VOL={x:CX,y:MID},ERUPT=4,STATIONS=[{x:1,y:4},{x:7,y:8}];
+let VOL={x:CX,y:MID},ERUPT=4,STATIONS=[{x:1,y:4},{x:7,y:8}];
+/* Campo: la partita normale usa il campo di base 9x13; ogni livello della campagna porta il suo (g.board).
+   useBoard() sceglie il campo prima di qualsiasi calcolo o disegno: tutto il resto legge queste variabili. */
+const BOARD0={W:9,H:13,base:[[4,12],[4,0]],st:[[1,4],[7,8]],vol:[4,6],erupt:4,maxr:36,maxu:8,hold:3};
+function useBoard(g){
+  const b=(g&&g.board)||BOARD0;
+  W=b.W;H=b.H;CX=W>>1;MID=H>>1;MAXR=b.maxr;MAXU=b.maxu;ERUPT=b.erupt||4;HOLD=b.hold||3;
+  BASE=b.base.map(([x,y])=>({x,y}));STATIONS=b.st.map(([x,y])=>({x,y}));VOL=b.vol?{x:b.vol[0],y:b.vol[1]}:null;
+}
 // Tempi dell'animazione di combattimento (secondi): colpo in mischia, colpo a distanza, inizio del contrattacco.
 const T_MELEE=.18,T_RANGED=.26,T_COUNTER=.55,T_LEAD=.3;
 
@@ -464,22 +488,61 @@ function genMap(seed){
   m[VOL.y][VOL.x]='V';for(const s of STATIONS)m[s.y][s.x]='S';
   return m;
 }
-function genWeather(seed){
-  const r=rng(seed*17+5),pool=['sereno','vento','vento','pioggia','pioggia','nebbia','gelo'];
+function genWeather(seed,opt){
+  const r=rng(seed*17+5),pool=(opt&&opt.pool)||['sereno','vento','vento','pioggia','pioggia','nebbia','gelo'];
   const out=[{t:'sereno'}];
+  if(opt&&opt.seq&&opt.seq.length){out.length=0;for(const k of opt.seq){const [t,d]=String(k).split(':');out.push({t,dir:t==='vento'?(d||'E'):null})}}
   while(out.length<MAXR+3){
-    let t;do{t=pool[Math.floor(r()*pool.length)]}while(t===out[out.length-1].t);
+    let t,tr=0;do{t=pool[Math.floor(r()*pool.length)]}while(t===out[out.length-1].t&&pool.length>1&&++tr<50);
     out.push({t,dir:t==='vento'?'NESO'[Math.floor(r()*4)]:null});
   }
   return out;
 }
 function newGame(seed,off){
+  useBoard(null);
   seed=seed||((Math.random()*1e9)|0)+1;
   off=off?1:0;
   const g={seed,off,bonus:[0,0],map:genMap(seed),wx:genWeather(seed),round:1,turn:off,first:off,step:0,coins:[3,3],units:[],over:null,why:'',nid:1,fx:[],log:[],trail:[],windN:0,thawN:0,erupted:false,eruptN:0,ev:[]};
-  const add=(t,o,x,y)=>g.units.push({id:g.nid++,t,o,x,y,vx:x,vy:y,hp:UT[t].hp,moved:false,done:false,aid:false});
+  const add=(t,o,x,y)=>g.units.push(mkUnit(g,t,o,x,y));
   add('G',0,CX,H-2);add('A',0,CX-1,H-1);add('E',0,CX+1,H-1);
   add('G',1,CX,1);add('A',1,CX+1,0);add('E',1,CX-1,0);
+  return g;
+}
+const mhp=u=>UT[u.t].hp+(u.bh||0);
+function mkUnit(g,t,o,x,y,ex){
+  const up=(o===0&&g.upg&&g.upg[t])||null;
+  const u={id:g.nid++,t,o,x,y,vx:x,vy:y,hp:0,moved:false,done:false,aid:false};
+  const bh=(up?up.hp||0:0)+((ex&&ex.bh)||0),ba=(up?up.atk||0:0)+((ex&&ex.ba)||0);
+  if(bh)u.bh=bh;if(ba)u.ba=ba;
+  if(ex){if(ex.boss)u.boss=1;if(ex.vip)u.vip=1;if(ex.name)u.nm=ex.name;if(ex.mode)u.mode=ex.mode;if(ex.anchor)u.anchor=ex.anchor;if(ex.wake)u.wake=ex.wake}
+  u.hp=mhp(u);
+  return u;
+}
+/* Livello della campagna: mappa logica a caratteri (. prato, F bosco, M monte, L lago, V vulcano, S stazione, 1 base tua, 2 base nemica, T bersaglio).
+   def: {id,map,p:[[tipo,x,y,{extra}]],e:[...],coins,rounds,maxu,erupt,goal,rules,ai,weather,waves,seed}.
+   Il disegno del terreno non sa nulla dei livelli: legge soltanto g.map. */
+function newLevel(def,opt){
+  opt=opt||{};
+  const rows=def.map,h=rows.length,w=rows[0].length,base=[null,null],st=[],cells=[];let vol=null;
+  const map=Array.from({length:h},()=>Array(w).fill('P'));
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    const ch=rows[y][x];let t='P';
+    if(ch==='F'||ch==='M'||ch==='L')t=ch;
+    else if(ch==='V'){t='V';vol=[x,y]}
+    else if(ch==='S'){t='S';st.push([x,y])}
+    else if(ch==='1')base[0]=[x,y];
+    else if(ch==='2')base[1]=[x,y];
+    else if(ch==='T')cells.push([x,y]);
+    map[y][x]=t;
+  }
+  const G=Object.assign({t:'stations'},def.goal||{});if(G.t==='reach'&&!G.cells)G.cells=cells;
+  const board={W:w,H:h,base,st,vol,erupt:def.erupt||4,maxr:def.rounds||24,maxu:def.maxu||8,hold:G.hold||3};
+  useBoard({board});
+  const seed=def.seed||1,lv=AI_LEVELS[def.lvl||'normale']?def.lvl||'normale':'normale';
+  const g={seed,off:0,bonus:[0,(def.rules&&def.rules.eBonus!==undefined)?def.rules.eBonus:AI_LEVELS[lv].bonus],board,map,wx:genWeather(seed,def.weather),round:1,turn:0,first:0,step:0,coins:def.coins?def.coins.slice():[3,3],units:[],over:null,why:'',nid:1,fx:[],log:[],trail:[],windN:0,thawN:0,erupted:false,eruptN:0,ev:[],
+    lvl:lv,goal:G,rules:Object.assign({norec:false},def.rules),ai:Object.assign({mode:'stations'},def.ai),aiOv:def.aiOv||null,allow:opt.allow||def.allow||null,upg:opt.upg||null,waves:(def.waves||[]).map(x=>Object.assign({},x,{done:false})),camp:{id:def.id,name:def.name}};
+  for(const [t,x,y,ex] of (def.p||[])){const u=mkUnit(g,t,0,x,y,ex);g.units.push(u);if(ex&&ex.vip){g.vipId=u.id;g.vipName=ex.name||UT[t].n}}
+  for(const [t,x,y,ex] of (def.e||[])){const u=mkUnit(g,t,1,x,y,ex);g.units.push(u);if(ex&&ex.boss){g.bossId=u.id;g.bossName=ex.name||UT[t].n}}
   return g;
 }
 const tileAt=(g,x,y)=>g.map[y][x];
@@ -488,7 +551,7 @@ const wNow=g=>g.wx[g.round-1];
 const wNext=g=>g.wx[g.round];
 function mvOf(g,u){let v=UT[u.t].mv;if(u.t!=='R'&&g.units.some(a=>a.o===u.o&&a.t==='R'&&a!==u&&md(a,u)<=1))v+=1;if(wNow(g).t==='pioggia')v=Math.max(1,v-1);return v}
 function rgOf(g,u){let v=UT[u.t].rg;if(wNow(g).t==='nebbia')v=Math.min(v,1);return v}
-function atkOf(g,u){let v=UT[u.t].atk;if(wNow(g).t==='pioggia'&&UT[u.t].rg>1)v=Math.max(1,v-1);return v}
+function atkOf(g,u){let v=UT[u.t].atk+(u.ba||0);if(wNow(g).t==='pioggia'&&UT[u.t].rg>1)v=Math.max(1,v-1);return v}
 function stepCost(g,x,y,u){
   const t=tileAt(g,x,y);
   if(t==='M'||t==='V')return Infinity;
@@ -579,6 +642,8 @@ function doAttack(g,a,d){
   a.moved=true;a.done=true;
   const res={dm,counter,killed:d.hp<=0,died:a.hp<=0,pushed:!!pushed,bump:h.bump};
   g.st=g.st||{lost:0,kills:0,erupt:0,burn:0};
+  if(d.vip&&d.o===0)g.st.vipHit=(g.st.vipHit||0)+1;
+  if(a.vip&&counter)g.st.vipHit=(g.st.vipHit||0)+1;
   if(res.killed){if(d.o===0)g.st.lost++;else g.st.kills++}
   if(res.died){if(a.o===0)g.st.lost++;else g.st.kills++}
   // evento per l'animazione: le unità cadute restano visibili finché il colpo non arriva
@@ -587,27 +652,34 @@ function doAttack(g,a,d){
   checkElim(g);
   return res;
 }
+function wavesPending(g){return !!(g.waves&&g.waves.some(w=>!w.done))}
 function checkElim(g){
   if(g.over!==null)return;
   for(const o of [0,1]){
-    if(!g.units.some(u=>u.o===o)&&g.coins[o]<2){g.over=1-o;g.why=o===0?'Non ti restano unità né monete.':'Il computer non ha più unità né monete.';return}
+    if(g.units.some(u=>u.o===o))continue;
+    if(o===1&&wavesPending(g))continue;
+    const R=g.rules,nr=!!R&&(norec(g)||(o===1&&!!R.eNoRec));
+    if(nr||g.coins[o]<2){g.over=1-o;g.why=R?(o===0?'Tutte le tue unità sono cadute.':'Tutti i nemici sono stati sconfitti.'):(o===0?'Non ti restano unità né monete.':'Il computer non ha più unità né monete.');return}
   }
 }
-const HOLD=3;
+let HOLD=3;
 /* Rinforzi: ogni RF_EVERY round arriva una scelta tra 2 unità, UGUALE per i due giocatori (dipende da meteo e mappa).
    Nel livello Facile non c'è reclutamento con le monete: i rinforzi sono l'unico modo. */
-function norec(g){const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
+function norec(g){if(g.rules&&g.rules.norec!==undefined)return !!g.rules.norec;const L=AI_LEVELS[g.lvl];return !!(L&&L.norec)}
 function rfEvery(g){return 3}
 function rfMake(g){
+  if(g.rules&&g.rules.norf){g.rf=null;return}
   if(g.round<=rfEvery(g)||(g.round-1)%rfEvery(g)!==0||g.round>=MAXR-1){g.rf=null;return}
   const w=wNow(g).t,W0={sereno:{G:1,A:1,E:1,K:1,W:1,L:1,H:1,B:1,R:1},vento:{G:1,A:1,E:1.6,K:1.8,W:1.5,L:1,H:1,B:.6,R:1.5},pioggia:{G:2,A:1.4,E:.8,K:.8,W:1,L:1.6,H:1.5,B:.5,R:1},nebbia:{G:1.6,A:.5,E:2,K:1,W:1,L:1.2,H:1,B:.3,R:1.2},gelo:{G:2,A:1,E:.8,K:1.5,W:.8,L:1.5,H:1.4,B:.8,R:1}}[w]||{G:1,A:1,E:1,K:1,W:1,L:1,H:1,B:1,R:1};
   let sd=((g.seed*2654435761)^(g.round*40503))>>>0;const rn=()=>{sd=(Math.imul(sd^(sd>>>15),2246822519)+3266489917)>>>0;sd^=sd>>>13;return(sd>>>0)/4294967296};
-  const pool=Object.entries(W0).filter(([k])=>!(g.lvl==='facile')||'GAE'.includes(k)),ch=[];
+  const pool=Object.entries(W0).filter(([k])=>!(g.lvl==='facile')||'GAE'.includes(k)).filter(([k])=>!g.allow||g.allow.includes(k)),ch=[];
+  if(pool.length<2){g.rf=null;return}
   while(ch.length<2){const tot=pool.filter(([k])=>!ch.includes(k)).reduce((a,[,v])=>a+v,0);let r=rn()*tot;for(const[k,v]of pool){if(ch.includes(k))continue;if(r<v){ch.push(k);break}r-=v}}
   g.rf={r:g.round,ch,done:[false,false]};
 }
-function rfCell(g,o){
-  const b=BASE[o];if(!unitAt(g,b.x,b.y))return b;
+function rfCell(g,o){return freeNear(g,BASE[o])}
+function freeNear(g,b){
+  if(!unitAt(g,b.x,b.y)&&stepCost(g,b.x,b.y,null)!==Infinity)return {x:b.x,y:b.y};
   const seen=new Set([b.x+','+b.y]),q=[b];
   while(q.length){const c=q.shift();for(const [dx,dy] of [[0,1],[1,0],[-1,0],[0,-1]]){const x=c.x+dx,y=c.y+dy;if(x<0||y<0||x>=W||y>=H||seen.has(x+','+y))continue;seen.add(x+','+y);
     if(stepCost(g,x,y,null)===Infinity)continue;if(!unitAt(g,x,y))return{x,y};q.push({x,y})}}
@@ -618,18 +690,35 @@ function rfTake(g,o,t){
   g.rf.done[o]=true;
   if(g.units.filter(u=>u.o===o).length>=MAXU)return false;
   const c=rfCell(g,o);if(!c)return false;
-  g.units.push({id:g.nid++,t,o,x:c.x,y:c.y,vx:c.x,vy:c.y,hp:UT[t].hp,moved:true,done:true,aid:true});
+  {const nu=mkUnit(g,t,o,c.x,c.y);nu.moved=true;nu.done=true;nu.aid=true;g.units.push(nu)}
   g.lastRec=g.nid-1;return true;
 }
 function rfAI(g,o){
-  if(!g.rf||g.rf.done[o])return;
+  if(!g.rf||g.rf.done[o]||(o===1&&g.rules&&g.rules.eNoRf))return;
   const hold=heldBy(g,o),sc=t=>({E:hold<STATIONS.length?3:1,K:hold<STATIONS.length?2.5:2,G:hold>=STATIONS.length?3:2,A:2.4,W:1.2}[t]+Math.random()*.6);
   rfTake(g,o,g.rf.ch.slice().sort((a,b)=>sc(b)-sc(a))[0]);
 }
 // Scopo: tenere entrambe le stazioni meteo per HOLD round di fila (si controlla a fine round). Occupare la base non fa più vincere.
+function goalCheck(g){
+  if(g.over!==null||!g.goal)return;
+  const G=g.goal;
+  if(g.vipId&&!g.units.some(u=>u.id===g.vipId)){g.over=1;g.why=(g.vipName||'Il messaggero')+' è caduto: la missione è fallita.';return}
+  if(G.t==='boss'&&g.bossId&&!g.units.some(u=>u.id===g.bossId)){g.over=0;g.why=(g.bossName||'Il boss')+' è stato sconfitto!';return}
+  if(G.t==='elim'&&!g.units.some(u=>u.o===1)&&!wavesPending(g)){g.over=0;g.why='Tutti i nemici sono stati sconfitti.';return}
+  if(G.t==='reach'&&G.cells){
+    for(const u of g.units)if(u.o===0&&(!G.vip||u.vip)&&G.cells.some(c=>c[0]===u.x&&c[1]===u.y)){g.over=0;g.why=G.vip&&g.vipName?g.vipName+' è arrivato a destinazione.':'Hai raggiunto la meta.';return}
+  }
+}
+function baseFall(g){
+  if(g.over!==null||!g.rules||!g.rules.baseFall)return;
+  const u=unitAt(g,BASE[0].x,BASE[0].y);
+  if(u&&u.o===1){g.over=1;g.why='Il nemico ha conquistato la tua base.'}
+}
 function checkCapture(g){
   if(g.over!==null)return;
+  goalCheck(g);if(g.over!==null)return;
   if(!g.hold)g.hold=[0,0];if(!g.sc)g.sc=[0,0];
+  if((g.goal&&g.goal.t!=='stations')||!STATIONS.length)return;
   if(!g.holdDone)return;
   for(const o of [0,1]){
     if(g.hold[o]>=HOLD){g.over=o;g.why=o===0?'Hai tenuto entrambe le stazioni meteo per '+HOLD+' round.':'Il computer ha tenuto entrambe le stazioni meteo per '+HOLD+' round.';return}
@@ -637,7 +726,7 @@ function checkCapture(g){
 }
 function holdTick(g){ // a fine round
   if(!g.hold)g.hold=[0,0];if(!g.sc)g.sc=[0,0];
-  for(const o of [0,1]){const n=heldBy(g,o);g.sc[o]+=n;g.hold[o]=n===STATIONS.length?g.hold[o]+1:0}
+  for(const o of [0,1]){const n=heldBy(g,o);g.sc[o]+=n;g.hold[o]=(STATIONS.length&&n===STATIONS.length)?g.hold[o]+1:0}
   g.holdDone=true;
 }
 function canRecruit(g,o,t){
@@ -650,8 +739,41 @@ function canRecruit(g,o,t){
 function doRecruit(g,o,t){
   if(canRecruit(g,o,t))return false;
   const b=BASE[o];g.coins[o]-=UT[t].cost;
-  g.units.push({id:g.nid++,t,o,x:b.x,y:b.y,vx:b.x,vy:b.y,hp:UT[t].hp,moved:true,done:true,aid:true});
+  {const nu=mkUnit(g,t,o,b.x,b.y);nu.moved=true;nu.done=true;nu.aid=true;g.units.push(nu)}
   return true;
+}
+// Ondate nemiche (livelli della campagna): a inizio round compaiono unità nuove sulla casella indicata (o vicino alla base nemica).
+function spawnWaves(g){
+  g.waveN=0;
+  if(!g.waves)return;
+  for(const w of g.waves){
+    if(w.done||g.round<w.r)continue;
+    w.done=true;
+    const at=(w.at&&w.at.length)?w.at:[[BASE[1].x,BASE[1].y]];let i=0;
+    for(const [t,ex] of w.u){
+      const a=at[i++%at.length],c=freeNear(g,{x:a[0],y:a[1]});if(!c)continue;
+      const nu=mkUnit(g,t,1,c.x,c.y,ex);g.units.push(nu);g.waveN++;
+    }
+  }
+}
+// Aiuti della campagna: cielo sereno (azzera il meteo di questo round), cura (+3 vita a tutte le tue unità), rinforzo (un Guerriero gratis sulla base).
+function boostUse(g,k){
+  g.bu=g.bu||{};
+  if(g.bu[k])return {ok:false,msg:'Già usato in questo livello.'};
+  if(k==='sereno'){
+    if(wNow(g).t==='sereno')return {ok:false,msg:'Il cielo è già sereno.'};
+    g.wx[g.round-1]={t:'sereno',dir:null};
+  }else if(k==='cura'){
+    const hurt=g.units.filter(u=>u.o===0&&u.hp<mhp(u));
+    if(!hurt.length)return {ok:false,msg:'Nessuna unità ferita.'};
+    for(const u of hurt){const n=Math.min(3,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}
+  }else if(k==='rinforzo'){
+    if(g.units.filter(u=>u.o===0).length>=MAXU)return {ok:false,msg:'Hai già '+MAXU+' unità.'};
+    const c=rfCell(g,0);if(!c)return {ok:false,msg:'Nessun posto libero sulla base.'};
+    const nu=mkUnit(g,'G',0,c.x,c.y);g.units.push(nu);
+  }else return {ok:false,msg:'Aiuto sconosciuto.'};
+  g.bu[k]=1;g.boostN=(g.boostN||0)+1;
+  return {ok:true};
 }
 // Dove finirebbe ogni unità se il round finisse adesso (serve anche per l'anteprima).
 function windPlan(g){
@@ -709,7 +831,7 @@ function erupt(g){
     for(const u of g.units)if(u.hp<=0){g.ev.push({k:'die',u});if(u.o===0)g.st.lost++;else g.st.kills++}
     g.units=g.units.filter(u=>u.hp>0);g.hot=null;checkElim(g);
   }
-  if(g.round%ERUPT!==0)return;
+  if(!VOL||g.round%ERUPT!==0)return;
   g.erupted=true;g.st.erupt++;g.hot=null;
   for(const u of g.units){
     const d=md(u,VOL),dm=d===1?3:d===2?1:0;
@@ -717,7 +839,7 @@ function erupt(g){
   }
   for(const [dx,dy] of Object.values(DIRS)){
     const x=VOL.x+dx,y=VOL.y+dy;
-    if(g.map[y][x]==='P'){g.map[y][x]='C';(g.hot=g.hot||[]).push({x,y})}
+    if(x>=0&&y>=0&&x<W&&y<H&&g.map[y][x]==='P'){g.map[y][x]='C';(g.hot=g.hot||[]).push({x,y})}
   }
   for(const u of g.units)if(u.hp<=0){g.ev.push({k:'die',u});if(u.o===0)g.st.lost++;else g.st.kills++}
   g.units=g.units.filter(u=>u.hp>0);
@@ -730,13 +852,13 @@ function heldBy(g,o){return STATIONS.filter(s=>{const u=unitAt(g,s.x,s.y);return
 // g.turn = a chi tocca adesso (0 giocatore, 1 computer); g.step = 0 primo a muovere, 1 secondo.
 function startTurnOf(g,o){
   g.turn=o;g.lastRec=0;
-  g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<UT[u.t].hp){const n=Math.min(2,UT[u.t].hp-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
+  g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<mhp(u)){const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
   g.units.forEach(u=>{if(u.o===o){u.moved=false;u.done=false;u.aid=false;u.px=undefined;u.py=undefined}});
 }
 function endTurn(g){
   checkCapture(g);
   if(g.over!==null)return;
-  g.windN=0;g.thawN=0;g.erupted=false;g.eruptN=0;
+  g.windN=0;g.thawN=0;g.erupted=false;g.eruptN=0;g.waveN=0;
   if(g.step===0){
     g.step=1;
     startTurnOf(g,1-g.first);
@@ -746,15 +868,22 @@ function endTurn(g){
     if(g.over!==null)return;
     holdTick(g);checkCapture(g);
     if(g.over!==null)return;
+    baseFall(g);
+    if(g.over!==null)return;
     g.coins[0]+=2+bonusAt(g,0)+heldBy(g,0);g.coins[1]+=2+bonusAt(g,1)+heldBy(g,1);
     if(g.round>=MAXR){
+      if(g.goal&&g.goal.t!=='stations'){
+        if(g.goal.t==='survive'){g.over=0;g.why='Hai resistito per '+MAXR+' round.'}
+        else{g.over=1;g.why='Tempo scaduto: l’obiettivo non è stato raggiunto in '+MAXR+' round.'}
+        return;
+      }
       const a=g.sc[0],b=g.sc[1];
       g.over=a>b?0:b>a?1:'pari';
       g.why='Dopo '+MAXR+' round vince chi ha controllato di più le stazioni: '+a+' contro '+b+'.';
       return;
     }
     g.round++;g.step=0;g.first=(g.round-1+g.off)%2;
-    thaw(g);rfMake(g);
+    thaw(g);rfMake(g);spawnWaves(g);
     startTurnOf(g,g.first);
   }
 }
@@ -790,11 +919,18 @@ function distMap(g,target){
 function aiChoose(g,u,noise){
   const nz=noise===true?0.8:(+noise||0);
   const o=u.o,eo=1-o,eb=BASE[eo],mb=BASE[o];
-  const free=STATIONS.filter(q=>{const v=unitAt(g,q.x,q.y);return !(v&&v.o===o&&v!==u)});
-  const tgtS=(free.length?free:STATIONS).slice().sort((a,b)=>md(u,a)-md(u,b))[0],dEnemyBase=distMap(g,tgtS),heldNow=heldBy(g,o);
   const foes=g.units.filter(e=>e.o===eo);
+  // modalità: stations (vai alle stazioni), hunt (insegui il nemico più vicino, il messaggero per primo), guard (resta sul posto finché nessuno si avvicina)
+  let mode=u.mode||(g.ai&&g.ai.mode)||'stations';
+  if(mode==='guard'&&foes.some(e=>md(e,u)<=(u.wake||(g.ai&&g.ai.wake)||5)))mode='hunt';
+  if(mode==='stations'&&!STATIONS.length)mode='hunt';
+  let tgtS;
+  if(mode==='hunt'){const f=foes.slice().sort((a,b)=>(md(u,a)-(a.vip?4:0))-(md(u,b)-(b.vip?4:0)))[0];tgtS=f?{x:f.x,y:f.y}:eb}
+  else if(mode==='guard'){const an=u.anchor||(g.ai&&g.ai.anchor);tgtS=an?{x:an[0],y:an[1]}:mb}
+  else{const free=STATIONS.filter(q=>{const v=unitAt(g,q.x,q.y);return !(v&&v.o===o&&v!==u)});tgtS=(free.length?free:STATIONS).slice().sort((a,b)=>md(u,a)-md(u,b))[0]}
+  const dEnemyBase=distMap(g,tgtS),heldNow=heldBy(g,o);
   const known=foes.filter(e=>sees(g,o,e));
-  const threats=foes.filter(e=>STATIONS.some(q=>md(e,q)<=2));
+  const threats=mode==='stations'?foes.filter(e=>STATIONS.some(q=>md(e,q)<=2)):[];
   const rc=reach(g,u);
   let best=null;
   for(const [k,c] of rc){
@@ -805,12 +941,12 @@ function aiChoose(g,u,noise){
       else s-=dEnemyBase[y][x]*((u.t==='E'||u.t==='K')?1.6:1.4);
       if(tileAt(g,x,y)==='F')s+=1.5;
       if(STATIONS.some(q=>q.x===x&&q.y===y))s+=(heldNow>=STATIONS.length-1?9:5);
-      if(g.round%ERUPT===0){const dv=md(p,VOL);if(dv===1)s-=6;else if(dv===2)s-=2}
+      if(VOL&&g.round%ERUPT===0){const dv=md(p,VOL);if(dv===1)s-=6;else if(dv===2)s-=2}
       if(x===mb.x&&y===mb.y){if(g.coins[o]>=2&&g.units.filter(v=>v.o===o).length<MAXU)s-=5;else if(threats.length)s+=1}
       let exp=0;
       for(const e of foes){
         const reachE=UT[e.t].mv+UT[e.t].rg;
-        if(md(p,e)<=reachE)exp+=atkOf(g,e)*(e.hp/UT[e.t].hp)*0.6;
+        if(md(p,e)<=reachE)exp+=atkOf(g,e)*(e.hp/mhp(e))*0.6;
       }
       const urg=Math.max(0.12,1-(g.round-1)/10);
       s-=exp*(u.hp<=exp?1.8*urg:0.45*urg);
@@ -834,7 +970,7 @@ function aiChoose(g,u,noise){
         const cn=counterOf(g,d,{x,y});
         s-=cn*2*(u.hp<=cn?3:1);
       }
-      s+=(d.t==='A'?1.5:0);
+      s+=(d.t==='A'?1.5:0)+(d.vip?4:0)+(d.boss?2:0);
       opts.push({s,tgt:d});
     }
     for(const op of opts){if(!best||op.s>best.s)best={s:op.s,x,y,tgt:op.tgt}}
@@ -869,12 +1005,13 @@ function aiStep(g,o,lv){
     g.aiRec=g.round+'-'+o;
     if(g.over!==null)return false;
     rfAI(g,o);
-    if(norec(g))return false;
+    if(norec(g)||(o===1&&g.rules&&g.rules.eNoRec))return false;
     const c=g.coins[o];
     // ogni tanto risparmia per un Cavaliere
     const save=c>=3&&c<5&&g.units.filter(u=>u.o===o).length>=3&&Math.random()<.3;
     if(c>=2&&!save&&!canRecruit(g,o,'E')){
-      const pool=[['G',.28],['A',.28],['E',.14],['K',.16],['W',.14],['L',.16],['H',.08],['B',.1],['R',.08]].filter(([k])=>UT[k].cost<=c);
+      const pool=[['G',.28],['A',.28],['E',.14],['K',.16],['W',.14],['L',.16],['H',.08],['B',.1],['R',.08]].filter(([k])=>UT[k].cost<=c&&(!g.allow||g.allow.includes(k)));
+      if(!pool.length)return false;
       let r=Math.random()*pool.reduce((a,[,w])=>a+w,0),t=pool[0][0];
       for(const [k,w] of pool){if(r<w){t=k;break}r-=w}
       if(!canRecruit(g,o,t)&&doRecruit(g,o,t))return {recruit:t};
@@ -898,6 +1035,19 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:56,d:'25 nov 2026',t:'La Campagna',n:[
+'Nuovo tasto «Campagna» nel menu: 3 mondi, 24 livelli con campi da 7x9 fino a 13x17, ognuno con la sua mappa, il suo meteo e il suo obiettivo',
+'Obiettivi diversi: tieni le stazioni, elimina tutti, resisci alle ondate, porta il messaggero alla meta, sconfiggi il boss (un boss per mondo)',
+'Ogni livello ha 3 stelle: vittoria e due sfide bonus (pochi round, nessuna perdita, nessun aiuto...). Servono stelle per aprire i mondi 2 e 3',
+'Perle di ricompensa: nuove stelle, primo successo, boss e mondi completati. Con le perle potenzi le unita\' nell\'Arsenale (3 livelli ciascuna, valgono solo in campagna)',
+'Nuove unita\' da sbloccare completando i livelli: Lanciere, Sciamano, Cavaliere, Guaritore, Balestriere e Alfiere',
+'Aiuti in partita (tasto a sinistra sotto il menu): Cielo sereno, Cura e Rinforzo, una volta per livello. Li trovi come premio o dalle scorte',
+'Imprese: 31 obiettivi a lungo termine con ricompensa in perle',
+'Sfida del giorno: un campo diverso ogni giorno della settimana, uguale per tutti, con serie di giorni e premio crescente',
+'Salvataggio automatico della campagna, separato dalla partita veloce; la partita veloce resta com\'era',
+'Spazio pubblicitario pronto ma spento: in «Impostazioni» il tasto «Pubblicita\' (prova)» mostra una striscia nei menu e un finto video per aiuti e perle doppie. Nessuna pubblicita\' vera per ora',
+'Corretto: «Continua partita» non resta piu\' visibile quando non c\'e\' nessuna partita da riprendere'
+]},
 {v:55,d:'24 nov 2026',t:'Terreno a caselle separate di base',n:[
 'Il terreno di base (per chi non ha mai scelto) torna «a caselle separate», quello che hai scelto: le altre varianti restano nel tasto «Terreno (prova)»'
 ]},
@@ -1302,7 +1452,7 @@ function geTiles(n,T,ox,oy,al){ // tessera ripetuta a tappeto, scorrevole
   ctx.restore();
 }
 function geEruption(){
-  if(REDUCE)return;
+  if(REDUCE||!VOL)return;
   const X=gcx(VOL.x),Y=gcy(VOL.y),cs=lay.cs;
   for(let i=0;i<52;i++)vfx.push({k:'ash',x:X+(Math.random()-.5)*cs*6.5,y:Y-cs*(1.4+Math.random()*1.8),vx:(Math.random()-.5)*cs*.45,vy:cs*(.75+Math.random()*.95),life:1.9+Math.random()*1.3,max:3.2,r:1.6+Math.random()*2.4,c:i%3?'#4a3b38':'#8f7e76'});
   if(!geReady())return;
@@ -1365,11 +1515,29 @@ function icon(t,dir){
   return `<svg viewBox="0 0 24 24" ${st}><path d="M12 3v18M4.5 7.5l15 9M4.5 16.5l15-9"/></svg>`;
 }
 function wName(w){return w.t==='vento'?'Vento verso '+DIRN[w.dir]:WE[w.t].n}
+function goalInfo(g){
+  const G=g.goal||{t:'stations'},nE=g.units.filter(u=>u.o===1).length,wv=g.waves?g.waves.filter(w=>!w.done):[];
+  if(G.t==='elim')return {a:'Elimina tutti i nemici',b:nE+(nE===1?' rimasto':' rimasti')+(wv.length?' · altre ondate':'')};
+  if(G.t==='survive')return {a:'Resisti fino al round '+MAXR,b:'Round '+g.round+'/'+MAXR+(wv.length?' · ondata al '+wv[0].r:'')};
+  if(G.t==='reach'){
+    const us=g.units.filter(u=>u.o===0&&(!G.vip||u.vip));
+    const d=us.length&&G.cells&&G.cells.length?Math.min(...us.map(u=>Math.min(...G.cells.map(c=>Math.abs(c[0]-u.x)+Math.abs(c[1]-u.y))))):0;
+    return {a:G.vip?'Porta '+(g.vipName||'il messaggero')+' alla meta':'Raggiungi la meta',b:d+(d===1?' casella':' caselle')};
+  }
+  if(G.t==='boss'){const b=g.units.find(u=>u.id===g.bossId);return {a:'Sconfiggi '+(g.bossName||'il boss'),b:b?b.hp+'/'+mhp(b)+' vita':'sconfitto'}}
+  return {a:'Tieni le stazioni per '+HOLD+' round',b:(g.hold?g.hold[0]:0)+'/'+HOLD};
+}
+function renderGoal(){
+  const gb=$('goalBar');if(!gb)return;
+  if(!g.camp||!started){gb.hidden=true;return}
+  const gi=goalInfo(g);gb.hidden=false;gb.innerHTML='<b><i>🎯</i>'+gi.a+'</b><span>'+gi.b+'</span>';
+}
 function renderTop(){
   const n=wNow(g),x=wNext(g),x2=heldBy(g,0)?g.wx[g.round+1]:null;
   const more=x2?`<span title="Poi: ${wName(x2)}" aria-label="Poi: ${wName(x2)}" style="display:flex;align-items:center;gap:3px">›${icon(x2.t,x2.dir)}</span>`:'';
   $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${x.t==='vento'?'Vento':wName(x)}</b></span>${more}</div>`;
   $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+(g.hold&&(g.hold[0]||g.hold[1])?' · stazioni '+g.hold[0]+'/'+HOLD+' contro '+g.hold[1]+'/'+HOLD:'')+'</small>';
+  renderGoal();
   $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>+'+(2+heldBy(g,0))+' a round</small>';
 }
 function terrInfo(x,y){
@@ -1396,7 +1564,7 @@ function renderInfo(){
     const tg=(u.o===0&&!u.done)?targetsFrom(g,u,u.x,u.y).length:0;
     let h='Unità nemica.';
     if(u.o===0)h=u.done?'Ha già agito.':tg?'Rosso = danno, arancio = contrattacco.':u.moved?'Mosso. Nessun nemico a tiro.':'Tocca una casella chiara per muoverti.';
-    el.innerHTML=`<b>${u.o===0?'':'Nemico: '}${T.n} · ${u.hp}/${T.hp} vita</b><span class="sub">Attacco ${atkOf(g,u)} · Passi ${mvOf(g,u)} · Gittata ${rgOf(g,u)} · ${terr}${u.t==='W'?' · Spinge il nemico':u.t==='K'?' · Bosco: 3 passi':''}</span><span class="sub">${h}</span>`;
+    el.innerHTML=`<b>${u.o===0?'':'Nemico: '}${u.nm||T.n} · ${u.hp}/${mhp(u)} vita</b><span class="sub">Attacco ${atkOf(g,u)} · Passi ${mvOf(g,u)} · Gittata ${rgOf(g,u)} · ${terr}${u.t==='W'?' · Spinge il nemico':u.t==='K'?' · Bosco: 3 passi':''}</span><span class="sub">${h}</span>`;
   }else if(tinfo){
     const [n,d]=terrInfo(tinfo.x,tinfo.y);
     el.innerHTML=`<b>${n}</b><span class="sub">${d}</span>`;
@@ -1411,6 +1579,7 @@ function canUndo(){
   return canUndoRec()||canPlay()&&!!sel&&g.units.includes(sel)&&sel.o===0&&sel.moved&&!sel.done&&sel.px!==undefined&&wNow(g).t!=='nebbia';
 }
 function renderBtns(){
+  {const ba=$('bAid');if(ba){ba.hidden=!(g.camp&&started&&g.over===null);const n=window.IAV&&IAV.boostCount?IAV.boostCount():0;$('aidN').textContent=n;$('aidN').hidden=!n}}
   const pl=g.turn===0&&!busy&&g.over===null&&started;
   $('bRec').hidden=norec(g);$('coins').hidden=norec(g);$('bEnd').disabled=!pl;$('bRec').disabled=!pl;$('bUndo').disabled=!(canUndo()||canUndoRec());
 }
@@ -1484,7 +1653,7 @@ function rfCheck(){
 function recSheet(){
   const l=$('recList');l.innerHTML='';
   let why='';
-  for(const t of ['G','L','A','B','E','K','W','H','R']){
+  for(const t of ['G','L','A','B','E','K','W','H','R'].filter(t=>!g.allow||g.allow.includes(t))){
     const r=canRecruit(g,0,t);if(r&&!why)why=r;
     const b=document.createElement('button');b.type='button';b.className='rec';b.disabled=!!r;
     b.innerHTML=(GP.on?`<img class="ui" src="assets/${ICO(t)}" alt="">`:'')+`<div class="t"><div class="n">${UT[t].n}</div><div class="d">${UT[t].d} · vita ${UT[t].hp} · att. ${UT[t].atk} · passi ${UT[t].mv}</div></div><div class="p">${UT[t].cost}</div>`;
@@ -1692,7 +1861,7 @@ function groundDraw(c0,gelo,nebbia,seen,noGrid){
   if(GT.im.terreno_sabbia_a){
     const sd=((typeof g.seed==='number'?g.seed:0)*2654435761)>>>0,rn=(n)=>{n=((n^sd)^61)^(n>>>16);n=(n+(n<<3))>>>0;n^=n>>>4;n=Math.imul(n,0x27d4eb2d);n^=n>>>15;return(n>>>0)/4294967296};
     const fc=(nm,S,fe)=>{const k='t'+nm+Math.round(S);let t=GCACHE.get(k);if(!t){const im=GT.im[nm];if(!im)return null;t=featherTile(im,0,0,im.width,S,fe,0,0,0);GCACHE.set(k,t)}return t};
-    const bases=[...BASE,VOL];
+    const bases=VOL?[...BASE,VOL]:[...BASE];
     const free=(px,py,r)=>bases.every(b=>Math.hypot(px-(b.x+.5),py-(b.y+.5))>r);
     // prati pieni di Muse come chiazze sfumate in più
     const SZ2=cs*dpr*2.3;for(let i=0;i<Math.round(W*H*.5);i++){const nm=GT.pr[Math.floor(rn(i*7+900)*GT.pr.length)],t=fc(nm,SZ2,.18);if(!t)continue;
@@ -1991,12 +2160,21 @@ function actMarks(u,x,gy,st,after){
   }
 }
 function hpBar(u,x,hy,hw){ // barra della vita con il valore dentro
-  const cs=lay.cs,bh=Math.max(9,Math.round(cs*.22)),hx=x-hw/2,hv=Math.max(0,u.hv===undefined?u.hp:u.hv),f=hv/UT[u.t].hp;
+  const cs=lay.cs,bh=Math.max(9,Math.round(cs*.22)),hx=x-hw/2,hv=Math.max(0,u.hv===undefined?u.hp:u.hv),f=hv/mhp(u);
   ctx.fillStyle='rgba(8,18,26,.88)';rr(hx-1.5,hy-1.5,hw+3,bh+3,4);ctx.fill();
   ctx.fillStyle=f>.55?'#59cdb7':f>.28?'#f2b84b':'#ef6a5a';rr(hx,hy,Math.max(0,hw*f),bh,3);ctx.fill();
   ctx.font='800 '+Math.round(bh*.92)+'px Nunito, system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.lineWidth=2.2;ctx.strokeStyle='rgba(8,18,26,.9)';ctx.lineJoin='round';const tx=String(Math.ceil(hv-.001));ctx.strokeText(tx,x,hy+bh/2+.5);ctx.fillStyle='#fff';ctx.fillText(tx,x,hy+bh/2+.5);
   ctx.textBaseline='alphabetic';
+  if(u.boss||u.vip){ // distintivo a sinistra della barra
+    const R=bh*.82,bx=hx-R*.95,by=hy+bh/2;
+    ctx.save();ctx.translate(bx,by);ctx.lineJoin='round';ctx.lineWidth=2;ctx.strokeStyle='rgba(8,18,26,.95)';
+    ctx.fillStyle=u.boss?'#ef6a5a':'#6fd0ff';
+    ctx.beginPath();
+    if(u.boss){ctx.moveTo(-R,R*.7);ctx.lineTo(-R,-R*.4);ctx.lineTo(-R*.5,R*.1);ctx.lineTo(0,-R*.8);ctx.lineTo(R*.5,R*.1);ctx.lineTo(R,-R*.4);ctx.lineTo(R,R*.7);ctx.closePath()}
+    else{for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr0=i%2?R*.45:R;ctx.lineTo(Math.cos(a)*rr0,Math.sin(a)*rr0)}ctx.closePath()}
+    ctx.stroke();ctx.fill();ctx.restore();
+  }
 }
 function drawUnit(u,hidden,sc,al){
   if(hidden)return;
@@ -2170,7 +2348,7 @@ function drawProjectiles(){
 /* Vulcano scenografico: più l'eruzione è vicina, più il cratere brilla e il fumo sale */
 let volAcc=0;
 function volcanoFx(dt){
-  if(!started||g.over!==null)return;
+  if(!VOL||!started||g.over!==null)return;
   const n=eruptionRound(g)-g.round,cs=lay.cs,X=cx(VOL.x)+cs/2,Y=cy(VOL.y)+lay.fh*.5;
   const k=n<=0?1:n===1?.62:n===2?.34:.16;
   const pl=.78+.22*Math.sin(tick*(n<=0?9:n===1?5:2.5));
@@ -2260,6 +2438,18 @@ function draw(ts){
     const u=unitAt(g,st.x,st.y);if(!u)continue;
     ctx.strokeStyle=u.o===0?'#f2b84b':'#6f9fe0';ctx.lineWidth=2.5;rr(...faceR(st.x,st.y,2),7);ctx.stroke();
   }
+  // meta del livello: casella dorata con bandierina
+  if(g.goal&&g.goal.t==='reach'&&g.goal.cells&&started){
+    const ph=.5+.5*Math.sin(tick*4),cs=lay.cs;
+    for(const [tx,ty] of g.goal.cells){
+      ctx.fillStyle='rgba(255,224,138,'+(.24+.2*ph).toFixed(2)+')';rr(...faceR(tx,ty,1),6);ctx.fill();
+      ctx.strokeStyle='rgba(255,238,170,'+(.75+.25*ph).toFixed(2)+')';ctx.lineWidth=3;rr(...faceR(tx,ty,2),7);ctx.stroke();
+      const X=gcx(tx),Y=gcy(ty),sw=REDUCE?0:Math.sin(tick*5)*cs*.04;
+      ctx.strokeStyle='#5a3b12';ctx.lineWidth=Math.max(2,cs*.06);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(X-cs*.12,Y+cs*.3);ctx.lineTo(X-cs*.12,Y-cs*.32);ctx.stroke();
+      ctx.fillStyle='#ffd24a';ctx.beginPath();ctx.moveTo(X-cs*.12,Y-cs*.32);ctx.quadraticCurveTo(X+cs*.14,Y-cs*.38+sw,X+cs*.3,Y-cs*.24);ctx.quadraticCurveTo(X+cs*.14,Y-cs*.18-sw,X-cs*.12,Y-cs*.08);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#a8741f';ctx.lineWidth=1.4;ctx.stroke();
+    }
+  }
   // unità: tween
   for(const u of g.units){
     if(u.wait>0&&!fast)u.wait-=dt/1000;
@@ -2309,7 +2499,7 @@ function draw(ts){
   }
   // zona dell'eruzione: debole il round prima, forte nel round dell'eruzione
   const nErupt=eruptionRound(g)-g.round;
-  if(started&&g.over===null&&nErupt<=1){
+  if(VOL&&started&&g.over===null&&nErupt<=1){
     const pulse=.5+.5*Math.sin(tick*7);
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){
       const d=md({x,y},VOL);if(d<1||d>2)continue;
@@ -2473,12 +2663,15 @@ function afterAction(){
 function finish(){
   tutEnd();
   refreshUI();
-  const o=g.over;sfx(o===0?'win':'lose');clearSave();
-  if(!g.counted){g.counted=true;addStat(o===0?'w':o===1?'l':'d')}
+  const o=g.over,isC=!!g.camp;sfx(o===0?'win':'lose');clearSave(saveKey(g));
+  if(!isC&&!g.counted){g.counted=true;addStat(o===0?'w':o===1?'l':'d')}
+  for(const id of ['bAgain','bSame','bMenu'])$(id).hidden=isC;
+  $('campEnd').hidden=!isC;$('campEnd').innerHTML='';
   $('ovEnd').className='ov '+(o===0?'vit':o===1?'sco':'par');
   $('endT').textContent=o===0?'Hai vinto!':o===1?'Hai perso':'Pareggio';
-  $('endD').textContent=g.why+' (mappa '+g.seed+')';
+  $('endD').textContent=isC?g.why:g.why+' (mappa '+g.seed+')';
   {const st=g.st||{lost:0,kills:0,erupt:0,burn:0};$('endS').textContent='Round giocati: '+Math.min(g.round,MAXR)+' · nemici sconfitti: '+st.kills+' · unità perse: '+st.lost+' · eruzioni: '+st.erupt+(st.burn?' · scottature di cenere: '+st.burn:'')}
+  if(isC&&window.IAV&&IAV.onFinish){try{IAV.onFinish(g,o)}catch(e){console.error(e)}}
   setTimeout(()=>{$('ovEnd').hidden=false;endFx(o)},fast?0:1300);
 }
 /* Vittoria: coriandoli dai due angoli e pioggia di festa; sconfitta: pioggia fine e grigia; pareggio: nessun effetto */
@@ -2525,7 +2718,7 @@ async function computerTurn(){
   busy=true;sel=null;inspect=null;tinfo=null;g.trail=[];refreshUI();
   toast('Turno del computer');
   await sleep(500);
-  const L=AI_LEVELS[level];
+  const L=Object.assign({},AI_LEVELS[g.lvl]||AI_LEVELS[level],g.aiOv||{});
   let guard=0;
   while(g.over===null&&guard++<30){
     const a=aiStep(g,1,L);
@@ -2548,7 +2741,7 @@ function afterEnd(){
   if(g.erupted){sfx('erupt');geEruption();if(!REDUCE){flash=1;rbT=RB0}}else sfx('turn');
   setTimeout(()=>weatherCue(false),900);
   saveGame();
-  toast(g.erupted?'Il vulcano erutta! '+(g.eruptN?g.eruptN+(g.eruptN===1?' unità colpita':' unità colpite'):'Nessuno colpito'):g.thawN?'Il ghiaccio si scioglie':g.windN?'Il vento sposta '+g.windN+' unità':'Round '+g.round+' · '+wName(wNow(g)),1800);
+  toast(g.waveN?'Nuova ondata nemica!':g.erupted?'Il vulcano erutta! '+(g.eruptN?g.eruptN+(g.eruptN===1?' unità colpita':' unità colpite'):'Nessuno colpito'):g.thawN?'Il ghiaccio si scioglie':g.windN?'Il vento sposta '+g.windN+' unità':'Round '+g.round+' · '+wName(wNow(g)),1800);
 }
 function playerEnd(){
   if(!canPlay())return;
@@ -2564,39 +2757,58 @@ function undoMove(){
   sel.x=sel.px;sel.y=sel.py;sel.path=null;sel.moved=false;sel.px=undefined;sel.py=undefined;
   refreshUI();
 }
-const SAVEK='isole-save';
+const SAVEK='isole-save',SAVEKC='isole-save-camp';
+const saveKey=x=>x&&x.camp?SAVEKC:SAVEK;
 function saveGame(){
   if(!started||g.over!==null||g.turn!==0)return;
-  try{const c=Object.assign({},g,{ev:[],fx:[],trail:[]});LS.set(SAVEK,JSON.stringify({g:c,level}))}catch(e){}
+  try{const c=Object.assign({},g,{ev:[],fx:[],trail:[]});LS.set(saveKey(g),JSON.stringify({g:c,level}))}catch(e){}
 }
-function clearSave(){try{LS.set(SAVEK,'')}catch(e){}}
-function loadSave(){try{const t=LS.get(SAVEK);if(!t)return null;const o=JSON.parse(t);return o&&o.g&&Array.isArray(o.g.units)&&o.g.over===null?o:null}catch(e){return null}}
+function clearSave(k){try{LS.set(k||SAVEK,'')}catch(e){}}
+function loadSave(k){try{const t=LS.get(k||SAVEK);if(!t)return null;const o=JSON.parse(t);return o&&o.g&&Array.isArray(o.g.units)&&o.g.over===null?o:null}catch(e){return null}}
 function contButton(){const o=loadSave();$('bCont').hidden=!o;if(o)$('bCont').textContent='Continua partita · round '+o.g.round+' · mappa '+o.g.seed}
-function resumeGame(){
-  const o=loadSave();if(!o)return;
+function resumeGame(k){
+  const o=loadSave(k);if(!o)return;
   $('ovStart').hidden=true;$('ovEnd').hidden=true;$('ovRec').hidden=true;tutEnd();
   strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;rbT=0;camFit();
   if(AI_LEVELS[o.level]){level=o.level;LS.set('isole-level',level)}
-  g=o.g;g.ev=[];g.fx=[];g.trail=[];sel=null;inspect=null;tinfo=null;busy=false;started=true;
+  g=o.g;g.ev=[];g.fx=[];g.trail=[];sel=null;inspect=null;tinfo=null;busy=false;started=true;useBoard(g);size();camFit();
   refreshUI();toast('Partita ripresa · '+wName(wNow(g)),1800);
 }
 let lastSeed=0;
+/* Livello della campagna: stessa schermata di gioco, campo e regole del livello. */
+function startLevel(def,opt){
+  $('ovStart').hidden=true;$('ovEnd').hidden=true;$('ovRec').hidden=true;$('ovRf').hidden=true;$('ovPause').hidden=true;
+  tutEnd();
+  strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;rbT=0;
+  g=newLevel(def,opt);lastSeed=0;sel=null;inspect=null;tinfo=null;busy=false;started=true;
+  cv.setAttribute('aria-label','Campo di gioco, '+W+' colonne per '+H+' righe. Pizzica per ingrandire, trascina per spostarti.');
+  size();camFit();saveGame();
+  setTimeout(()=>weatherCue(true),700);
+  refreshUI();toast((def.name||'Livello')+' · '+wName(wNow(g))+' · tocca a te',2200);
+}
+function useBoostUI(k){
+  if(!canPlay())return {ok:false,msg:'Aspetta il tuo turno.'};
+  const r=boostUse(g,k);
+  if(r.ok){sfx(k==='sereno'?'turn':'recruit');buzz(30);if(k==='sereno')flash=.7;sel=null;inspect=null;tinfo=null;saveGame();refreshUI();toast(k==='sereno'?'Il cielo si schiarisce':k==='cura'?'Le tue unità sono curate':'Un Guerriero arriva sulla tua base',1600)}
+  return r;
+}
 function startGame(withTut,seed){
   $('ovStart').hidden=true;$('ovEnd').hidden=true;$('ovRec').hidden=true;
   tutEnd();
   strikes.length=0;ghosts.length=0;vfx.length=0;uoff.clear();shake=0;rbT=0;camFit();
   if(!seed){const v=parseInt(($('seedIn')||{}).value,10);seed=v>0?v:0}
-  g=freshGame(seed);lastSeed=g.seed;sel=null;inspect=null;tinfo=null;busy=false;started=true;saveGame();
+  g=freshGame(seed);lastSeed=g.seed;sel=null;inspect=null;tinfo=null;busy=false;started=true;size();camFit();saveGame();
   setTimeout(()=>weatherCue(true),700);
   refreshUI();toast('Mappa '+g.seed+' · '+wName(wNow(g))+' · tocca a te',2200);
   if(withTut===true||(!tutSeen&&!LS.get('isole-tut')))tutStart();
 }
 $('bEnd').onclick=playerEnd;
+$('bAid').onclick=()=>{if(window.IAV&&IAV.onAid&&canPlay())IAV.onAid()};
 $('bUndo').onclick=undoMove;
 $('bRec').onclick=()=>{if(!canPlay())return;recSheet();$('ovRec').hidden=false};
 $('bRecClose').onclick=()=>{$('ovRec').hidden=true};
 $('bPlay').onclick=()=>startGame(false);
-$('bCont').onclick=resumeGame;
+$('bCont').onclick=()=>resumeGame();
 $('bSame').onclick=()=>startGame(false,lastSeed);
 $('bSnd').onclick=()=>{SND=!SND;LS.set('isole-snd',SND?'1':'0');sndLabel();sfx('recruit')};
 $('bMus').onclick=()=>{MUS=!MUS;LS.set('isole-mus',MUS?'1':'0');musLabel();if(MUS)musStart();else musStop()};
@@ -2647,14 +2859,14 @@ $('tutNext').onclick=tutNext;
 $('tutSkip').onclick=tutEnd;
 try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#ovStart button,#ovStart summary,#ovPause button,#ovEnd button,#ovRf button'))sfx('tap')},true);
-$('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStart').hidden=false};
+$('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStart').hidden=false;if(window.IAV&&IAV.onMenu)IAV.onMenu()};
 
 /* menu di gioco (pausa): ritorno al menu principale e impostazioni senza uscire dalla partita */
 function vibLabel(){$('pVib').textContent='Vibrazione: '+(LS.get('isole-vib')==='0'?'spenta':'accesa')}
-function pSync(){$('pSnd').textContent=$('bSnd').textContent;$('pMus').textContent=$('bMus').textContent;$('pGP').textContent=$('bGP').textContent;$('pG3').textContent=$('bG3').textContent;$('pLook').textContent=$('bLook').textContent;$('pSea').textContent=$('bSea').textContent;$('pPsz').textContent=$('bPsz').textContent;vibLabel()}
+function pSync(){$('pHome').textContent=(g.camp&&started&&g.over===null)?'Torna alla campagna':'Torna al menu principale';$('pSnd').textContent=$('bSnd').textContent;$('pMus').textContent=$('bMus').textContent;$('pGP').textContent=$('bGP').textContent;$('pG3').textContent=$('bG3').textContent;$('pLook').textContent=$('bLook').textContent;$('pSea').textContent=$('bSea').textContent;$('pPsz').textContent=$('bPsz').textContent;vibLabel()}
 $('bPause').onclick=()=>{pSync();$('ovPause').hidden=false};
 $('pBack').onclick=()=>{$('ovPause').hidden=true};
-$('pHome').onclick=()=>{try{saveGame()}catch(e){}$('ovPause').hidden=true;$('bMenu').click()};
+$('pHome').onclick=()=>{try{saveGame()}catch(e){}$('ovPause').hidden=true;if(g.camp&&started&&g.over===null&&window.IAV&&IAV.openCamp){IAV.openCamp();return}$('bMenu').click()};
 for(const [a,b] of [['pSnd','bSnd'],['pMus','bMus'],['pGP','bGP'],['pG3','bG3'],['pLook','bLook'],['pSea','bSea'],['pPsz','bPsz']])$(a).onclick=()=>{$(b).click();pSync()};
 $('pVib').onclick=()=>{const off=LS.get('isole-vib')!=='0';LS.set('isole-vib',off?'0':'1');vibLabel();if(!off)buzz(30)};
 // Un tocco breve sceglie/muove/attacca; un dito che si sposta trascina la mappa; due dita zoomano.
@@ -2695,6 +2907,20 @@ new ResizeObserver(size).observe($('stage'));
 addEventListener('resize',size);
 legend();buildSeg();size();refreshUI();requestAnimationFrame(draw);
 
+/* ponte verso la campagna (campagna.js): il motore resta qui, la campagna lo usa soltanto da fuori */
+window.IAV={
+  UT,AI_LEVELS,WE,startLevel,mhp,newLevel,aiStep,endTurn,
+  get g(){return g},get started(){return started},
+  resume:()=>resumeGame(SAVEKC),
+  saveInfo:()=>{const o=loadSave(SAVEKC);return o?{id:o.g.camp&&o.g.camp.id,name:o.g.camp&&o.g.camp.name,round:o.g.round}:null},
+  dropSave:()=>clearSave(SAVEKC),
+  useBoost:useBoostUI,canPlay,goalInfo:()=>goalInfo(g),
+  toast,sfx,buzz,pause:()=>{$('ovPause').hidden=true},
+  unitImg:t=>'assets/pedine/'+GU.T[t]+'_oro_normale.png',
+  unitImgBlu:t=>'assets/pedine/'+GU.T[t]+'_blu_normale.png',
+  showStart:()=>{buildSeg();contButton();$('ovStart').hidden=false},
+  boardRows:seed=>{useBoard(null);const m=genMap(seed),r=m.map(row=>row.map(c=>c==='P'?'.':c==='C'?'.':c));r[BASE[0].y][BASE[0].x]='1';r[BASE[1].y][BASE[1].x]='2';return r.map(x=>x.join(''))}
+};
 /* appoggio per le prove automatiche */
 window.Isole={setLook:(n)=>{LOOK=n;LS.set('isole-look',String(n))},
   reach:(u)=>reach(g,u),
@@ -2718,10 +2944,12 @@ window.Isole={setLook:(n)=>{LOOK=n;LS.set('isole-look',String(n))},
       if(G.turn===1&&G.round%3===0)L.push('R'+G.round+' c'+G.coins+' '+G.units.map(u=>u.o+u.t+u.x+','+u.y+':'+u.hp).join(' '));
       if(G.over===null)endTurn(G)}
     return L.concat([String(G.over)+' '+G.why])},
-  api:{reach,targetsFrom,doMove,doAttack,endTurn,doRecruit,canRecruit,windPush,windPlan,erupt,heldBy,eruptionRound,STATIONS,VOL,wNow,mvOf,rgOf,atkOf,UT,BASE,unitAt,genMap,connected,tileAt,AI_LEVELS}
+  api:{reach,targetsFrom,doMove,doAttack,endTurn,doRecruit,canRecruit,windPush,windPlan,erupt,heldBy,eruptionRound,get STATIONS(){return STATIONS},get VOL(){return VOL},wNow,mvOf,rgOf,atkOf,UT,get BASE(){return BASE},unitAt,genMap,connected,tileAt,AI_LEVELS,newLevel,mkUnit,boostUse,goalCheck,spawnWaves,useBoard}
 };
 })();
 </script>
+<script src="campagna-livelli.js"></script>
+<script src="campagna.js"></script>
 <script>
 /* Aggiornamento automatico: se su GitHub Pages c'è una versione nuova, la ricarica quando sei nel menu (mai durante una partita). */
 (()=>{
