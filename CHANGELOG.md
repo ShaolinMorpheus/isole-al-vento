@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v55 — 24 nov 2026 · Terreno a caselle separate di base
+- Il terreno predefinito è «a caselle separate» (la variante scelta); le altre restano nel tasto «Terreno (prova)»
+
 ## v54 — 24 nov 2026 · Vulcano ben visibile e Fine turno pulito
 - Zona di danno del vulcano molto più visibile: caselle arancio piene con bordo che pulsa e numeri −3 / −1 grandi, già dal round prima (più tenui) e forti nel round dell'eruzione; cenere calda (−1) più evidente
 - Tasto «Fine turno» che pulsa: alone morbido che segue la forma, senza rettangolo attorno

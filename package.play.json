@@ -1,0 +1,12 @@
+{
+  "name": "isole-al-vento",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Isole al Vento - strategia a turni a tema meteo (versione per Google Play)",
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/haptics": "^8.0.0"
+  }
+}
