@@ -2,7 +2,7 @@
   "appId": "it.isolealvento.game",
   "appName": "Isole al Vento",
   "webDir": "www",
-  "backgroundColor": "#0e2433",
+  "backgroundColor": "#2b7a8f",
   "android": {
     "allowMixedContent": false
   },

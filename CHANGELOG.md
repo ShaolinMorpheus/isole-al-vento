@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v48 — 24 nov 2026 · Caricamento pulito e più veloce
+- Schermata di caricamento con barra, font inclusi, immagini dei menu in WebP, cache sul telefono (service worker)
+
 ## v47 — 24 nov 2026 · Menu adattato allo schermo
 - La scheda del menu iniziale si scala per stare sempre intera (cornice compresa); tolta la bandiera dietro l'isoletta
 

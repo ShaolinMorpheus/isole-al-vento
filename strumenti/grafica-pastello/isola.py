@@ -54,7 +54,6 @@ svg=f'''<svg xmlns="http://www.w3.org/2000/svg" width="800" height="440" viewBox
  {palm(215,262,170,122,-34,1)}
  {palm(585,262,634,126,34,-1)}
 </g>
-<rect width="800" height="440" filter="url(#tex)" opacity=".35" style="mix-blend-mode:soft-light"/>
 </svg>'''
 open('isola.svg','w').write(svg)
 async def main():

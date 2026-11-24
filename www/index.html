@@ -1,8 +1,20 @@
 <!doctype html>
 <html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="build" content="__BUILD__"><title>Isole al Vento</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:Fredoka;font-weight:500;font-style:normal;font-display:block;src:url(assets/font/fredoka-latin-500-normal.woff2) format("woff2")}
+@font-face{font-family:Fredoka;font-weight:600;font-style:normal;font-display:block;src:url(assets/font/fredoka-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Nunito;font-weight:600;font-style:normal;font-display:block;src:url(assets/font/nunito-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:Nunito;font-weight:800;font-style:normal;font-display:block;src:url(assets/font/nunito-latin-800-normal.woff2) format("woff2")}
+html,body{background:#2b7a8f}
+#boot{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:linear-gradient(#58b2c4,#2b7a8f 70%,#25697d);color:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;transition:opacity .4s ease}
+#boot.out{opacity:0;pointer-events:none}
+#boot img{width:min(46vw,200px);height:auto;opacity:0;transition:opacity .3s}
+#boot img.on{opacity:1}
+#boot .bt{font-size:30px;font-weight:800;letter-spacing:.3px;text-shadow:0 2px 6px rgba(12,70,88,.55)}
+#boot .bb{width:min(62vw,260px);height:10px;border-radius:99px;background:rgba(255,255,255,.28);overflow:hidden;box-shadow:inset 0 1px 3px rgba(12,70,88,.35)}
+#boot .bb i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(#fff3c4,#f8cf72);transition:width .2s ease}
+#boot .bp{font-size:14px;opacity:.9}
+</style>
 <style>
 /* Layout: schermata unica a colonna. Barra meteo in alto, mappa 7x9 che riempie lo spazio, pannello unità e comandi in basso. Gioco con un solo aspetto (mare al tramonto). */
 :root{
@@ -106,22 +118,22 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 /* Grafica di prova: interfaccia di Muse (pannelli a 9 parti, bottoni, zoom) */
 body.gpui .wbox,body.gpui .stat,body.gpui #info,body.gpui .card,body.gpui .rec{position:relative;isolation:isolate;background:none;border-color:transparent}
 body.gpui .wbox::before,body.gpui .stat::before,body.gpui #info::before,body.gpui .card::before,body.gpui .rec::before{content:'';position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:16px solid transparent}
-body.gpui .wbox::before{border-image:url(assets/interfaccia/ui_pannello_meteo.png) 48 fill/16px stretch}
-body.gpui .stat::before{border-image:url(assets/interfaccia/ui_pannello_stat.png) 48 fill/16px stretch}
-body.gpui #info::before{border-image:url(assets/interfaccia/ui_pannello_info.png) 48 fill/16px stretch}
-body.gpui .rec::before{border-image:url(assets/interfaccia/ui_pannello_riga.png) 48 fill/16px stretch}
-body.gpui .card::before{border-width:22px;border-image:url(assets/interfaccia/ui_pannello_scheda.png) 66 fill/22px stretch}
+body.gpui .wbox::before{border-image:url(assets/interfaccia/ui_pannello_meteo.webp) 48 fill/16px stretch}
+body.gpui .stat::before{border-image:url(assets/interfaccia/ui_pannello_stat.webp) 48 fill/16px stretch}
+body.gpui #info::before{border-image:url(assets/interfaccia/ui_pannello_info.webp) 48 fill/16px stretch}
+body.gpui .rec::before{border-image:url(assets/interfaccia/ui_pannello_riga.webp) 48 fill/16px stretch}
+body.gpui .card::before{border-width:22px;border-image:url(assets/interfaccia/ui_pannello_scheda.webp) 66 fill/22px stretch}
 body.gpui .btn,body.gpui .btn.alt{border:12px solid transparent;padding:0 4px;background:none;border-radius:0}
-body.gpui .btn.alt{border-image:url(assets/interfaccia/ui_bottone_chiaro_normale.png) 36 fill/12px stretch;color:#0d3b47}
-body.gpui .btn.alt:active{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_premuto.png)}
-body.gpui .btn.alt[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_disattivo.png);opacity:1}
-body.gpui .btn:not(.alt){border-image:url(assets/interfaccia/ui_bottone_oro_normale.png) 36 fill/12px stretch;color:#2a1d02}
-body.gpui .btn:not(.alt):active{border-image-source:url(assets/interfaccia/ui_bottone_oro_premuto.png)}
-body.gpui .btn:not(.alt)[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_oro_disattivo.png);opacity:1}
-body.gpui .btn.pulse:not(.alt){border-image-source:url(assets/interfaccia/ui_bottone_oro_pulsante.png);animation:none}
-body.gpui #zoomBox button{background:url(assets/interfaccia/ui_zoom_normale.png) center/100% 100% no-repeat;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
-body.gpui #zoomBox button:active{background-image:url(assets/interfaccia/ui_zoom_premuto.png)}
-body.gpui #zoomBox button[disabled]{background-image:url(assets/interfaccia/ui_zoom_disattivo.png);opacity:1}
+body.gpui .btn.alt{border-image:url(assets/interfaccia/ui_bottone_chiaro_normale.webp) 36 fill/12px stretch;color:#0d3b47}
+body.gpui .btn.alt:active{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_premuto.webp)}
+body.gpui .btn.alt[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_chiaro_disattivo.webp);opacity:1}
+body.gpui .btn:not(.alt){border-image:url(assets/interfaccia/ui_bottone_oro_normale.webp) 36 fill/12px stretch;color:#2a1d02}
+body.gpui .btn:not(.alt):active{border-image-source:url(assets/interfaccia/ui_bottone_oro_premuto.webp)}
+body.gpui .btn:not(.alt)[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_oro_disattivo.webp);opacity:1}
+body.gpui .btn.pulse:not(.alt){border-image-source:url(assets/interfaccia/ui_bottone_oro_pulsante.webp);animation:none}
+body.gpui #zoomBox button{background:url(assets/interfaccia/ui_zoom_normale.webp) center/100% 100% no-repeat;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
+body.gpui #zoomBox button:active{background-image:url(assets/interfaccia/ui_zoom_premuto.webp)}
+body.gpui #zoomBox button[disabled]{background-image:url(assets/interfaccia/ui_zoom_disattivo.webp);opacity:1}
 .wnow img{width:26px;height:26px;flex:none}.wnext img{width:16px;height:16px}
 .rec img.ui{width:40px;height:40px;flex:none}.stat .c img{width:22px;height:22px;vertical-align:-5px;margin-right:2px}
 body.gpui #ovStart{background:linear-gradient(rgba(5,14,20,.12),rgba(5,14,20,.12)),url(assets/schermate/sfondo_menu.webp) center/cover no-repeat}
@@ -135,7 +147,7 @@ body.gpui #ovStart{background:url(assets/menu/sfondo_menu.webp) center/cover no-
 body.gpui #ovStart{padding:62px 8px 10px}
 body.gpui #ovStart .card{box-sizing:border-box;width:100%;position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:392px;padding:88px 30px 40px;gap:8px;max-height:none}
 body.gpui #ovStart img.tx{max-width:100%;height:auto}
-body.gpui #ovStart .card::before{content:'';position:absolute;inset:0;z-index:-1;border:80px solid transparent;border-image:url(assets/menu/menu_pannello.png) 240 fill/80px stretch;pointer-events:none}
+body.gpui #ovStart .card::before{content:'';position:absolute;inset:0;z-index:-1;border:80px solid transparent;border-image:url(assets/menu/menu_pannello.webp) 240 fill/80px stretch;pointer-events:none}
 body.gpui #ovStart .card::after{content:'';position:absolute;left:50%;top:0;width:150px;height:150px;transform:translate(-50%,-50%);background:url(assets/menu/menu_simbolo.png) center/contain no-repeat;pointer-events:none;z-index:2}
 body.gpui #ovStart .card h1{height:80px;font-size:0;margin:-14px 0 -6px;background:url(assets/menu/menu_titolo.png) center/contain no-repeat;flex:none}
 body.gpui #ovStart .card.menu .sc{gap:9px;padding:2px 0}
@@ -147,23 +159,23 @@ body.gpui #ovStart .sg{display:flex;align-items:center;justify-content:center}
 body.gpui #ovStart .sg img.tx{transform:translateY(-1.5px)}
 body.gpui #ovStart .dt summary img.tx{margin-right:0}
 body.gpui #ovStart .dt summary{display:flex;align-items:center;justify-content:space-between}
-body.gpui #ovStart .sg{border:0;border-radius:0;min-height:50px;flex:none;background:url(assets/menu/menu_difficolta_normale.png) 0 0/100% 100% no-repeat;color:#0d3b47;font-size:16px}
-body.gpui #ovStart .sg:active{background-image:url(assets/menu/menu_difficolta_premuto.png)}
-body.gpui #ovStart .sg[aria-pressed=true]{background-image:url(assets/menu/menu_difficolta_selezionato.png);color:#3a2503}
+body.gpui #ovStart .sg{border:0;border-radius:0;min-height:50px;flex:none;background:url(assets/menu/menu_difficolta_normale.webp) 0 0/100% 100% no-repeat;color:#0d3b47;font-size:16px}
+body.gpui #ovStart .sg:active{background-image:url(assets/menu/menu_difficolta_premuto.webp)}
+body.gpui #ovStart .sg[aria-pressed=true]{background-image:url(assets/menu/menu_difficolta_selezionato.webp);color:#3a2503}
 body.gpui #ovStart .btn{border:0;border-radius:0;padding:0 14px;background:none;min-height:0}
-body.gpui #ovStart .btn:not(.alt){box-sizing:border-box;min-height:76px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_oro_normale.png) 60 fill/20px stretch;padding:0 0 4px;background:none;color:#3a2503;font-size:21px;line-height:1.15;animation:none}
-body.gpui #ovStart .btn:not(.alt):active{border-image-source:url(assets/menu/menu_bottone_oro_premuto.png)}
-body.gpui #ovStart .btn:not(.alt)[disabled]{border-image-source:url(assets/menu/menu_bottone_oro_disattivo.png)}
-body.gpui #ovStart .btn.pulse:not(.alt){border-image-source:url(assets/menu/menu_bottone_oro_pulsante.png)}
-body.gpui #ovStart .btn.alt{box-sizing:border-box;min-height:64px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_vetro_normale.png) 60 fill/20px stretch;padding:0 0 3px;background:none;color:#0d3b47;font-size:19px;line-height:1.15}
-body.gpui #ovStart .btn.alt:active{border-image-source:url(assets/menu/menu_bottone_vetro_premuto.png)}
-body.gpui #ovStart .btn.alt[disabled]{border-image-source:url(assets/menu/menu_bottone_vetro_disattivo.png)}
+body.gpui #ovStart .btn:not(.alt){box-sizing:border-box;min-height:76px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_oro_normale.webp) 60 fill/20px stretch;padding:0 0 4px;background:none;color:#3a2503;font-size:21px;line-height:1.15;animation:none}
+body.gpui #ovStart .btn:not(.alt):active{border-image-source:url(assets/menu/menu_bottone_oro_premuto.webp)}
+body.gpui #ovStart .btn:not(.alt)[disabled]{border-image-source:url(assets/menu/menu_bottone_oro_disattivo.webp)}
+body.gpui #ovStart .btn.pulse:not(.alt){border-image-source:url(assets/menu/menu_bottone_oro_pulsante.webp)}
+body.gpui #ovStart .btn.alt{box-sizing:border-box;min-height:64px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_vetro_normale.webp) 60 fill/20px stretch;padding:0 0 3px;background:none;color:#0d3b47;font-size:19px;line-height:1.15}
+body.gpui #ovStart .btn.alt:active{border-image-source:url(assets/menu/menu_bottone_vetro_premuto.webp)}
+body.gpui #ovStart .btn.alt[disabled]{border-image-source:url(assets/menu/menu_bottone_vetro_disattivo.webp)}
 body.gpui #ovStart #bTut{align-self:center;width:62%}
 body.gpui #ovStart #seedIn::placeholder{color:#e2f6f9;opacity:.9}
-body.gpui #ovStart #seedIn{flex:none;height:54px;min-height:0!important;border:0!important;border-radius:0!important;background:url(assets/menu/menu_campo_mappa.png) 0 0/100% 100% no-repeat!important;color:#fff!important;font-size:16px}
+body.gpui #ovStart #seedIn{flex:none;height:54px;min-height:0!important;border:0!important;border-radius:0!important;background:url(assets/menu/menu_campo_mappa.webp) 0 0/100% 100% no-repeat!important;color:#fff!important;font-size:16px}
 body.gpui #ovStart .dt{flex:none;background:none;border:0;border-radius:0;padding:0}
-body.gpui #ovStart .dt summary{overflow:visible;height:54px;padding:0 18px;box-sizing:border-box;background:url(assets/menu/menu_sezione.png) 0 0/100% 100% no-repeat;color:#e4f4f7;font-size:16px}
-body.gpui #ovStart .dt[open] summary{background-image:url(assets/menu/menu_sezione_aperta.png)}
+body.gpui #ovStart .dt summary{overflow:visible;height:54px;padding:0 18px;box-sizing:border-box;background:url(assets/menu/menu_sezione.webp) 0 0/100% 100% no-repeat;color:#e4f4f7;font-size:16px}
+body.gpui #ovStart .dt[open] summary{background-image:url(assets/menu/menu_sezione_aperta.webp)}
 body.gpui #ovStart .dt summary::after{content:'';width:22px;height:22px;background:#e4f4f7;-webkit-mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;mask:url(assets/menu/icona_freccia_giu.png) center/contain no-repeat;transition:transform .2s}
 body.gpui #ovStart .dt[open] summary::after{transform:rotate(180deg)}
 body.gpui #ovStart .dt ul,body.gpui #ovStart .dtb,body.gpui #ovStart .dt .wl{margin:0 0 2px;padding:10px 12px 10px 28px;background:rgba(6,32,44,.55);border-radius:0 0 14px 14px;color:#d9eef2}
@@ -173,11 +185,28 @@ body.gpui #ovStart .tl{color:#f4cf7a}
 body.gpui #ovPause,body.gpui #ovRec,body.gpui #ovRf,body.gpui #ovLog{background:rgba(24,80,98,.5)}
 body.gpui .ov:not(#ovStart) .card{padding:52px 46px 46px;min-height:190px}
 body.gpui .btn[disabled]{color:#6f868c!important}
-body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.png) 180 fill/60px stretch}
+body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.webp) 180 fill/60px stretch}
 body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-shadow:0 1px 3px rgba(12,70,88,.6)}
 
 @media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}#toast{transition:none}}
 </style></head><body>
+<div id="boot"><img id="bootImg" src="assets/menu/menu_simbolo.png" alt=""><div class="bt">Isole al Vento</div><div class="bb"><i id="bootBar"></i></div><div class="bp" id="bootTxt">Preparo il gioco…</div></div>
+<script>
+/* Schermata di caricamento: aspetta immagini e font prima di mostrare il gioco, cosi' non compaiono a pezzi */
+(function(){
+var CRIT=["assets/menu/icona_freccia_giu.png", "assets/menu/menu_bottone_oro_disattivo.webp", "assets/menu/menu_bottone_oro_normale.webp", "assets/menu/menu_bottone_oro_premuto.webp", "assets/menu/menu_bottone_oro_pulsante.webp", "assets/menu/menu_bottone_vetro_disattivo.webp", "assets/menu/menu_bottone_vetro_normale.webp", "assets/menu/menu_bottone_vetro_premuto.webp", "assets/menu/menu_campo_mappa.webp", "assets/menu/menu_difficolta_normale.webp", "assets/menu/menu_difficolta_premuto.webp", "assets/menu/menu_difficolta_selezionato.webp", "assets/menu/menu_pannello.webp", "assets/menu/menu_pannello_piccolo.webp", "assets/menu/menu_sezione.webp", "assets/menu/menu_sezione_aperta.webp", "assets/menu/menu_simbolo.png", "assets/menu/menu_t_comesigioca.png", "assets/menu/menu_t_difficile_vetro.png", "assets/menu/menu_t_facile_vetro.png", "assets/menu/menu_t_gioca.png", "assets/menu/menu_t_normale_oro.png", "assets/menu/menu_t_tutorial.png", "assets/menu/menu_titolo.png", "assets/menu/sfondo_menu.webp", "assets/interfaccia/icona_meteo_pioggia.png", "assets/interfaccia/icona_meteo_sereno.png", "assets/interfaccia/icona_meteo_vento.png", "assets/interfaccia/icona_moneta.png", "assets/interfaccia/ui_bottone_chiaro_disattivo.webp", "assets/interfaccia/ui_bottone_chiaro_normale.webp", "assets/interfaccia/ui_bottone_chiaro_premuto.webp", "assets/interfaccia/ui_bottone_oro_disattivo.webp", "assets/interfaccia/ui_bottone_oro_normale.webp", "assets/interfaccia/ui_bottone_oro_premuto.webp", "assets/interfaccia/ui_bottone_oro_pulsante.webp", "assets/interfaccia/ui_pannello_info.webp", "assets/interfaccia/ui_pannello_meteo.webp", "assets/interfaccia/ui_pannello_riga.webp", "assets/interfaccia/ui_pannello_scheda.webp", "assets/interfaccia/ui_pannello_stat.webp", "assets/interfaccia/ui_zoom_disattivo.webp", "assets/interfaccia/ui_zoom_normale.webp", "assets/interfaccia/ui_zoom_premuto.webp", "assets/schermate/logo_titolo.png", "assets/schermate/sfondo_menu.webp", "assets/schermate/sfondo_pareggio.webp", "assets/schermate/sfondo_sconfitta.webp", "assets/schermate/sfondo_vittoria.webp"],REST=["assets/effetti/eff_cenere.png", "assets/effetti/eff_cenere_caduta.png", "assets/effetti/eff_colpo.png", "assets/effetti/eff_colpo_critico.png", "assets/effetti/eff_fiocco_a.png", "assets/effetti/eff_fiocco_b.png", "assets/effetti/eff_foglia_a.png", "assets/effetti/eff_foglia_b.png", "assets/effetti/eff_freccia.png", "assets/effetti/eff_fumo.png", "assets/effetti/eff_goccia.png", "assets/effetti/eff_lava_a.png", "assets/effetti/eff_lava_b.png", "assets/effetti/eff_onda_vento.png", "assets/effetti/eff_scintilla.png", "assets/effetti/eff_taglio.png", "assets/effetti/meteo_gelo.png", "assets/effetti/meteo_nebbia.png", "assets/effetti/meteo_pioggia.png", "assets/effetti/meteo_vento.png", "assets/effetti/ui_anello_selezione.png", "assets/effetti/ui_casella_attacco.png", "assets/effetti/ui_casella_libera.png", "assets/effetti/ui_casella_pericolo.png", "assets/oggetti/bandiera_blu_1.png", "assets/oggetti/bandiera_blu_2.png", "assets/oggetti/bandiera_oro_1.png", "assets/oggetti/bandiera_oro_2.png", "assets/oggetti/boschetto_a.png", "assets/oggetti/boschetto_b.png", "assets/oggetti/montagna_a.png", "assets/oggetti/montagna_b.png", "assets/oggetti/pino_a.png", "assets/oggetti/pino_b.png", "assets/oggetti/pino_c.png", "assets/oggetti/stazione_0.png", "assets/oggetti/stazione_40.png", "assets/oggetti/stazione_80.png", "assets/oggetti/stazione_f00.png", "assets/oggetti/stazione_f01.png", "assets/oggetti/stazione_f02.png", "assets/oggetti/stazione_f03.png", "assets/oggetti/stazione_f04.png", "assets/oggetti/stazione_f05.png", "assets/oggetti/stazione_f06.png", "assets/oggetti/stazione_f07.png", "assets/oggetti/stazione_f08.png", "assets/oggetti/stazione_f09.png", "assets/oggetti/stazione_f10.png", "assets/oggetti/stazione_f11.png", "assets/oggetti/stazione_f12.png", "assets/oggetti/stazione_f13.png", "assets/oggetti/stazione_f14.png", "assets/oggetti/stazione_f15.png", "assets/oggetti/stazione_f16.png", "assets/oggetti/stazione_f17.png", "assets/oggetti/stazione_f18.png", "assets/oggetti/stazione_f19.png", "assets/oggetti/stazione_f20.png", "assets/oggetti/stazione_f21.png", "assets/oggetti/stazione_f22.png", "assets/oggetti/stazione_f23.png", "assets/oggetti/terreno_vulcano_arde.png", "assets/oggetti/terreno_vulcano_calmo.png", "assets/oggetti/terreno_vulcano_eruttato.png", "assets/pedine/alfiere_blu_normale.png", "assets/pedine/alfiere_blu_stanca.png", "assets/pedine/alfiere_oro_normale.png", "assets/pedine/alfiere_oro_stanca.png", "assets/pedine/arciere_blu_normale.png", "assets/pedine/arciere_blu_stanca.png", "assets/pedine/arciere_oro_normale.png", "assets/pedine/arciere_oro_stanca.png", "assets/pedine/balestriere_blu_normale.png", "assets/pedine/balestriere_blu_stanca.png", "assets/pedine/balestriere_oro_normale.png", "assets/pedine/balestriere_oro_stanca.png", "assets/pedine/cavaliere_blu_normale.png", "assets/pedine/cavaliere_blu_stanca.png", "assets/pedine/cavaliere_oro_normale.png", "assets/pedine/cavaliere_oro_stanca.png", "assets/pedine/esploratore_blu_normale.png", "assets/pedine/esploratore_blu_stanca.png", "assets/pedine/esploratore_oro_normale.png", "assets/pedine/esploratore_oro_stanca.png", "assets/pedine/guaritore_blu_normale.png", "assets/pedine/guaritore_blu_stanca.png", "assets/pedine/guaritore_oro_normale.png", "assets/pedine/guaritore_oro_stanca.png", "assets/pedine/guerriero_blu_normale.png", "assets/pedine/guerriero_blu_stanca.png", "assets/pedine/guerriero_oro_normale.png", "assets/pedine/guerriero_oro_stanca.png", "assets/pedine/lanciere_blu_normale.png", "assets/pedine/lanciere_blu_stanca.png", "assets/pedine/lanciere_oro_normale.png", "assets/pedine/lanciere_oro_stanca.png", "assets/pedine/sciamano_blu_normale.png", "assets/pedine/sciamano_blu_stanca.png", "assets/pedine/sciamano_oro_normale.png", "assets/pedine/sciamano_oro_stanca.png", "assets/terreno-unico/bordo_sabbia_lago_a.png", "assets/terreno-unico/bordo_sabbia_lago_b.png", "assets/terreno-unico/dettaglio_ciuffi_a.png", "assets/terreno-unico/dettaglio_ciuffi_b.png", "assets/terreno-unico/dettaglio_ciuffi_c.png", "assets/terreno-unico/dettaglio_fiori_a.png", "assets/terreno-unico/dettaglio_fiori_b.png", "assets/terreno-unico/dettaglio_fiori_c.png", "assets/terreno-unico/dettaglio_foglie_a.png", "assets/terreno-unico/dettaglio_foglie_b.png", "assets/terreno-unico/dettaglio_funghi_a.png", "assets/terreno-unico/dettaglio_funghi_b.png", "assets/terreno-unico/dettaglio_sassi_a.png", "assets/terreno-unico/dettaglio_sassi_b.png", "assets/terreno-unico/dettaglio_sassi_c.png", "assets/terreno-unico/terreno_erbasecca_a.png", "assets/terreno-unico/terreno_erbasecca_b.png", "assets/terreno-unico/terreno_erbasecca_c.png", "assets/terreno-unico/terreno_fango_a.png", "assets/terreno-unico/terreno_fango_b.png", "assets/terreno-unico/terreno_prato_c.jpg", "assets/terreno-unico/terreno_prato_d.jpg", "assets/terreno-unico/terreno_prato_e.jpg", "assets/terreno-unico/terreno_prato_f.jpg", "assets/terreno-unico/terreno_prato_g.jpg", "assets/terreno-unico/terreno_prato_h.jpg", "assets/terreno-unico/terreno_sabbia_a.png", "assets/terreno-unico/terreno_sabbia_b.png", "assets/terreno-unico/terreno_sabbia_c.png", "assets/terreno-unico/terreno_sassi_a.png", "assets/terreno-unico/terreno_sassi_b.png", "assets/terreno-unico/terreno_sassi_c.png", "assets/terreno-unico/terreno_terra_a.png", "assets/terreno-unico/terreno_terra_b.png", "assets/terreno-unico/terreno_terra_c.png", "assets/terreno-v2/terreno_base_blu.png", "assets/terreno-v2/terreno_base_oro.png", "assets/terreno-v2/terreno_bosco_a.png", "assets/terreno-v2/terreno_bosco_b.png", "assets/terreno-v2/terreno_cenere_a.png", "assets/terreno-v2/terreno_cenere_b.png", "assets/terreno-v2/terreno_ghiaccio_a.png", "assets/terreno-v2/terreno_ghiaccio_b.png", "assets/terreno-v2/terreno_lago_a.png", "assets/terreno-v2/terreno_lago_b.png", "assets/terreno-v2/terreno_monte_a.png", "assets/terreno-v2/terreno_monte_b.png", "assets/terreno-v2/terreno_prato_a.png", "assets/terreno-v2/terreno_prato_b.png", "assets/terreno-v2/terreno_stazione_a.png", "assets/terreno-v2/terreno_stazione_b.png"];
+var boot=document.getElementById('boot'),bar=document.getElementById('bootBar'),txt=document.getElementById('bootTxt'),img=document.getElementById('bootImg');
+img.onload=function(){img.classList.add('on')};if(img.complete&&img.naturalWidth)img.classList.add('on');
+var done=0,fin=false,fonts=['500 16px Fredoka','600 16px Fredoka','600 16px Nunito','800 16px Nunito'];
+var total=CRIT.length+REST.length+fonts.length;
+function finish(){if(fin)return;fin=true;window.__bootDone=true;boot.classList.add('out');setTimeout(function(){if(boot.parentNode)boot.parentNode.removeChild(boot)},500)}
+function tick(){done++;var p=Math.min(100,Math.round(done/total*100));bar.style.width=p+'%';txt.textContent='Carico le immagini… '+p+'%';if(done>=total)finish()}
+CRIT.forEach(function(u){var im=new Image();im.onload=im.onerror=function(){(im.decode?im.decode().catch(function(){}):Promise.resolve()).then(tick)};im.src=u});
+REST.forEach(function(u){var im=new Image();im.onload=im.onerror=tick;im.src=u});
+fonts.forEach(function(f){(document.fonts&&document.fonts.load?document.fonts.load(f):Promise.resolve()).then(tick,tick)});
+setTimeout(finish,25000);
+})();
+</script>
 
 <div id="app">
   <div class="top">
@@ -811,6 +840,11 @@ const LS={
 let LOOK=6; // fisso: terreno a caselle separate su campo unico
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:48,d:'24 nov 2026',t:'Caricamento pulito e piu\' veloce',n:[
+'Schermata di caricamento con barra: il gioco compare solo quando immagini e font sono pronti, senza piu\' pezzi che arrivano uno alla volta',
+'Font inclusi nel gioco (prima venivano scaricati da internet) e immagini dei menu molto piu\' leggere (da 6,8 MB a 0,6 MB)',
+'Dal secondo avvio le immagini restano salvate sul telefono: si apre subito e anche senza rete'
+]},
 {v:47,d:'24 nov 2026',t:'Menu iniziale adattato allo schermo',n:[
 'Il menu iniziale ora si adatta a ogni telefono: se lo schermo e\' piu\' piccolo la scheda si rimpicciolisce con la cornice intera, senza piu\' tagli ai lati o in basso',
 'Tolta la bandiera blu dello sfondo che finiva dietro l\'isoletta'
@@ -2334,6 +2368,13 @@ function fitStart(){
 $('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
 gpLabel();
 $('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;
+/* Cache sul telefono (service worker): se esce una nuova versione ricarica una volta per avere tutto coerente */
+if('serviceWorker' in navigator){
+  const hadSW=!!navigator.serviceWorker.controller;let rl=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadSW&&!rl){rl=true;location.reload()}});
+  addEventListener('load',()=>{navigator.serviceWorker.register('sw.js?v='+CHANGELOG[0].v).catch(()=>{})});
+}
+
 $('bLog').onclick=()=>{logBuild();$('ovLog').hidden=false};
 $('bLogClose').onclick=()=>{$('ovLog').hidden=true};
 $('bAgain').onclick=()=>{$('seedIn').value='';startGame(false,0)};
