@@ -150,6 +150,8 @@ body.gpui #ovStart{background:url(assets/menu/sfondo_menu.webp) center/cover no-
 body.gpui #ovStart{padding:62px 8px 10px}
 body.gpui #ovStart .card{box-sizing:border-box;width:100%;position:relative;isolation:isolate;overflow:visible;background:none;border:0;border-radius:0;max-width:392px;padding:88px 30px 40px;gap:8px;max-height:none}
 body.gpui #ovStart img.tx{max-width:100%;height:auto}
+body.gpui #ovStart{overflow-y:auto;overflow-x:hidden;align-items:flex-start;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+body.gpui #ovStart .card{margin:auto}
 body.gpui #ovStart .card::before{content:'';position:absolute;inset:0;z-index:-1;border:80px solid transparent;border-image:url(assets/menu/menu_pannello.webp) 240 fill/80px stretch;pointer-events:none}
 body.gpui #ovStart .card::after{content:'';position:absolute;left:50%;top:0;width:150px;height:150px;transform:translate(-50%,-50%);background:url(assets/menu/menu_simbolo.png) center/contain no-repeat;pointer-events:none;z-index:2}
 body.gpui #ovStart .card h1{height:80px;font-size:0;margin:-14px 0 -6px;background:url(assets/menu/menu_titolo.png) center/contain no-repeat;flex:none}
@@ -187,6 +189,8 @@ body.gpui #ovStart .tl{color:#f4cf7a}
 /* Pastello: schede dei menu secondari con la cornice di pali piccola */
 body.gpui #ovPause,body.gpui #ovRec,body.gpui #ovRf,body.gpui #ovLog{background:rgba(24,80,98,.5)}
 body.gpui .ov:not(#ovStart) .card{padding:52px 46px 46px;min-height:190px}
+body.gpui .ov:not(#ovStart) .card{overflow:hidden;box-sizing:border-box}
+body.gpui #logList,body.gpui #recList,body.gpui #rfList{overflow-y:auto;min-height:0;flex:1 1 auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 body.gpui .btn[disabled]{color:#6f868c!important}
 body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.webp) 180 fill/60px stretch}
 body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-shadow:0 1px 3px rgba(12,70,88,.6)}
@@ -868,6 +872,11 @@ let LOOK=LS.get('isole-look')===null?6:(+LS.get('isole-look')||0);
 let SEAON=LS.get('isole-mare')==='1'; // mare attorno al campo (prova, spento di base)
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:52,d:'24 nov 2026',t:'Menu che scorrono',n:[
+'Menu iniziale: con «Impostazioni e prove grafiche» o «Come si gioca» aperti ora si scorre fino in fondo',
+'Menu di gioco, registro modifiche e Recluta restano dentro lo schermo con la cornice intera: scorre solo la lista e il tasto «Chiudi» resta sempre visibile',
+'Le prove grafiche restano nelle Impostazioni e nel menu di gioco'
+]},
 {v:51,d:'24 nov 2026',t:'Mappe piu\' ricche e pedine ferme',n:[
 'Mappe con meno zone vuote: dove c\'era troppo prato compaiono boschi, monti e laghi, sempre uguali per i due giocatori e con i passaggi a sinistra e a destra liberi',
 'Le pedine stanno ferme: si muove su e giu\' solo quella selezionata (restano il passo quando cammina e gli anelli); lo sciamano resta sollevato senza oscillare',

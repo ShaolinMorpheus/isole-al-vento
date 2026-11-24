@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v52 — 24 nov 2026 · Menu che scorrono
+- Menu iniziale scorrevole con le tendine aperte; menu di gioco, registro e Recluta con cornice intera e lista scorrevole, «Chiudi» sempre visibile
+
 ## v51 — 24 nov 2026 · Mappe più ricche e pedine ferme
 - Mappe con meno zone vuote (boschi, monti e laghi dove c'era solo prato), simmetriche e con le corsie libere
 - Solo la pedina selezionata fa l'animazione su e giù; le altre stanno ferme
