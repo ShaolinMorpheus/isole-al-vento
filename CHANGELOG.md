@@ -2,6 +2,9 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v57 — 25 nov 2026 · Scheda livello compatta
+- La scheda di un livello sta tutta nello schermo: titolo con X per chiudere, mappa piccola accanto a obiettivo e stelle, tasto «Inizia» (o «Riprendi» / «Ricomincia») sempre visibile in basso, senza scorrere
+
 ## v56 — 25 nov 2026 · La Campagna
 - Nuovo tasto «Campagna»: 3 mondi, 24 livelli (campi da 7×9 a 13×17) con mappa, meteo e obiettivo propri
 - Obiettivi: tieni le stazioni, elimina tutti, resisti alle ondate, porta il messaggero alla meta, sconfiggi il boss (uno per mondo)

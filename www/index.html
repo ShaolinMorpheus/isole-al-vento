@@ -1035,6 +1035,9 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:57,d:'25 nov 2026',t:'Scheda livello compatta',n:[
+'La scheda di un livello ora sta tutta nello schermo: titolo in alto con la X per chiudere, mappa piccola accanto a obiettivo e stelle, e il tasto «Inizia» (o «Riprendi» / «Ricomincia») sempre visibile in basso, senza dover scorrere'
+]},
 {v:56,d:'25 nov 2026',t:'La Campagna',n:[
 'Nuovo tasto «Campagna» nel menu: 3 mondi, 24 livelli con campi da 7x9 fino a 13x17, ognuno con la sua mappa, il suo meteo e il suo obiettivo',
 'Obiettivi diversi: tieni le stazioni, elimina tutti, resisci alle ondate, porta il messaggero alla meta, sconfiggi il boss (un boss per mondo)',

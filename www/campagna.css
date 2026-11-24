@@ -152,3 +152,26 @@ body:not(.gpui) #bCamp{display:flex;align-items:center;justify-content:center;mi
 #ovStart p.qk{margin:2px 0 -2px;font:600 13px var(--disp,system-ui);letter-spacing:.4px;text-transform:uppercase;opacity:.9}
 /* un tasto con l'attributo hidden deve sparire anche con la grafica dei menu (prima «Continua partita» restava visibile senza salvataggio) */
 body.gpui #ovStart .btn[hidden]{display:none!important}
+
+/* ---- scheda livello compatta: titolo e tasti sempre visibili, il resto scorre solo se serve ---- */
+#ovCmSheet .shCard{gap:6px}
+#ovCmSheet .shHead{flex:none}
+#ovCmSheet .shTt{flex:1;min-width:0}
+#ovCmSheet .shHead h2{font-size:20px!important;margin:0}
+.shClose{flex:none;width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,240,190,.55);background:rgba(10,52,66,.55);color:#fff;font:600 24px/1 var(--disp);padding:0 0 3px;display:flex;align-items:center;justify-content:center}
+#ovCmSheet .shBody{gap:7px;padding:0}
+.shDesc{margin:0;font-size:13px;line-height:1.3}
+.shMid{display:flex;gap:10px;align-items:flex-start}
+.shMid .shMap{margin:0;max-width:none}
+.shSide{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.shGoalT{display:flex;gap:5px;align-items:flex-start;padding:6px 8px;border-radius:10px;background:rgba(10,52,66,.55)}
+.shGoalT b{font:600 13.5px/1.2 var(--disp);color:#ffe9a6}
+.shSide .shStar{font-size:12.5px;gap:5px}
+.shSide .shStar svg{width:18px;height:18px}
+.shNote{font-size:12px;line-height:1.3;opacity:.92}
+.shUnR{display:flex;align-items:center;gap:6px}
+.shUnR .shUn{flex-wrap:nowrap;gap:1px}
+.shUnR .shUn img{width:25px;height:25px}
+.shWarn{color:#ffd0c4}
+#ovCmSheet .shFoot{flex:none;margin-top:2px}
+#ovCmSheet .shFoot .cmBtn{min-height:50px}

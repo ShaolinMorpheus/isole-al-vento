@@ -167,7 +167,7 @@ function gateText(W){
 
 /* ------------------------------------------------ scheda livello */
 function drawMini(cv,l){
-  const rows=l.map,w=rows[0].length,h=rows.length,cs=Math.max(8,Math.floor(Math.min(300/w,250/h)));
+  const rows=l.map,w=rows[0].length,h=rows.length,cs=Math.max(7,Math.floor(Math.min(124/w,164/h)));
   cv.width=w*cs;cv.height=h*cs;cv.style.width=w*cs+'px';cv.style.height=h*cs+'px';
   const c=cv.getContext('2d');
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
@@ -193,17 +193,19 @@ function openSheet(l){
   const wx=[...new Set((l.weather&&l.weather.pool)||['sereno','vento','pioggia','nebbia','gelo'])];
   const en=(l.e||[]).length,wv=(l.waves||[]).reduce((a,w)=>a+w.u.length,0);
   const ai={facile:'Facile',normale:'Normale',difficile:'Difficile'}[l.lvl]||'Normale';
-  const card=el('div','card menu');
-  card.innerHTML=`<div class="sc"><div class="shHead"><div class="shNum${boss?' boss':''}">${l.id}</div><div><h2>${l.name}</h2><small>Mondo ${W.id} · ${W.name}</small></div></div>
-  <p>${l.desc}</p><canvas class="shMap" id="shMap"></canvas>
-  <div class="shGoal"><div>${ico('flag').replace('<svg','<svg style="width:24px;height:24px"')}</div><div><b>${g[0]}</b>${g[1]}<br>Limite: ${l.rounds} round · campo ${l.map[0].length}×${l.map.length}</div></div>
-  <div class="shStars">${[['Vinci il livello']].concat(l.stars.map(s=>[s.txt])).map((s,i)=>`<div class="shStar${i<rec.s?'':' off'}">${star(i<rec.s)}<span>${s[0]}</span></div>`).join('')}</div>
-  <div class="shChips"><span class="shChip">Nemico: ${ai}${en?' · '+en+(en===1?' unità':' unità'):''}${wv?' + '+wv+' in ondate':''}</span>${wx.map(t=>`<span class="shChip">${wxIcon(t)}${WXN[t]}</span>`).join('')}${l.goal.t==='stations'?'':''}</div>
-  <div><div class="shSave" style="margin-bottom:3px">Unità che puoi reclutare</div><div class="shUn">${(l.allow||[]).map(t=>`<img src="${IAV.unitImg(t)}" alt="${UT[t].n}" title="${UT[t].n}">`).join('')}</div></div>
-  <div class="shSave">Ricompensa al primo successo: fino a ${levelReward(l)} perle e 3 stelle${l.reward&&l.reward.bonus?' (compreso il bonus boss)':''}.</div>
-  ${(sv&&!same)?`<div class="shSave">Hai una partita in corso (${sv.id}). Iniziare questo livello la cancella.</div>`:''}
-  <div class="cmRow">${same?'<button type="button" class="cmBtn" id="shRes">Riprendi</button>':''}<button type="button" class="cmBtn${same?' alt':''}" id="shGo">${same?'Ricomincia':'Inizia'}</button></div>
-  <button type="button" class="cmBtn alt" id="shX">Chiudi</button></div>`;
+  const card=el('div','card menu shCard');
+  const starRows=[['Vinci il livello']].concat((l.stars||[]).map(x=>[x.txt])).map((x,i)=>`<div class="shStar${i<rec.s?'':' off'}">${star(i<rec.s)}<span>${x[0]}</span></div>`).join('');
+  card.innerHTML=`<div class="shHead"><div class="shNum${boss?' boss':''}">${l.id}</div><div class="shTt"><h2>${l.name}</h2><small>Mondo ${W.id} · ${W.name}</small></div><button type="button" class="shClose" id="shX" aria-label="Chiudi">×</button></div>
+  <div class="sc shBody">
+  <p class="shDesc">${l.desc}</p>
+  <div class="shMid"><canvas class="shMap" id="shMap"></canvas><div class="shSide"><div class="shGoalT">${ico('flag').replace('<svg','<svg style="width:18px;height:18px;flex:none"')}<b>${g[0]}</b></div><div class="shStars">${starRows}</div></div></div>
+  <div class="shNote">${g[1]} Limite: ${l.rounds} round · campo ${l.map[0].length}×${l.map.length}.</div>
+  <div class="shChips"><span class="shChip">Nemico: ${ai}${en?' · '+en+' unità':''}${wv?' + '+wv+' a ondate':''}</span>${wx.map(t=>`<span class="shChip" title="${WXN[t]}">${wxIcon(t)}${WXN[t]}</span>`).join('')}</div>
+  <div class="shUnR"><span class="shSave">Unità:</span><div class="shUn">${(l.allow||[]).map(t=>`<img src="${IAV.unitImg(t)}" alt="${UT[t].n}" title="${UT[t].n}">`).join('')}</div></div>
+  <div class="shSave">Primo successo: fino a ${levelReward(l)} perle${l.reward&&l.reward.bonus?' (compreso il bonus boss)':''}.</div>
+  ${(sv&&!same)?`<div class="shSave shWarn">Hai una partita in corso (${sv.id}): iniziare questo livello la cancella.</div>`:''}
+  </div>
+  <div class="cmRow shFoot">${same?'<button type="button" class="cmBtn" id="shRes">Riprendi</button><button type="button" class="cmBtn alt" id="shGo">Ricomincia</button>':'<button type="button" class="cmBtn" id="shGo">Inizia</button>'}</div>`;
   sheet.innerHTML='';sheet.appendChild(card);sheet.hidden=false;
   drawMini(card.querySelector('#shMap'),l);
   card.querySelector('#shX').onclick=()=>{sheet.hidden=true};
