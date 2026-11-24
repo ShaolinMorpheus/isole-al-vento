@@ -49,7 +49,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .stat .c small{display:inline;font:600 10px var(--body);color:var(--muted);white-space:nowrap;margin-left:3px}
 .stat .c small br{display:none}
 #stage{position:relative;flex:1;min-height:0;border-radius:16px;background:radial-gradient(120% 90% at 50% 20%,var(--sea2),var(--sea));overflow:hidden;border:1px solid var(--line)}
-body.gpui #stage::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:15px;box-shadow:inset 0 0 30px rgba(6,45,66,.38)}
+body.sea #stage::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:15px;box-shadow:inset 0 0 30px rgba(6,45,66,.38)}
 body.gpui #stage>button,body.gpui #stage>#zoomBox,body.gpui #stage>#toast{z-index:3}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
@@ -265,13 +265,14 @@ setTimeout(finish,25000);
     </ul>
       <div class="wl" id="wl"></div>
     </details>
-    <details class="dt"><summary>Impostazioni</summary>
+    <details class="dt"><summary>Impostazioni e prove grafiche</summary>
       <div class="dtb">
         <button class="btn alt" id="bSnd" type="button" style="min-height:44px"></button>
         <button class="btn alt" id="bMus" type="button" style="min-height:44px"></button>
-        <button class="btn alt" id="bGP" type="button" hidden style="display:none"></button>
-        <button class="btn alt" id="bG3" type="button" hidden style="display:none"></button>
-        <button class="btn alt" id="bLook" type="button" hidden style="display:none"></button>
+        <button class="btn alt" id="bGP" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bG3" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bLook" type="button" style="min-height:44px"></button>
+        <button class="btn alt" id="bSea" type="button" style="min-height:44px"></button>
       </div>
     </details>
     <button class="tl" id="bLog" type="button" style="align-self:center"></button>
@@ -284,14 +285,15 @@ setTimeout(finish,25000);
     <div class="sc">
       <button class="btn" id="pBack" type="button" style="min-height:48px">Riprendi la partita</button>
       <button class="btn alt" id="pHome" type="button" style="min-height:44px">Torna al menu principale</button>
-      <details class="dt" open><summary>Suoni e vibrazione</summary>
+      <details class="dt" open><summary>Suoni e grafica</summary>
         <div class="dtb">
           <button class="btn alt" id="pSnd" type="button" style="min-height:44px"></button>
           <button class="btn alt" id="pVib" type="button" style="min-height:44px"></button>
           <button class="btn alt" id="pMus" type="button" style="min-height:44px"></button>
-          <button class="btn alt" id="pGP" type="button" hidden style="display:none"></button>
-          <button class="btn alt" id="pG3" type="button" hidden style="display:none"></button>
-          <button class="btn alt" id="pLook" type="button" hidden style="display:none"></button>
+          <button class="btn alt" id="pGP" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pG3" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pLook" type="button" style="min-height:44px"></button>
+          <button class="btn alt" id="pSea" type="button" style="min-height:44px"></button>
         </div>
       </details>
     </div>
@@ -840,9 +842,14 @@ const LS={
   get(k){try{return localStorage.getItem(k)}catch(e){return null}},
   set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 };
-let LOOK=6; // fisso: terreno a caselle separate su campo unico
+let LOOK=LS.get('isole-look')===null?6:(+LS.get('isole-look')||0);
+let SEAON=LS.get('isole-mare')==='1'; // mare attorno al campo (prova, spento di base)
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:50,d:'24 nov 2026',t:'Tornano le prove grafiche',n:[
+'Tornano i tasti «Grafica di prova», «Oggetti 3D» e «Terreno (prova)» nelle Impostazioni e nel menu di gioco, con le scelte che avevi salvato',
+'Il mare con spiaggia e onde e\' diventato una prova a parte («Mare attorno al campo (prova)»), spenta di base: il campo torna com\'era prima'
+]},
 {v:49,d:'24 nov 2026',t:'Mare, spiaggia e onde attorno all\'isola',n:[
 'Il campo di gioco ora e\' un\'isola in mezzo al mare: acque basse, schiuma che si muove, spiaggia sottile attorno alla mappa e onde dipinte che scorrono',
 'Il mare segue il meteo: col vento le onde corrono nella direzione del vento, col sereno compaiono riflessi di sole, con gelo e nebbia l\'acqua cambia colore; ogni tanto passano ombre di nuvole',
@@ -1098,7 +1105,7 @@ function buildSeg(){
   $('stats').textContent=statsText();
 }
 /* --- suoni e vibrazione (sintetizzati, nessun file) --- */
-let G3=true; // fisso: oggetti 3D accesi
+let G3=LS.get('isole-g3')!=='0';
 let SND=LS.get('isole-snd')!=='0',AC=null;
 function buzz(pat){ // vibrazione: plugin nativo Capacitor (app Android) oppure API del browser
   if(REDUCE||LS.get('isole-vib')==='0')return;
@@ -1185,7 +1192,7 @@ const lay={cs:40,dz:8,fh:32,th:8,ox:0,oy:0,cw:0,ch:0,dpr:1};
 const sleep=ms=>new Promise(r=>setTimeout(r,fast?0:ms));
 
 /* --- Grafica di prova: blocchi del terreno disegnati da Muse (PNG 256×256: faccia 194 px + fronte 62 px) --- */
-const GP={on:true,mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
+const GP={on:LS.get('isole-gp')!=='0',mips:{},loading:false,dir:'assets/terreno-v2/terreno_',
   names:['prato_a','prato_b','stazione_a','stazione_b','bosco_a','bosco_b','lago_a','lago_b','ghiaccio_a','ghiaccio_b','monte_a','monte_b','cenere_a','cenere_b','base_oro','base_blu']};
 function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sfuoca e sfarfalla
   const L=[im];let s=256;
@@ -1436,7 +1443,7 @@ function size(){
   cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);
   ctx.setTransform(d,0,0,d,0,0);
   const prev={cs:lay.cs,ox:lay.ox,oy:lay.oy,cw:lay.cw,ch:lay.ch};
-  const pad=8;
+  const pad=SEAON?8:3;
   cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2)/(H+(GP.on?.12:.38)))));
   lay.cw=r.width;lay.ch=r.height;lay.dpr=d;
   if(cam.ready&&cam.z>1&&prev.cw>0){ // mantiene al centro ciò che si stava guardando
@@ -1540,6 +1547,12 @@ function drawSea(dt,w){
 }
 
 function drawPlinth(){
+  if(gpReady()&&!SEAON){ // niente strati di terra e roccia: una semplice cornice verde scura con ombra
+    const cs=lay.cs,bh=cs*H+5;
+    ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(lay.ox+cs*W/2,lay.oy+bh+2,cs*W*.52,cs*.14,0,0,7);ctx.fill();
+    rr(lay.ox-4,lay.oy-4,cs*W+8,bh+1,9);ctx.fillStyle='#2a5230';ctx.fill();
+    return;
+  }
   if(gpReady()){ // l'isola nel mare: acque basse, schiuma, spiaggia e una sottile cornice d'erba scura
     const cs=lay.cs,bh=cs*H+5,x0=lay.ox-4,y0=lay.oy-4,wd=cs*W+8,hh=bh+1,sw=REDUCE?0:Math.sin(tick*1.3);
     ctx.save();ctx.lineJoin='round';
@@ -2109,7 +2122,7 @@ function draw(ts){
   // nebbia: si vede solo a 2 caselle dalle proprie unità
   const seen=new Set();
   if(nebbia)for(const u of g.units)if(u.o===0)for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.abs(xx)+Math.abs(yy)<=2)seen.add((u.x+xx)+','+(u.y+yy));
-  drawSea(dt/1000,w);
+  if(SEAON&&gpReady())drawSea(dt/1000,w);
   drawPlinth();
   if(!(GP.on&&(LOOK===5?groundOne(gelo,nebbia,seen):LOOK===6&&groundCells(gelo,nebbia,seen))))
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)drawBlock(x,y,tileAt(g,x,y),gelo,tick,nebbia&&!seen.has(x+','+y));
@@ -2425,9 +2438,11 @@ $('bTut').onclick=()=>startGame(true);
 $('bG3').onclick=()=>{G3=!G3;LS.set('isole-g3',G3?'1':'0');g3Label()};
 const LOOKN=['a caselle separate','continuo','continuo + linee sottili','continuo + sfumature','continuo e variato','tutt’uno (sfumato)','caselle separate su prato unico'];
 $('bLook').onclick=()=>{LOOK=(LOOK+1)%7;LS.set('isole-look',String(LOOK));lookLabel()};
+$('bSea').onclick=()=>{SEAON=!SEAON;LS.set('isole-mare',SEAON?'1':'0');seaLabel();size()};
+function seaLabel(){$('bSea').textContent='Mare attorno al campo (prova): '+(SEAON?'acceso':'spento');document.body.classList.toggle('sea',SEAON)}
 function lookLabel(){$('bLook').textContent='Terreno (prova): '+LOOKN[LOOK]}
 function g3Label(){$('bG3').textContent='Oggetti 3D (prova): '+(G3?'accesi':'spenti')}
-g3Label();lookLabel();
+g3Label();lookLabel();seaLabel();
 
 /* Adatta il menu iniziale allo schermo: scala la scheda (cornice compresa) se e' piu' alta o larga dello spazio disponibile */
 function fitStart(){
@@ -2464,11 +2479,11 @@ $('bMenu').onclick=()=>{$('ovEnd').hidden=true;buildSeg();contButton();$('ovStar
 
 /* menu di gioco (pausa): ritorno al menu principale e impostazioni senza uscire dalla partita */
 function vibLabel(){$('pVib').textContent='Vibrazione: '+(LS.get('isole-vib')==='0'?'spenta':'accesa')}
-function pSync(){$('pSnd').textContent=$('bSnd').textContent;$('pMus').textContent=$('bMus').textContent;$('pGP').textContent=$('bGP').textContent;$('pG3').textContent=$('bG3').textContent;$('pLook').textContent=$('bLook').textContent;vibLabel()}
+function pSync(){$('pSnd').textContent=$('bSnd').textContent;$('pMus').textContent=$('bMus').textContent;$('pGP').textContent=$('bGP').textContent;$('pG3').textContent=$('bG3').textContent;$('pLook').textContent=$('bLook').textContent;$('pSea').textContent=$('bSea').textContent;vibLabel()}
 $('bPause').onclick=()=>{pSync();$('ovPause').hidden=false};
 $('pBack').onclick=()=>{$('ovPause').hidden=true};
 $('pHome').onclick=()=>{try{saveGame()}catch(e){}$('ovPause').hidden=true;$('bMenu').click()};
-for(const [a,b] of [['pSnd','bSnd'],['pMus','bMus'],['pGP','bGP'],['pG3','bG3'],['pLook','bLook']])$(a).onclick=()=>{$(b).click();pSync()};
+for(const [a,b] of [['pSnd','bSnd'],['pMus','bMus'],['pGP','bGP'],['pG3','bG3'],['pLook','bLook'],['pSea','bSea']])$(a).onclick=()=>{$(b).click();pSync()};
 $('pVib').onclick=()=>{const off=LS.get('isole-vib')!=='0';LS.set('isole-vib',off?'0':'1');vibLabel();if(!off)buzz(30)};
 // Un tocco breve sceglie/muove/attacca; un dito che si sposta trascina la mappa; due dita zoomano.
 const ptrs=new Map();let gest=null;

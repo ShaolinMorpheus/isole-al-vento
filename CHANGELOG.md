@@ -2,6 +2,10 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v50 — 24 nov 2026 · Tornano le prove grafiche
+- Tasti «Grafica di prova», «Oggetti 3D», «Terreno (prova)» di nuovo nelle Impostazioni e nel menu di gioco (valgono le scelte salvate)
+- Mare attorno al campo: ora è una prova a parte, spenta di base (il campo torna com'era)
+
 ## v49 — 24 nov 2026 · Mare, spiaggia e onde attorno all'isola
 - Campo di gioco come isola nel mare: acque basse, schiuma animata, spiaggia, onde che scorrono (col vento nella sua direzione), riflessi di sole, ombre di nuvole, colori diversi con gelo e nebbia
 - Scheda meteo e monete in alto sistemate (niente testo a capo o tagliato col vento)
