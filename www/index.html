@@ -133,7 +133,8 @@ body.gpui .btn.alt[disabled]{border-image-source:url(assets/interfaccia/ui_botto
 body.gpui .btn:not(.alt){border-image:url(assets/interfaccia/ui_bottone_oro_normale.webp) 36 fill/12px stretch;color:#2a1d02}
 body.gpui .btn:not(.alt):active{border-image-source:url(assets/interfaccia/ui_bottone_oro_premuto.webp)}
 body.gpui .btn:not(.alt)[disabled]{border-image-source:url(assets/interfaccia/ui_bottone_oro_disattivo.webp);opacity:1}
-body.gpui .btn.pulse:not(.alt){border-image-source:url(assets/interfaccia/ui_bottone_oro_pulsante.webp);animation:none}
+body.gpui .btn.pulse:not(.alt){animation:plg 1.3s ease-in-out infinite}
+@keyframes plg{0%,100%{filter:drop-shadow(0 0 0 rgba(255,226,130,0))}50%{filter:drop-shadow(0 0 7px rgba(255,226,130,.95)) drop-shadow(0 0 14px rgba(255,200,80,.55)) brightness(1.07) saturate(1.08)}}
 body.gpui #zoomBox button{background:url(assets/interfaccia/ui_zoom_normale.webp) center/100% 100% no-repeat;border:0;-webkit-backdrop-filter:none;backdrop-filter:none}
 body.gpui #zoomBox button:active{background-image:url(assets/interfaccia/ui_zoom_premuto.webp)}
 body.gpui #zoomBox button[disabled]{background-image:url(assets/interfaccia/ui_zoom_disattivo.webp);opacity:1}
@@ -190,7 +191,7 @@ body.gpui #ovStart .btn{border:0;border-radius:0;padding:0 14px;background:none;
 body.gpui #ovStart .btn:not(.alt){box-sizing:border-box;min-height:76px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_oro_normale.webp) 60 fill/20px stretch;padding:0 0 4px;background:none;color:#3a2503;font-size:21px;line-height:1.15;animation:none}
 body.gpui #ovStart .btn:not(.alt):active{border-image-source:url(assets/menu/menu_bottone_oro_premuto.webp)}
 body.gpui #ovStart .btn:not(.alt)[disabled]{border-image-source:url(assets/menu/menu_bottone_oro_disattivo.webp)}
-body.gpui #ovStart .btn.pulse:not(.alt){border-image-source:url(assets/menu/menu_bottone_oro_pulsante.webp)}
+body.gpui #ovStart .btn.pulse:not(.alt){animation:plg 1.3s ease-in-out infinite}
 body.gpui #ovStart .btn.alt{box-sizing:border-box;min-height:64px!important;flex:none;display:flex;align-items:center;justify-content:center;text-align:center;border:20px solid transparent;border-image:url(assets/menu/menu_bottone_vetro_normale.webp) 60 fill/20px stretch;padding:0 0 3px;background:none;color:#0d3b47;font-size:19px;line-height:1.15}
 body.gpui #ovStart .btn.alt:active{border-image-source:url(assets/menu/menu_bottone_vetro_premuto.webp)}
 body.gpui #ovStart .btn.alt[disabled]{border-image-source:url(assets/menu/menu_bottone_vetro_disattivo.webp)}
@@ -214,7 +215,7 @@ body.gpui .btn[disabled]{color:#6f868c!important}
 body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.webp) 180 fill/60px stretch}
 body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-shadow:0 1px 3px rgba(12,70,88,.6)}
 
-@media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}#toast{transition:none}}
+@media (prefers-reduced-motion:reduce){.btn.pulse,body.gpui .btn.pulse:not(.alt),body.gpui #ovStart .btn.pulse:not(.alt){animation:none}body.gpui .btn.pulse:not(.alt){filter:drop-shadow(0 0 8px rgba(255,226,130,.85))}#toast{transition:none}}
 </style></head><body>
 <div id="boot"><img id="bootImg" src="assets/menu/menu_simbolo.png" alt=""><div class="bt">Isole al Vento</div><div class="bb"><i id="bootBar"></i></div><div class="bp" id="bootTxt">Preparo il gioco…</div></div>
 <script>
@@ -897,6 +898,11 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:54,d:'24 nov 2026',t:'Vulcano ben visibile e Fine turno pulito',n:[
+'Zona di danno del vulcano molto piu\' visibile: caselle piene arancio con bordo luminoso che pulsa e numeri −3 / −1 grandi con contorno scuro, gia\' dal round prima dell\'eruzione (piu\' tenui) e forti nel round dell\'eruzione',
+'Cenere ancora calda (−1) piu\' evidente, con lo stesso riquadro e numero grande',
+'Tasto «Fine turno» quando pulsa: alone luminoso morbido che segue la forma del bottone, senza il rettangolo attorno'
+]},
 {v:53,d:'24 nov 2026',t:'Piu\' spettacolo',n:[
 'Montagne a colori naturali: pietra calda con qualche muschio, senza neve bianca in cima',
 'Pedine piu\' grandi (anelli a terra e barra della vita inclusi); tasto «Dimensione pedine (prova)» nelle Impostazioni e nel menu di gioco: normali, grandi, molto grandi',
@@ -2218,6 +2224,10 @@ function drawVfx(dt){
   }
   ctx.globalAlpha=1;
 }
+function dangerLabel(x,y,txt,al){ // numero del danno nella casella: grande, con contorno scuro
+  const cs=lay.cs;ctx.save();ctx.globalAlpha=al;ctx.font=`700 ${Math.round(cs*.34)}px Fredoka, sans-serif`;ctx.textAlign='left';ctx.textBaseline='top';ctx.lineJoin='round';
+  ctx.lineWidth=4.5;ctx.strokeStyle='rgba(70,18,8,.92)';ctx.strokeText(txt,cx(x)+cs*.1,cy(y)+cs*.04);ctx.fillStyle='#fff1dc';ctx.fillText(txt,cx(x)+cs*.1,cy(y)+cs*.04);ctx.restore();
+}
 let last=0,tick=0,flash=0;
 function draw(ts){
   const dt=Math.min(50,ts-last||16);last=ts;tick+=dt/1000;
@@ -2289,9 +2299,10 @@ function draw(ts){
   if(started&&g.over===null&&g.hot&&g.hot.length){ // cenere ancora calda
     const ph=.55+.45*Math.sin(tick*4);
     for(const h of g.hot){const [fx0,fy0,fw0,fh0]=faceR(h.x,h.y,0);
-      if(geReady()){ctx.globalAlpha=.35+.35*ph;ctx.drawImage(GE.im.ui_casella_pericolo,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
-      else{ctx.fillStyle='rgba(255,110,50,'+(.14+.14*ph).toFixed(2)+')';rr(...faceR(h.x,h.y,1),6);ctx.fill()}
-      ctx.fillStyle='rgba(255,232,214,.9)';ctx.font=`600 ${Math.round(cs*.26)}px Fredoka, sans-serif`;ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('−1',cx(h.x)+cs*.12,cy(h.y)+cs*.08);ctx.textBaseline='alphabetic';}
+      ctx.fillStyle='rgba(255,80,34,'+(.18+.14*ph).toFixed(2)+')';rr(...faceR(h.x,h.y,1),6);ctx.fill();
+      if(geReady()){ctx.globalAlpha=.55+.35*ph;ctx.drawImage(GE.im.ui_casella_pericolo,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
+      ctx.strokeStyle='rgba(255,150,60,'+(.45+.35*ph).toFixed(2)+')';ctx.lineWidth=2.5;rr(...faceR(h.x,h.y,1),6);ctx.stroke();
+      dangerLabel(h.x,h.y,'−1',.95)}
   }
   // zona dell'eruzione: debole il round prima, forte nel round dell'eruzione
   const nErupt=eruptionRound(g)-g.round;
@@ -2300,13 +2311,11 @@ function draw(ts){
     for(let y=0;y<H;y++)for(let x=0;x<W;x++){
       const d=md({x,y},VOL);if(d<1||d>2)continue;
       const t=tileAt(g,x,y);if(t==='M'||t==='V'||t==='L')continue;
-      if(geReady()){const [fx0,fy0,fw0,fh0]=faceR(x,y,0);ctx.globalAlpha=nErupt===0?Math.min(1,(d===1?.92:.82)+.1*pulse):(d===1?.4:.25);ctx.drawImage(GE.im.ui_casella_pericolo,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
-      else{ctx.fillStyle=nErupt===0?`rgba(255,100,60,${(d===1?.22:.12)+.16*pulse})`:`rgba(255,120,70,${d===1?.1:.05})`;
-      rr(...faceR(x,y,1),6);ctx.fill()}
-      if(nErupt===0){
-        ctx.fillStyle='rgba(255,232,214,.92)';ctx.font=`600 ${Math.round(cs*.26)}px Fredoka, sans-serif`;ctx.textAlign='left';ctx.textBaseline='top';
-        ctx.fillText(d===1?'−3':'−1',cx(x)+cs*.12,cy(y)+cs*.08);ctx.textBaseline='alphabetic';
-      }
+      const n0=nErupt===0;
+      ctx.fillStyle='rgba(255,70,30,'+(n0?(d===1?.3:.2)+.16*pulse:(d===1?.2:.13)+.07*pulse).toFixed(3)+')';rr(...faceR(x,y,1),6);ctx.fill();
+      if(geReady()){const [fx0,fy0,fw0,fh0]=faceR(x,y,0);ctx.globalAlpha=n0?Math.min(1,(d===1?.92:.82)+.1*pulse):(d===1?.75:.55);ctx.drawImage(GE.im.ui_casella_pericolo,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
+      ctx.strokeStyle='rgba(255,150,60,'+(n0?.6+.35*pulse:.45+.15*pulse).toFixed(2)+')';ctx.lineWidth=n0?3:2;rr(...faceR(x,y,1),6);ctx.stroke();
+      dangerLabel(x,y,d===1?'−3':'−1',n0?.97:.8);
     }
   }
   // tracce delle ultime mosse del computer (solo dove le vedi)
