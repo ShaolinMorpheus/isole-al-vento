@@ -2,6 +2,13 @@
 
 (Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
 
+## v53 — 24 nov 2026 · Più spettacolo
+- Montagne a colori naturali (pietra calda, un po' di muschio, niente neve bianca)
+- Pedine più grandi; tasto «Dimensione pedine (prova)»: normali / grandi / molto grandi
+- Combattimento più spettacolare: scintille con coda, onda d'urto, arco di taglio, scia della freccia, numeri di danno più grandi, scossone a ogni colpo
+- Vulcano scenografico: fumo e bagliore che crescono verso l'eruzione; tremolio d'eruzione lento e ondeggiante (diverso da quello dei colpi), pioggia di cenere, vibrazione a onde
+- Schermate di vittoria (coriandoli) e sconfitta (pioggia) animate
+
 ## v52 — 24 nov 2026 · Menu che scorrono
 - Menu iniziale scorrevole con le tendine aperte; menu di gioco, registro e Recluta con cornice intera e lista scorrevole, «Chiudi» sempre visibile
 
