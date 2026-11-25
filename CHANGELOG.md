@@ -1,6 +1,12 @@
 # Isole al Vento — registro modifiche
 
-(Lo stesso registro è dentro il gioco: menu iniziale → «Novità e registro modifiche».)
+> **Versioni:** il gioco è in alpha. Il numero interno (v59, v58…) conta le uscite; in gioco si vede come «v0.5.9 alpha» (decine e unità separate: 58 → v0.5.8). Le note qui sotto continuano a essere scritte a ogni modifica ma **in gioco non sono visibili** finché non viene deciso (interruttore `SHOW_LOG` in `www/index.html`).
+
+(Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
+
+## v59 — 25 nov 2026 · Versione alpha, registro nascosto
+- La versione si vede come «v0.5.9 alpha» invece di «versione 59»
+- Il registro modifiche non è più leggibile in gioco (resta qui e nell'array `CHANGELOG`); si riattiva con `SHOW_LOG`
 
 ## v58 — 25 nov 2026 · Difficoltà della campagna
 - Nella scheda di ogni livello: Facile / Medio / Alta (scelta salvata). Insane c'è ma è bloccata col lucchetto

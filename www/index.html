@@ -1035,6 +1035,10 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:59,d:'25 nov 2026',t:'Versione alpha, registro nascosto',n:[
+'La versione si vede come «v0.5.9 alpha» (gioco ancora in alpha) invece di un numero grande',
+'Il registro modifiche non e\' piu\' leggibile in gioco: resta scritto qui e in CHANGELOG.md su GitHub e si rende visibile solo quando lo decide Davide (SHOW_LOG)'
+]},
 {v:58,d:'25 nov 2026',t:'Difficolta\' della campagna',n:[
 'Nella scheda di ogni livello puoi scegliere la difficolta\': Facile, Medio o Alta. La scelta resta salvata per i livelli successivi',
 'Facile: avversario piu\' lento e distratto, nemici un po\' piu\' fragili, tue unita\' con +1 vita, qualche moneta in piu\' e 2 round extra. Medio: avversario piu\' mite del normale e un piccolo aiuto in monete. Alta: avversario normale (mai il «difficile»), pensata per non essere un muro',
@@ -1305,6 +1309,10 @@ const CHANGELOG=[
  'Griglia 7×11, tre unità (Guerriero, Arciere, Esploratore), meteo (sereno, vento, pioggia, nebbia, gelo) e computer avversario.',
  'Partite provate con simulazioni computer contro computer.']}
 ];
+/* Registro modifiche: le note restano salvate qui sotto (e in CHANGELOG.md) ma NON si vedono in gioco finche' non lo decide Davide: basta mettere SHOW_LOG a true. In gioco si vede solo la versione. */
+const SHOW_LOG=false;
+/* Nome mostrato della versione: gioco in alpha. Il numero interno (v) conta le uscite; qui diventa 0.<decine>.<unita'> alpha (es. 58 -> v0.5.8 alpha). */
+const verName=v=>'v0.'+Math.floor(v/10)+'.'+(v%10)+' alpha';
 const LOG_NOTE='Le versioni 1–4 sono state ricostruite dopo, dalla cronologia del lavoro; dalla 5 il registro viene aggiornato a ogni modifica.';
 function logBuild(){
   $('logNote').textContent=LOG_NOTE;
@@ -1312,7 +1320,7 @@ function logBuild(){
   for(const e of CHANGELOG){
     const d=document.createElement('div');d.className='e';
     const h=document.createElement('h3'),sm=document.createElement('small');
-    sm.textContent='Versione '+e.v+' · '+e.d;h.appendChild(sm);h.appendChild(document.createTextNode(e.t));
+    sm.textContent=verName(e.v)+' · '+e.d;h.appendChild(sm);h.appendChild(document.createTextNode(e.t));
     const ul=document.createElement('ul');
     for(const x of e.n){const li=document.createElement('li');li.textContent=x;ul.appendChild(li)}
     d.appendChild(h);d.appendChild(ul);l.appendChild(d);
@@ -2856,7 +2864,8 @@ function fitStart(){
   document.querySelectorAll('#ovStart details').forEach(d=>d.addEventListener('toggle',()=>{if(!d.open)go()}))})();
 $('bGP').onclick=()=>{GP.on=!GP.on;LS.set('isole-gp',GP.on?'1':'0');if(GP.on)gpLoad();gpLabel()};
 gpLabel();
-$('bLog').textContent='Novità e registro modifiche · versione '+CHANGELOG[0].v;
+$('bLog').textContent=SHOW_LOG?'Novità e registro modifiche · '+verName(CHANGELOG[0].v):'Isole al Vento · '+verName(CHANGELOG[0].v);
+if(!SHOW_LOG){const b=$('bLog');b.style.textDecoration='none';b.style.pointerEvents='none';b.style.opacity='.85';b.tabIndex=-1;b.setAttribute('aria-disabled','true')}
 /* Cache sul telefono (service worker): se esce una nuova versione ricarica una volta per avere tutto coerente */
 if('serviceWorker' in navigator){
   const hadSW=!!navigator.serviceWorker.controller;let rl=false;
@@ -2864,7 +2873,7 @@ if('serviceWorker' in navigator){
   addEventListener('load',()=>{navigator.serviceWorker.register('sw.js?v='+CHANGELOG[0].v).catch(()=>{})});
 }
 
-$('bLog').onclick=()=>{logBuild();$('ovLog').hidden=false};
+$('bLog').onclick=()=>{if(!SHOW_LOG)return;logBuild();$('ovLog').hidden=false};
 $('bLogClose').onclick=()=>{$('ovLog').hidden=true};
 $('bAgain').onclick=()=>{$('seedIn').value='';startGame(false,0)};
 $('tutNext').onclick=tutNext;
