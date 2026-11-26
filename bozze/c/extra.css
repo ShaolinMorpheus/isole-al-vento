@@ -13,3 +13,19 @@ body.gpui #ovStart .dt[open] summary{margin:0 -6px;position:relative;top:-1px}
 body.gpui #ovStart .dt ul,body.gpui #ovStart .dtb,body.gpui #ovStart .dt .wl{margin:0;padding:10px 12px 8px 28px;background:none;border:0;border-radius:0;box-shadow:none;color:#eef9ff}
 body.gpui #ovStart .dtb,body.gpui #ovStart .dt .wl{padding-left:12px}
 body.gpui #ovStart .dt .wl>*{background:rgba(255,255,255,.14)!important;border-radius:12px}
+
+/* ===== Campagna (Blender) ===== */
+.cmBack,.cmChip,.cmTab,.cmJ,.cmJump{background:none!important;border:0!important;box-shadow:none!important;border-style:solid!important;border-width:12px!important;border-image:url(assets/interfaccia/ui_scuro_normale.webp) 36 fill/12px stretch!important;border-radius:0!important}
+.cmBack{width:48px;height:48px;box-sizing:border-box}
+.cmChip{height:44px;box-sizing:border-box;padding:0 4px}
+.cmTab{min-height:60px;box-sizing:border-box;padding:0 2px}
+.cmJ{height:42px;box-sizing:border-box;padding:0 2px}
+.cmJump{box-sizing:border-box;padding:0 2px}
+.cmTab[aria-selected=true],.cmJ.on{border-image:url(assets/interfaccia/ui_bottone_oro_normale.webp) 36 fill/12px stretch!important}
+.cmNode .md{background:url(assets/campagna/medaglia_oro.webp) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;color:#4a2f06;filter:drop-shadow(0 4px 4px rgba(10,40,50,.45))}
+.cmNode.done .md{background-image:url(assets/campagna/medaglia_verde.webp)!important;color:#073a2c}
+.cmNode.lock .md{background-image:url(assets/campagna/medaglia_grigia.webp)!important;color:#3d525a}
+.cmNode.boss .md{background-image:url(assets/campagna/medaglia_boss.webp)!important;color:#fff}
+.cmNode.boss.done .md{background-image:url(assets/campagna/medaglia_boss_vinto.webp)!important;color:#4a2f06}
+.cmNode.boss.lock .md{background-image:url(assets/campagna/medaglia_grigia.webp)!important}
+@keyframes cmPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 4px 4px rgba(10,40,50,.45))}50%{transform:scale(1.08);filter:drop-shadow(0 0 10px rgba(255,236,150,.95))}}
