@@ -1036,6 +1036,9 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:62,d:'26 nov 2026',t:'Caricamento piu sicuro',n:[
+  'Se una immagine non arriva alla prima apertura (rete lenta) il gioco riprova da solo: niente piu campo vuoto da riaprire',
+]},
 {v:61,d:'26 nov 2026',t:'Menu scorrevole, pannello stabile',n:[
 'Il menu principale ora scorre col dito anche con le sezioni aperte (prima lo scorrimento restava bloccato dentro la lista interna)',
 'Il pannello informazioni in basso in partita ha altezza fissa: toccando le pedine non cambia piu\' misura e il campo non si muove su e giu'
@@ -1463,20 +1466,21 @@ function gpMips(im){ // versioni dimezzate: ridurre di molto in un colpo solo sf
 }
 function gpLoad(){
   if(GP.loading)return;GP.loading=true;goLoad();guLoad();geLoad();gtLoad();
-  for(const n of GP.names){const im=new Image();im.onload=()=>{GP.mips[n]=gpMips(im)};im.src=GP.dir+n+'.png'}
+  for(const n of GP.names){imgRetry(GP.dir+n+'.png',im=>{GP.mips[n]=gpMips(im)})}
 }
 const GO={im:{},names:['pino_a','pino_b','pino_c','boschetto_a','boschetto_b','montagna_a','montagna_b','stazione_0','stazione_40','stazione_80','stazione_f00','stazione_f01','stazione_f02','stazione_f03','stazione_f04','stazione_f05','stazione_f06','stazione_f07','stazione_f08','stazione_f09','stazione_f10','stazione_f11','stazione_f12','stazione_f13','stazione_f14','stazione_f15','stazione_f16','stazione_f17','stazione_f18','stazione_f19','stazione_f20','stazione_f21','stazione_f22','stazione_f23','bandiera_oro_1','bandiera_oro_2','bandiera_blu_1','bandiera_blu_2','terreno_vulcano_calmo','terreno_vulcano_arde','terreno_vulcano_eruttato'],
   A:{pino_a:356,pino_b:296,pino_c:340,boschetto_a:316,boschetto_b:312,montagna_a:256,montagna_b:231,stazione_0:296,stazione_40:296,stazione_80:296,stazione_f00:296,stazione_f01:296,stazione_f02:296,stazione_f03:296,stazione_f04:296,stazione_f05:296,stazione_f06:296,stazione_f07:296,stazione_f08:296,stazione_f09:296,stazione_f10:296,stazione_f11:296,stazione_f12:296,stazione_f13:296,stazione_f14:296,stazione_f15:296,stazione_f16:296,stazione_f17:296,stazione_f18:296,stazione_f19:296,stazione_f20:296,stazione_f21:296,stazione_f22:296,stazione_f23:296,bandiera_oro_1:320,bandiera_oro_2:320,bandiera_blu_1:320,bandiera_blu_2:320}};
-function goLoad(){for(const n of GO.names){const im=new Image();im.onload=()=>{GO.im[n]=im};im.src='assets/oggetti/'+n+'.png'}}
+function imgRetry(src,cb,n){n=n||0;const im=new Image();im.onload=()=>cb(im);im.onerror=()=>{if(n<4)setTimeout(()=>imgRetry(src,cb,n+1),1500*(n+1))};im.src=src+(n?'?r='+n:'')} // se una immagine non arriva (rete lenta, prima apertura) riprova da sola
+function goLoad(){for(const n of GO.names)imgRetry('assets/oggetti/'+n+'.png',im=>{GO.im[n]=im})}
 const GU={im:{},H:{esploratore:264,guerriero:245,arciere:286,cavaliere:316,sciamano:294,lanciere:300,guaritore:280,balestriere:270,alfiere:320},T:{E:'esploratore',G:'guerriero',A:'arciere',K:'cavaliere',W:'sciamano',L:'lanciere',H:'guaritore',B:'balestriere',R:'alfiere'}};
-function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','blu'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz,im=new Image();im.onload=()=>{GU.im[n]=im};im.src='assets/pedine/'+n+'.png'}}
+function guLoad(){for(const t of Object.keys(GU.H))for(const c of['oro','blu'])for(const pz of['normale','stanca']){const n=t+'_'+c+'_'+pz;imgRetry('assets/pedine/'+n+'.png',im=>{GU.im[n]=im})}}
 function ICO(t){return ['G','A','E','K','W'].includes(t)?'interfaccia/icona_unita_'+GU.T[t]+'.png':'pedine/'+GU.T[t]+'_oro_normale.png'}
 function guReady(){return gpReady()&&!!GU.im.esploratore_oro_normale}
 const GE={im:{},names:['eff_goccia','eff_fiocco_a','eff_fiocco_b','eff_foglia_a','eff_foglia_b','eff_cenere','eff_colpo','eff_colpo_critico','eff_taglio','eff_freccia','eff_scintilla','eff_onda_vento','eff_lava_a','eff_lava_b','eff_fumo','eff_cenere_caduta','meteo_pioggia','meteo_nebbia','meteo_gelo','meteo_vento','ui_casella_libera','ui_casella_attacco','ui_casella_pericolo','ui_anello_selezione']};
 const GT={im:{},names:['terreno_terra_a','terreno_terra_b','terreno_terra_c','terreno_sabbia_a','terreno_sabbia_b','terreno_sabbia_c','terreno_erbasecca_a','terreno_erbasecca_b','terreno_erbasecca_c','terreno_fango_a','terreno_fango_b','terreno_sassi_a','terreno_sassi_b','terreno_sassi_c','bordo_sabbia_lago_a','bordo_sabbia_lago_b','dettaglio_fiori_a','dettaglio_fiori_b','dettaglio_fiori_c','dettaglio_ciuffi_a','dettaglio_ciuffi_b','dettaglio_ciuffi_c','dettaglio_sassi_a','dettaglio_sassi_b','dettaglio_sassi_c','dettaglio_funghi_a','dettaglio_funghi_b','dettaglio_foglie_a','dettaglio_foglie_b'],pr:['terreno_prato_c','terreno_prato_d','terreno_prato_e','terreno_prato_f','terreno_prato_g','terreno_prato_h']};
-function gtLoad(){for(const n of GT.names){const im=new Image();im.onload=()=>{GT.im[n]=im};im.src='assets/terreno-unico/'+n+'.png'}
+function gtLoad(){for(const n of GT.names){imgRetry('assets/terreno-unico/'+n+'.png',im=>{GT.im[n]=im})}
   for(const n of GT.pr){const im=new Image();im.onload=()=>{GT.im[n]=im};im.src='assets/terreno-unico/'+n+'.jpg'}}
-function geLoad(){for(const n of GE.names){const im=new Image();im.onload=()=>{GE.im[n]=im};im.src='assets/effetti/'+n+'.png'}}
+function geLoad(){for(const n of GE.names){imgRetry('assets/effetti/'+n+'.png',im=>{GE.im[n]=im})}}
 function geReady(){return gpReady()&&!!GE.im.ui_casella_libera&&!!GE.im.meteo_vento}
 function geSpr(n,x,y,size,rot,al){const im=GE.im[n];if(!im)return;ctx.save();ctx.globalAlpha=al===undefined?1:al;ctx.translate(x,y);if(rot)ctx.rotate(rot);ctx.drawImage(im,-size/2,-size/2,size,size);ctx.restore()}
 function geTiles(n,T,ox,oy,al){ // tessera ripetuta a tappeto, scorrevole

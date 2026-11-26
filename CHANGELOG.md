@@ -4,6 +4,9 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v62 — 26 nov 2026 · Caricamento più sicuro
+- Se un'immagine non arriva alla prima apertura (rete lenta) il gioco riprova da solo: niente più campo vuoto da riaprire
+
 ## v61 — 26 nov 2026 · Menu scorrevole, pannello stabile
 - Il menu principale scorre col dito anche con le sezioni aperte (lo scorrimento restava bloccato nella lista interna)
 - Il pannello informazioni in basso in partita ha altezza fissa: toccando le pedine il campo non si muove più su e giù
