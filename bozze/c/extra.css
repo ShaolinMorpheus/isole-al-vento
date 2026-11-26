@@ -1,0 +1,10 @@
+body.gpui #ovStart .card::after{transform:translate(-50%,-40%)}
+body.gpui #goalBar{border:12px solid transparent;border-image:url(assets/interfaccia/ui_hud_obiettivo.webp) 36 fill/12px stretch;background:none;border-radius:0;min-height:30px;padding:0 4px}
+body.gpui #bPause{background:url(assets/interfaccia/ui_zoom_normale.webp) center/100% 100% no-repeat;border:0;width:44px;height:44px;left:18px;top:18px}
+body.gpui #bPause:active{background-image:url(assets/interfaccia/ui_zoom_premuto.webp)}
+body.gpui #bPause svg{stroke:#0d3b47}
+body.gpui #bAid{background:url(assets/interfaccia/ui_hud_oro.webp) center/100% 100% no-repeat;border:0;width:44px;height:44px;left:18px;top:68px;color:#4a2a00}
+body.gpui #stage::before{content:'';position:absolute;inset:0;z-index:4;pointer-events:none;border:18px solid transparent;border-image:url(assets/interfaccia/ui_hud_campo.webp) 56 / 18px stretch}
+body.gpui #stage>#zoomBox{right:18px;bottom:20px}
+body.gpui #tutCard{background:none;border:0;isolation:isolate}
+body.gpui #tutCard::before{content:'';position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:22px solid transparent;border-image:url(assets/interfaccia/ui_pannello_scheda.webp) 66 fill/22px stretch}
