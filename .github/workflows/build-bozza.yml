@@ -1,0 +1,145 @@
+name: Crea APK Bozza
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths: ['bozze/**', '.github/workflows/build-bozza.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installa Capacitor
+        run: npm install
+
+      - name: Config della Bozza (altra app, altro indirizzo)
+        run: |
+          node -e "const f='capacitor.config.json';const c=JSON.parse(require('fs').readFileSync(f));c.appId='it.isolealvento.bozza';c.appName='Isole BOZZA';c.server.url='https://shaolinmorpheus.github.io/isole-al-vento/bozza/';require('fs').writeFileSync(f,JSON.stringify(c,null,2));console.log(c)"
+
+      - name: Crea il progetto Android
+        run: npx cap add android
+
+      - name: Permesso di vibrazione
+        run: |
+          f=android/app/src/main/AndroidManifest.xml
+          grep -q VIBRATE "$f" || sed -i 's#<application#<uses-permission android:name="android.permission.VIBRATE" />\n    <application#' "$f"
+          grep -n "VIBRATE" "$f"
+
+      - name: Solo in verticale
+        run: |
+          f=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<activity#<activity android:screenOrientation="portrait"#' "$f"
+          grep -n "screenOrientation" "$f"
+
+      - name: Icona del gioco (isola con vortice di vento)
+        run: |
+          find android/app/src/main/res -name 'ic_launcher*' -delete
+          cp -r android-icons/res/* android/app/src/main/res/
+          ls android/app/src/main/res/mipmap-xxxhdpi
+
+      - name: Schermo intero e orientamento libero
+        run: |
+          f=android/app/src/main/res/values/styles.xml
+          sed -i 's#</style>#<item name="android:windowFullscreen">true</item></style>#' "$f" || true
+          cat "$f"
+
+      - name: Modalità immersiva (nasconde la barra di Android)
+        run: |
+          f=$(find android/app/src/main/java -name MainActivity.java | head -1)
+          pkg=$(grep -m1 '^package' "$f")
+          cat > "$f" <<'JAVA'
+          PKGLINE
+          import android.os.Bundle;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+            @Override
+            public void onCreate(Bundle b) {
+              super.onCreate(b);
+              hideBars();
+            }
+            @Override
+            public void onWindowFocusChanged(boolean focus) {
+              super.onWindowFocusChanged(focus);
+              if (focus) hideBars();
+            }
+            @Override
+            public void onPause() {
+              super.onPause();
+              try { getBridge().getWebView().onPause(); getBridge().getWebView().pauseTimers(); } catch (Exception e) { }
+            }
+            @Override
+            public void onResume() {
+              super.onResume();
+              try { getBridge().getWebView().onResume(); getBridge().getWebView().resumeTimers(); } catch (Exception e) { }
+              hideBars();
+            }
+            private void hideBars() {
+              WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+              WindowInsetsControllerCompat c = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+              c.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+              c.hide(WindowInsetsCompat.Type.systemBars());
+            }
+          }
+          JAVA
+          sed -i "s|PKGLINE|$pkg|" "$f"
+          cat "$f"
+
+      - name: Firma fissa (così gli aggiornamenti si installano sopra la versione precedente)
+        run: |
+          mkdir -p ~/.android
+          cp debug.keystore ~/.android/debug.keystore
+          sed -i "s/versionCode 1/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0\"/versionName \"0.${{ github.run_number }}\"/" android/app/build.gradle
+          grep -n "versionCode\|versionName" android/app/build.gradle
+          # firma esplicita con la chiave del repo (la chiave in ~/.android non veniva usata)
+          cp debug.keystore android/app/fixed.keystore
+          sed -i '0,/^android {/s//android {\n    signingConfigs {\n        debug {\n            storeFile file("fixed.keystore")\n            storePassword "android"\n            keyAlias "androiddebugkey"\n            keyPassword "android"\n        }\n    }/' android/app/build.gradle
+          sed -n 1,25p android/app/build.gradle
+
+      - name: Compila l'APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Salva l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: isole-bozza-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Controlla la firma dell'APK (deve essere sempre la stessa)
+        run: |
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          AS=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          got=$($AS verify --print-certs "$apk" | grep -i "SHA-256" | head -1 | sed 's/.*: //' | tr -d ':' | tr 'A-F' 'a-f')
+          want=$(keytool -list -v -keystore debug.keystore -storepass android 2>/dev/null | grep "SHA256" | head -1 | sed 's/.*: //' | tr -d ':' | tr 'A-F' 'a-f')
+          echo "firma APK:   $got"; echo "firma attesa: $want"
+          [ "$got" = "$want" ] || { echo "FIRMA DIVERSA: build fermata"; exit 1; }
+
+      - name: Pubblica l'APK per scaricarlo direttamente dal telefono
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk isole-bozza.apk
+          gh release delete bozza -y --cleanup-tag || true
+          gh release create bozza isole-bozza.apk --title "APK Bozza grafica (build ${{ github.run_number }})" --notes "Bozza della nuova grafica del menu: app separata (Isole BOZZA), si installa accanto al gioco vero."

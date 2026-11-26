@@ -3,7 +3,7 @@ name: Pubblica il gioco
 on:
   push:
     branches: [main, master]
-    paths: ['www/**', '.github/workflows/pages.yml']
+    paths: ['www/**', 'bozze/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,18 @@ jobs:
         run: |
           sed -i "s/__BUILD__/${GITHUB_SHA}/" www/index.html
           printf '%s' "${GITHUB_SHA}" > www/v.txt
+      - name: Versione bozza della grafica (copia del gioco in /bozza/, il gioco vero non cambia)
+        run: |
+          if [ -d bozze/c ]; then
+            mkdir -p /tmp/bz && cp -r www/. /tmp/bz/
+            mkdir -p www/bozza && cp -r /tmp/bz/. www/bozza/
+            cp -r bozze/c/assets/. www/bozza/assets/
+            # cache e versione separate, scritta BOZZA, logo un po' piu' in basso
+            sed -i "s#register('sw.js?v='+CHANGELOG\[0\].v)#register('sw.js?v=bozzaC-'+CHANGELOG[0].v)#" www/bozza/index.html
+            sed -i "s#</head>#<style>body.gpui \#ovStart .card::after{transform:translate(-50%,-40%)}</style></head>#" www/bozza/index.html
+            sed -i "s#' alpha'#' alpha BOZZA C'#" www/bozza/index.html
+            grep -c "bozzaC-" www/bozza/index.html || true
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: www
