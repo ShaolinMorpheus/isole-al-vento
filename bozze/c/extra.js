@@ -1,0 +1,22 @@
+/* Bozza C: suoni piu' ricchi (file sintetizzati). Se un file manca, resta il suono di prima. */
+(function(){
+  var names=['tap','sel','turn','move','hit','kill','recruit','erupt','win','lose','draw','w_pioggia','w_vento','w_gelo','w_nebbia','w_sereno'];
+  var B={},loading=false,VOL={tap:.9,sel:.8,turn:.7,move:.8,hit:1,kill:1,recruit:.8,erupt:1,win:.9,lose:.9,draw:.9,w_pioggia:.8,w_vento:.9,w_gelo:.8,w_nebbia:.9,w_sereno:.8};
+  function load(){
+    if(loading)return;var a=acx();if(!a)return;loading=true;
+    names.forEach(function(n){fetch('assets/audio/'+n+'.mp3').then(function(r){return r.arrayBuffer()}).then(function(b){return new Promise(function(ok,ko){a.decodeAudioData(b,ok,ko)})}).then(function(d){B[n]=d}).catch(function(){})});
+  }
+  document.addEventListener('pointerdown',load,{passive:true});
+  function play(n){var a=acx();if(!a||!B[n])return false;var s=a.createBufferSource(),g=a.createGain();s.buffer=B[n];g.gain.value=VOL[n]||1;s.connect(g);g.connect(a.destination);s.start();return true}
+  var _sfx=sfx,_wx=weatherSfx;
+  sfx=function(k){
+    if(SND&&B[k]){var s=SND;SND=false;try{_sfx(k)}finally{SND=s}play(k);return}
+    _sfx(k);
+  };
+  weatherSfx=function(w){
+    if(!SND||!w)return _wx(w);
+    var n='w_'+(['pioggia','vento','gelo','nebbia'].indexOf(w.t)>=0?w.t:'sereno');
+    if(!B[n])return _wx(w);
+    duck(5);play(n);
+  };
+})();

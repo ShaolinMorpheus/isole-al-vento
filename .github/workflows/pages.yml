@@ -37,6 +37,7 @@ jobs:
             # cache e versione separate, scritta BOZZA, logo un po' piu' in basso
             sed -i "s#register('sw.js?v='+CHANGELOG\[0\].v)#register('sw.js?v=bozzaC-'+CHANGELOG[0].v)#" www/bozza/index.html
             python3 -c "import sys;f='www/bozza/index.html';h=open(f,encoding='utf-8').read();c=open('bozze/c/extra.css',encoding='utf-8').read();open(f,'w',encoding='utf-8').write(h.replace('</head>','<style>'+c+'</style></head>',1))"
+            if [ -f bozze/c/extra.js ]; then python3 -c "f='www/bozza/index.html';h=open(f,encoding='utf-8').read();c=open('bozze/c/extra.js',encoding='utf-8').read();m='window.Isole={';assert h.count(m)==1;open(f,'w',encoding='utf-8').write(h.replace(m,c+chr(10)+m,1))"; fi
             sed -i "s#' alpha'#' alpha BOZZA C'#" www/bozza/index.html
             grep -c "bozzaC-" www/bozza/index.html || true
           fi
