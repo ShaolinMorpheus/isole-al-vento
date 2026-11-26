@@ -8,3 +8,8 @@ body.gpui #stage::before{content:'';position:absolute;inset:0;z-index:4;pointer-
 body.gpui #stage>#zoomBox{right:18px;bottom:20px}
 body.gpui #tutCard{background:none;border:0;isolation:isolate}
 body.gpui #tutCard::before{content:'';position:absolute;inset:-1px;z-index:-1;pointer-events:none;border:22px solid transparent;border-image:url(assets/interfaccia/ui_pannello_scheda.webp) 66 fill/22px stretch}
+body.gpui #ovStart .dt[open]{box-sizing:border-box;margin:-2px 3px 4px;background:linear-gradient(#1688d4,#0e6db6);border:3px solid #4cc8f6;border-top:0;border-radius:0 0 22px 22px;padding-bottom:6px}
+body.gpui #ovStart .dt[open] summary{margin:0 -6px;position:relative;top:-1px}
+body.gpui #ovStart .dt ul,body.gpui #ovStart .dtb,body.gpui #ovStart .dt .wl{margin:0;padding:10px 12px 8px 28px;background:none;border:0;border-radius:0;box-shadow:none;color:#eef9ff}
+body.gpui #ovStart .dtb,body.gpui #ovStart .dt .wl{padding-left:12px}
+body.gpui #ovStart .dt .wl>*{background:rgba(255,255,255,.14)!important;border-radius:12px}
