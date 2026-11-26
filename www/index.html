@@ -1035,6 +1035,15 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:60,d:'26 nov 2026',t:'Stagione 1: 10 mondi',n:[
+'La campagna passa da 3 a 10 mondi e da 24 a 83 livelli (da 7 a 10 livelli per mondo), presentata come «Stagione 1»',
+'Nuovi mondi: Golfo delle Tempeste, Foresta dei Sussurri, Altopiani del Gelo, Valle dei Tuoni, Arcipelago Spezzato, Cratere Antico, Occhio del Ciclone. Ognuno ha il suo colore sulla mappa, il suo meteo e un boss finale',
+'Campi fino a 14×19, fino a 10 unità per parte nei mondi finali; obiettivi misti: stazioni, eliminazione, ondate, scorta del protetto, boss. Nuovo: scorta anche con ondate (4-2) e protetto che non deve cadere',
+'In cima alla mappa la barra con i numeri dei mondi per saltare subito al mondo che vuoi; in fondo il cartello «Stagione 2 · Arriverà prossimamente»',
+'Stelle richieste per aprire i mondi: 32, 42, 53, 65, 76, 88 e 100 (dal mondo 4 al 10)',
+'Nuove imprese (livelli completati, stelle, nemici, boss, difficoltà Alta e un traguardo per ogni mondo); «Leggenda» ora richiede tutti gli 83 livelli',
+'Testi delle stelle bonus con il nome del protetto; livelli bilanciati con simulazioni (Medio e Alta alla portata)'
+]},
 {v:59,d:'25 nov 2026',t:'Versione alpha, registro nascosto',n:[
 'La versione si vede come «v0.5.9 alpha» (gioco ancora in alpha) invece di un numero grande',
 'Il registro modifiche non e\' piu\' leggibile in gioco: resta scritto qui e in CHANGELOG.md su GitHub e si rende visibile solo quando lo decide Davide (SHOW_LOG)'

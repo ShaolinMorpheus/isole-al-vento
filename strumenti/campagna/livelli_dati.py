@@ -7,13 +7,16 @@ Tipi di unità: G guerriero, A arciere, E esploratore, K cavaliere, W sciamano, 
 WORLDS = [
     dict(id=1, name='Arcipelago dell’Alba', sub='Dove il vento ti insegna a giocare', need=0,
          story='Le prime isole, prati e boschi sotto un cielo quasi sempre limpido. Impara a muoverti, a tenere le stazioni e a leggere il vento.',
-         boss='Capitano Burrasca', hue=0, sat=1.0, bri=1.0, accent='#ffd24a'),
+         boss='Capitano Burrasca', hue=0, sat=1.0, bri=1.0, accent='#ffd24a',
+         wf='saturate(1.05) brightness(.96)', wg='linear-gradient(rgba(255,244,190,.1),rgba(20,70,60,.16))'),
     dict(id=2, name='Monti della Nebbia', sub='Vedi poco, pensa molto', need=10,
          story='Laghi freddi e valli piene di nebbia. Qui il computer si nasconde: scorta, resisti e fidati dei tuoi esploratori.',
-         boss='Signora della Nebbia', hue=150, sat=.85, bri=.95, accent='#9fe3ff'),
+         boss='Signora della Nebbia', hue=150, sat=.85, bri=.95, accent='#9fe3ff',
+         wf='hue-rotate(125deg) saturate(.7) brightness(1.0)', wg='linear-gradient(rgba(220,236,246,.38),rgba(90,120,150,.3))'),
     dict(id=3, name='Terre di Fuoco', sub='Il vulcano non perdona', need=26,
          story='Cenere, gelo improvviso e un vulcano che erutta senza avvisare. Il nemico è forte: usa tutto quello che hai imparato.',
-         boss='Re del Vulcano', hue=-150, sat=1.1, bri=.92, accent='#ff9a5a'),
+         boss='Re del Vulcano', hue=-150, sat=1.1, bri=.92, accent='#ff9a5a',
+         wf='hue-rotate(-140deg) saturate(1.1) brightness(.82)', wg='linear-gradient(rgba(70,20,10,.24),rgba(255,110,40,.22))'),
 ]
 
 GAE = ['G', 'A', 'E']
@@ -288,3 +291,9 @@ SPECS = [
          weather=dict(pool=['sereno', 'vento', 'pioggia', 'nebbia', 'gelo']), allow=ALL,
          stars=[('rounds', 20), ('lost', 3)], reward=dict(bonus=150)),
 ]
+
+
+# Stagione 1, mondi 4-10
+from livelli_mondi4 import WORLDS_B, SPECS_B
+WORLDS = WORLDS + WORLDS_B
+SPECS = SPECS + SPECS_B

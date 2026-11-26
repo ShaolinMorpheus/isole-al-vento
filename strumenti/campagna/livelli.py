@@ -203,9 +203,16 @@ STAR_TXT = {
     'lost': lambda v: 'Non perdere nessuna unità' if v == 0 else ('Perdi al massimo %d unità' % v),
     'kills': lambda v: 'Sconfiggi almeno %d nemici' % v,
     'noaid': lambda v: 'Vinci senza usare aiuti',
-    'vipsafe': lambda v: 'Il messaggero non viene mai colpito',
+    'vipsafe': lambda v: 'Il protetto non subisce mai danni',
     'units': lambda v: 'Finisci con almeno %d unità' % v,
 }
+
+def star_txt(t, v, units):
+    if t == 'vipsafe':
+        for u in units['p']:
+            if len(u) > 3 and u[3].get('vip') and u[3].get('name'):
+                return '%s non subisce mai danni' % u[3]['name']
+    return STAR_TXT[t](v)
 
 def make_level(spec):
     g, info = build(spec)
@@ -221,7 +228,7 @@ def make_level(spec):
         'ai': spec.get('ai', {'mode': 'stations'}), 'lvl': spec.get('lvl', 'normale'),
         'weather': spec.get('weather', {}),
         'allow': spec.get('allow'),
-        'stars': [{'t': t, 'v': v, 'txt': STAR_TXT[t](v)} for (t, v) in spec.get('stars', [])],
+        'stars': [{'t': t, 'v': v, 'txt': star_txt(t, v, units)} for (t, v) in spec.get('stars', [])],
         'reward': spec.get('reward', {}),
     }
     if spec.get('aiOv'): lv['aiOv'] = spec['aiOv']

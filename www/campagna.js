@@ -32,6 +32,7 @@ const worldDone=w=>wLv(w).every(l=>done(l.id));
 function worldOpen(w){const W=WORLDS.find(x=>x.id===w);if(!W)return false;return w===1||(worldDone(w-1)&&starsTotal()>=W.need)}
 function unlocked(l){if(!worldOpen(l.world))return false;const ws=wLv(l.world),i=ws.findIndex(x=>x.id===l.id);return i===0||done(ws[i-1].id)}
 const currentLevel=()=>LV.find(l=>unlocked(l)&&!done(l.id))||null;
+const topIn=(n,root)=>{let y=0;while(n&&n!==root){y+=n.offsetTop;n=n.offsetParent}return y};
 const nextOf=l=>{const i=LV.indexOf(l);return LV[i+1]||null};
 const firstLevelOf=t=>LV.find(l=>(l.allow||[]).includes(t));
 const unitOpen=t=>'GAE'.includes(t)||(firstLevelOf(t)&&done(firstLevelOf(t).id));
@@ -64,6 +65,11 @@ const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 
 /* ------------------------------------------------ testi dei livelli */
 function goalText(l){
+  const r=goalText0(l),v=(l.p||[]).find(u=>u[3]&&u[3].vip);
+  if(v&&l.goal.t!=='reach')r[1]+=' '+(v[3].name||'Il protetto')+' non deve cadere: se cade, perdi.';
+  return r;
+}
+function goalText0(l){
   const G=l.goal||{t:'stations'};
   if(G.t==='elim')return ['Elimina tutti i nemici','Non servono le stazioni: basta eliminare ogni unità nemica.'];
   if(G.t==='survive')return ['Resisti fino alla fine del round '+l.rounds,'Il nemico arriva a ondate. Se resta un nemico sulla tua base a fine round, perdi.'];
@@ -118,13 +124,13 @@ function renderAll(){
   refreshHome();
   if(root.hidden)return;
   setTop();const b=$('cmBody'),keep=tab==='map'?b.scrollTop:0;
-  b.innerHTML='';
+  b.innerHTML='';b.onscroll=null;
   ({map:renderMap,daily:renderDaily,arsenal:renderArsenal,goals:renderGoals})[tab](b);
-  if(tab==='map'){if(focusId){const n=b.querySelector('[data-id="'+focusId+'"]');if(n){b.scrollTop=Math.max(0,n.offsetTop+n.offsetParent.offsetTop-b.clientHeight/2+30)}focusId=null}else b.scrollTop=keep}
+  if(tab==='map'){if(focusId){const n=b.querySelector('[data-id="'+focusId+'"]');if(n){b.scrollTop=Math.max(0,topIn(n,b)-b.clientHeight/2+30)}focusId=null}else b.scrollTop=keep;if(b.onscroll)b.onscroll()}
 }
 function openCamp(t,fid){
   tab=t||'map';focusId=fid||null;
-  if(tab==='map'&&!fid){const c=currentLevel();focusId=c?c.id:null}
+  if(tab==='map'&&!fid){const c=currentLevel()||[...LV].reverse().find(l=>done(l.id));focusId=c?c.id:null}
   $('ovStart').hidden=true;$('ovEnd').hidden=true;sheet.hidden=true;root.hidden=false;renderAll();
 }
 function closeCamp(){root.hidden=true;sheet.hidden=true;IAV.showStart();refreshHome()}
@@ -135,23 +141,38 @@ sheet.addEventListener('click',e=>{if(e.target.closest('button'))IAV.sfx('tap')}
 
 /* ------------------------------------------------ mappa dei mondi */
 const PX=[34,66,38,70,32,64,40,58];
-const DEC={1:['pino_a','boschetto_a','pino_b','montagna_b','pino_c','boschetto_b','pino_a','pino_b'],2:['montagna_a','pino_b','montagna_b','pino_c','montagna_a','pino_a','montagna_b','pino_b'],3:['terreno_vulcano_arde','montagna_a','montagna_b','terreno_vulcano_calmo','montagna_a','pino_c','montagna_b','terreno_vulcano_arde']};
+const DEC={1:['pino_a','boschetto_a','pino_b','montagna_b','pino_c','boschetto_b','pino_a','pino_b'],2:['montagna_a','pino_b','montagna_b','pino_c','montagna_a','pino_a','montagna_b','pino_b'],3:['terreno_vulcano_arde','montagna_a','montagna_b','terreno_vulcano_calmo','montagna_a','pino_c','montagna_b','terreno_vulcano_arde'],
+4:['boschetto_a','pino_a','montagna_b','boschetto_b','pino_c','montagna_a','pino_b','boschetto_a'],
+5:['pino_a','pino_b','boschetto_a','pino_c','boschetto_b','pino_a','pino_b','boschetto_a'],
+6:['montagna_a','pino_c','montagna_b','montagna_a','pino_b','montagna_b','pino_c','montagna_a','montagna_b'],
+7:['pino_b','montagna_a','boschetto_b','pino_a','montagna_b','pino_c','boschetto_a','montagna_a'],
+8:['boschetto_a','pino_a','boschetto_b','pino_b','boschetto_a','pino_c','boschetto_b','pino_a','boschetto_a'],
+9:['terreno_vulcano_arde','montagna_a','terreno_vulcano_eruttato','montagna_b','terreno_vulcano_calmo','montagna_a','terreno_vulcano_arde','montagna_b'],
+10:['montagna_b','pino_b','terreno_vulcano_calmo','montagna_a','pino_c','boschetto_a','montagna_b','terreno_vulcano_arde','pino_a','montagna_a']};
+const S1_NAME='Stagione 1';
 function renderMap(b){
   const sv=IAV.saveInfo();
   if(sv&&byId[sv.id]){
     const c=el('div','cmP cmCont');c.innerHTML=`<div style="flex:1;min-width:0"><h3>Partita in corso</h3><p>${byId[sv.id].id} · ${byId[sv.id].name} · round ${sv.round}</p></div>`;
     const bt=el('button','cmBtn','Riprendi');bt.type='button';bt.onclick=()=>{root.hidden=true;IAV.resume()};c.appendChild(bt);b.appendChild(c);
   }
+  const dn=doneCount(),all=dn===LV.length;
+  const se=el('div','cmP cmSeason');se.innerHTML=`<h3>${S1_NAME}${all?' · completata!':''}</h3><p>${WORLDS.length} mondi · ${LV.length} livelli · ${dn} completati · ⭐ ${starsTotal()}/${LV.length*3}</p><div class="acBar"><i style="width:${Math.round(dn/LV.length*100)}%"></i></div>`;b.appendChild(se);
+  const jump=el('div','cmJump');jump.setAttribute('role','navigation');jump.setAttribute('aria-label','Vai al mondo');
+  const secs={};
+  for(const W of WORLDS){const j=el('button','cmJ'+(worldOpen(W.id)?'':' lock'),worldOpen(W.id)?String(W.id):W.id+lockI);j.type='button';j.dataset.w=W.id;j.setAttribute('aria-label','Mondo '+W.id+': '+W.name);
+    j.onclick=()=>{const t=secs[W.id];if(t)b.scrollTo({top:Math.max(0,topIn(t,b)-jump.offsetHeight-8),behavior:'auto'})};jump.appendChild(j)}
+  b.appendChild(jump);
   for(const W of WORLDS){
     const ws=wLv(W.id),open=worldOpen(W.id),H=ws.length*104+64;
-    const sec=el('section','cmW w'+W.id);
+    const sec=el('section','cmW w'+W.id);sec.dataset.w=W.id;if(W.wf)sec.style.setProperty('--wf',W.wf);if(W.wg)sec.style.setProperty('--wg',W.wg);
     const hd=el('div','cmP cmWH',`<h3>Mondo ${W.id} · ${W.name}</h3><p>${W.sub}</p><div class="cmWS">${star(true)}${worldStars(W.id)}/${ws.length*3}</div>`);
     sec.appendChild(hd);
     const path=el('div','cmPath');path.style.height=H+'px';
     const pts=ws.map((l,i)=>({x:i===ws.length-1?50:PX[i%PX.length],y:48+i*104}));
     let d='M'+pts[0].x+' '+pts[0].y;for(let i=1;i<pts.length;i++){const a=pts[i-1],c=pts[i],my=(a.y+c.y)/2;d+=' C'+a.x+' '+my+' '+c.x+' '+my+' '+c.x+' '+c.y}
     path.innerHTML=`<svg class="cmLine" viewBox="0 0 100 ${H}" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="5" stroke-dasharray="1 11" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
-    DEC[W.id].forEach((n,i)=>{if(i>=ws.length)return;const left=i%2===0,im=el('img','cmDec');im.src='assets/oggetti/'+n+'.png';im.alt='';const sz=n.startsWith('terreno')?96:n.startsWith('montagna')?84:60;im.style.width=sz+'px';im.style[left?'left':'right']='0px';im.style.top=(40+i*104-sz/3)+'px';im.style.opacity=.95;path.appendChild(im)});
+    (DEC[W.id]||DEC[1]).forEach((n,i)=>{if(i>=ws.length)return;const left=i%2===0,im=el('img','cmDec');im.src='assets/oggetti/'+n+'.png';im.alt='';const sz=n.startsWith('terreno')?96:n.startsWith('montagna')?84:60;im.style.width=sz+'px';im.style[left?'left':'right']='0px';im.style.top=(40+i*104-sz/3)+'px';im.style.opacity=.95;path.appendChild(im)});
     ws.forEach((l,i)=>{
       const un=open&&unlocked(l),dn=done(l.id),cur=un&&!dn,boss=l.goal.t==='boss';
       const n=el('button','cmNode'+(dn?' done':'')+(un?'':' lock')+(cur?' cur':'')+(boss?' boss':''));n.type='button';n.dataset.id=l.id;
@@ -162,9 +183,19 @@ function renderMap(b){
     });
     sec.appendChild(path);
     if(!open){const g=el('div','cmGate');g.innerHTML=`<div class="cmP"><h3>${lockI.replace('<svg','<svg style="width:28px;height:28px;vertical-align:-6px;margin-right:4px"')}Mondo bloccato</h3><p>${gateText(W)}</p></div>`;sec.appendChild(g)}
-    b.appendChild(sec);
+    b.appendChild(sec);secs[W.id]=sec;
   }
-  const f=el('div','cmP');f.innerHTML=`<h3>Fine della mappa… per ora</h3><p>Altri mondi arriveranno. Intanto rigioca i livelli per le stelle mancanti e prova la Sfida del giorno.</p>`;b.appendChild(f);
+  // in fondo alla mappa: la prossima stagione, ancora chiusa
+  const s2=el('section','cmW s2');s2.style.setProperty('--wf','grayscale(.75) brightness(.5)');s2.style.setProperty('--wg','linear-gradient(rgba(10,16,34,.5),rgba(10,16,34,.35))');
+  const pp=el('div','cmPath');pp.style.height='170px';
+  [[28,40],[52,92],[74,50]].forEach(q=>{const n=el('div','cmNode lock');n.style.left=q[0]+'%';n.style.top=q[1]+'px';n.innerHTML='<div class="md">?</div>';pp.appendChild(n)});
+  s2.appendChild(pp);
+  const c2=el('div','cmP cmS2');c2.innerHTML=`${lockI.replace('<svg','<svg class="lk"')}<h3>Stagione 2</h3><p>Nuovi mondi, nuovi nemici e nuove sfide.</p><span class="soon">Arriverà prossimamente</span>`;s2.appendChild(c2);
+  b.appendChild(s2);
+  const sy=()=>{const y=b.scrollTop+jump.offsetHeight+30;let cur=WORLDS[0].id;for(const W of WORLDS){if(topIn(secs[W.id],b)<=y)cur=W.id}
+    jump.querySelectorAll('.cmJ').forEach(j=>{const on=+j.dataset.w===cur;j.classList.toggle('on',on);if(on&&!j._seen){}});
+    const a=jump.querySelector('.cmJ.on');if(a){const l=a.offsetLeft-jump.clientWidth/2+a.offsetWidth/2;if(Math.abs(jump.scrollLeft-l)>6)jump.scrollLeft=l}};
+  b.onscroll=sy;
 }
 function gateText(W){
   const p=WORLDS.find(x=>x.id===W.id-1);
@@ -261,18 +292,27 @@ const ACH=[
   ['first','Prima vittoria','Vinci un livello della campagna',()=>S.stats.wins,1,10,'sword'],
   ['lv5','Cadetto','Completa 5 livelli',doneCount,5,20,'flag'],
   ['lv12','Veterano','Completa 12 livelli',doneCount,12,40,'flag'],
-  ['lv24','Leggenda','Completa tutti i livelli',doneCount,LV.length,120,'crown'],
+  ['lv24','Maresciallo','Completa 24 livelli',doneCount,24,60,'flag'],
+  ['lv40','Condottiero','Completa 40 livelli',doneCount,40,70,'flag'],
+  ['lv60','Stratega','Completa 60 livelli',doneCount,60,100,'flag'],
+  ['lvAll','Leggenda','Completa tutti i livelli della Stagione 1',doneCount,LV.length,250,'crown'],
   ['st10','Cacciatore di stelle','Raccogli 10 stelle',starsTotal,10,20,'star'],
   ['st30','Costellazione','Raccogli 30 stelle',starsTotal,30,50,'star'],
   ['st60','Cielo stellato','Raccogli 60 stelle',starsTotal,60,100,'star'],
-  ['stAll','Tre stelle ovunque','Raccogli tutte le stelle',starsTotal,LV.length*3,250,'star'],
+  ['st120','Via Lattea','Raccogli 120 stelle',starsTotal,120,150,'star'],
+  ['st180','Notte di stelle','Raccogli 180 stelle',starsTotal,180,200,'star'],
+  ['stAll','Tre stelle ovunque','Raccogli tutte le stelle',starsTotal,LV.length*3,400,'star'],
   ['k25','Spada e scudo','Sconfiggi 25 nemici',()=>S.stats.kills,25,15,'sword'],
   ['k100','Mietitore','Sconfiggi 100 nemici',()=>S.stats.kills,100,30,'sword'],
   ['k300','Flagello dei mari','Sconfiggi 300 nemici',()=>S.stats.kills,300,80,'sword'],
+  ['k600','Tempesta di spade','Sconfiggi 600 nemici',()=>S.stats.kills,600,120,'sword'],
+  ['k1000','Leggenda del vento','Sconfiggi 1000 nemici',()=>S.stats.kills,1000,200,'sword'],
   ['perf1','Senza un graffio','Vinci un livello senza perdere unità',()=>S.stats.perfect,1,15,'shield'],
   ['perf8','Imbattibile','Vinci 8 livelli senza perdere unità',()=>S.stats.perfect,8,60,'shield'],
+  ['perf25','Intoccabile','Vinci 25 livelli senza perdere unità',()=>S.stats.perfect,25,150,'shield'],
   ['boss1','Cacciatore di boss','Sconfiggi un boss',()=>S.stats.boss,1,30,'crown'],
-  ['boss3','Sovrano dei boss','Sconfiggi tutti i boss',()=>S.stats.boss,WORLDS.length,100,'crown'],
+  ['boss5','Domatore di boss','Sconfiggi 5 boss',()=>S.stats.boss,5,60,'crown'],
+  ['boss3','Sovrano dei boss','Sconfiggi tutti i boss',()=>S.stats.boss,WORLDS.length,200,'crown'],
   ['rain','Sotto la pioggia','Vinci un livello mentre piove',()=>S.stats.wx.pioggia||0,1,15,'cloud'],
   ['fog','Nella nebbia','Vinci un livello con la nebbia',()=>S.stats.wx.nebbia||0,1,15,'cloud'],
   ['ice','Sul ghiaccio','Vinci un livello durante il gelo',()=>S.stats.wx.gelo||0,1,15,'cloud'],
@@ -281,7 +321,8 @@ const ACH=[
   ['er30','Signore del fuoco','Assisti a 30 eruzioni',()=>S.stats.erupt,30,50,'flame'],
   ['fast','Lampo','Vinci un livello in 6 round o meno',()=>S.stats.fast,1,20,'bolt'],
   ['alta1','Sfida accettata','Vinci un livello in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,1,20,'bolt'],
-  ['alta24','Maestro del vento','Vinci tutti i livelli in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,LV.length,150,'crown'],
+  ['alta20','Sfidante','Vinci 20 livelli in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,20,80,'bolt'],
+  ['alta24','Maestro del vento','Vinci tutti i livelli in difficoltà Alta',()=>LV.filter(l=>dOf(S.lv[l.id])===2).length,LV.length,400,'crown'],
   ['aid5','Un aiutino','Usa 5 aiuti',()=>S.stats.aids,5,10,'pearl'],
   ['up3','Fabbro','Compra 3 potenziamenti',upgCount,3,15,'hammer'],
   ['up10','Armaiolo','Compra 10 potenziamenti',upgCount,10,40,'hammer'],
@@ -290,7 +331,14 @@ const ACH=[
   ['d10','Abitudinario','Completa 10 sfide del giorno',()=>S.stats.daily,10,60,'cal'],
   ['w1','Alba conquistata','Completa il Mondo 1',()=>worldDone(1)?1:0,1,50,'flag'],
   ['w2','Oltre la nebbia','Completa il Mondo 2',()=>worldDone(2)?1:0,1,50,'flag'],
-  ['w3','Fuoco domato','Completa il Mondo 3',()=>worldDone(3)?1:0,1,80,'flag']
+  ['w3','Fuoco domato','Completa il Mondo 3',()=>worldDone(3)?1:0,1,80,'flag'],
+  ['w4','Dopo la tempesta','Completa il Mondo 4',()=>worldDone(4)?1:0,1,90,'flag'],
+  ['w5','Voce del bosco','Completa il Mondo 5',()=>worldDone(5)?1:0,1,100,'flag'],
+  ['w6','Cuore di ghiaccio','Completa il Mondo 6',()=>worldDone(6)?1:0,1,110,'flag'],
+  ['w7','Domatore di fulmini','Completa il Mondo 7',()=>worldDone(7)?1:0,1,120,'flag'],
+  ['w8','Signore dell’arcipelago','Completa il Mondo 8',()=>worldDone(8)?1:0,1,130,'flag'],
+  ['w9','Cratere domato','Completa il Mondo 9',()=>worldDone(9)?1:0,1,150,'flag'],
+  ['w10','Occhio del ciclone','Completa il Mondo 10',()=>worldDone(10)?1:0,1,250,'crown']
 ].map(a=>({id:a[0],n:a[1],d:a[2],val:a[3],goal:a[4],rew:a[5],ic:a[6]}));
 const achReady=()=>ACH.filter(a=>!S.ach[a.id]&&a.val()>=a.goal).length;
 function renderGoals(b){
@@ -444,7 +492,8 @@ function finishDaily(g,win,box){
 function refreshHome(){
   const s=$('campSub');if(!s)return;
   const c=currentLevel(),n=doneCount();
-  s.textContent=c?('Livello '+c.id+' · ⭐ '+starsTotal()+'/'+LV.length*3):('Completata! ⭐ '+starsTotal()+'/'+LV.length*3);
+  const gw=WORLDS.find(W=>!worldOpen(W.id));
+  s.textContent=c?('Livello '+c.id+' · ⭐ '+starsTotal()+'/'+LV.length*3):(n===LV.length?('Stagione 1 completata! ⭐ '+starsTotal()+'/'+LV.length*3):(gw?('Mondo '+gw.id+': servono ⭐ '+gw.need+' · hai '+starsTotal()):'⭐ '+starsTotal()+'/'+LV.length*3));
   const bd=$('campBadge');if(bd){const k=achReady()+(S.daily.done!==todayStr()?1:0);bd.textContent=k;bd.hidden=!k}
   const ba=$('bAds');if(ba)ba.textContent='Pubblicità (prova): '+(ADS.on()?'accesa':'spenta');
 }

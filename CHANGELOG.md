@@ -4,6 +4,15 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v60 — 26 nov 2026 · Stagione 1: 10 mondi
+- La campagna passa da 3 a 10 mondi e da 24 a 83 livelli (7–10 livelli per mondo), presentata come «Stagione 1»
+- Nuovi mondi: Golfo delle Tempeste, Foresta dei Sussurri, Altopiani del Gelo, Valle dei Tuoni, Arcipelago Spezzato, Cratere Antico, Occhio del Ciclone; ognuno con colore di mappa, meteo e boss proprio
+- Campi fino a 14×19 e fino a 10 unità per parte nei mondi finali; scorta anche in modalità ondate (4-2)
+- Mappa: barra per saltare ai mondi, intestazione «Stagione 1» con avanzamento, cartello «Stagione 2 · Arriverà prossimamente» in fondo
+- Stelle per aprire i mondi: 32, 42, 53, 65, 76, 88, 100 (mondi 4–10)
+- Nuove imprese (livelli, stelle, nemici, boss, difficoltà Alta, un traguardo per mondo); «Leggenda» = tutti gli 83 livelli
+- Dati dei livelli generati da `strumenti/campagna/livelli_dati.py` + `livelli_mondi4.py`; bilanciati con simulazioni IA contro IA
+
 ## v59 — 25 nov 2026 · Versione alpha, registro nascosto
 - La versione si vede come «v0.5.9 alpha» invece di «versione 59»
 - Il registro modifiche non è più leggibile in gioco (resta qui e nell'array `CHANGELOG`); si riattiva con `SHOW_LOG`

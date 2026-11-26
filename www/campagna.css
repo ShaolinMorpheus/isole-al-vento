@@ -34,9 +34,6 @@
 .cmW{position:relative;margin:0 0 14px;border-radius:22px;overflow:hidden;isolation:isolate}
 .cmW::before{content:'';position:absolute;inset:0;z-index:-2;background:url(assets/menu/sfondo_menu.webp) center/cover no-repeat;filter:var(--wf,none)}
 .cmW::after{content:'';position:absolute;inset:0;z-index:-1;background:var(--wg,none)}
-.cmW.w1{--wf:saturate(1.05) brightness(.96);--wg:linear-gradient(rgba(255,244,190,.1),rgba(20,70,60,.16))}
-.cmW.w2{--wf:hue-rotate(125deg) saturate(.7) brightness(1.0);--wg:linear-gradient(rgba(220,236,246,.38),rgba(90,120,150,.3))}
-.cmW.w3{--wf:hue-rotate(-140deg) saturate(1.1) brightness(.82);--wg:linear-gradient(rgba(70,20,10,.24),rgba(255,110,40,.22))}
 .cmWH{margin:10px 10px 0}
 .cmWH .cmWS{position:absolute;right:12px;top:11px;display:flex;align-items:center;gap:3px;font:600 15px var(--disp);color:#ffe9a6}
 .cmWH .cmWS svg{width:17px;height:17px}
@@ -58,8 +55,22 @@
 .cmNode .st svg{width:17px;height:17px}
 .cmNode .nm{margin-top:2px;font:600 12px/1.1 var(--disp);text-shadow:0 1px 3px rgba(8,40,52,.9);text-align:center;max-width:100px}
 .cmDec{position:absolute;pointer-events:none;filter:drop-shadow(0 4px 3px rgba(8,40,52,.35))}
-.cmGate{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(8,36,50,.5);padding:20px;text-align:center}
+.cmGate{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-start;justify-content:center;background:rgba(8,36,50,.55);padding:150px 20px 20px;text-align:center}
 .cmGate .cmP{margin:0;max-width:300px}
+.cmW{scroll-margin-top:60px}
+.cmSeason{margin-bottom:8px}.cmSeason h3{font-size:21px}
+.cmJump{position:sticky;top:0;z-index:6;display:flex;gap:6px;margin:0 0 10px;padding:6px 6px;overflow-x:auto;scrollbar-width:none;background:rgba(8,44,58,.9);border-radius:16px;border:1.5px solid rgba(255,240,190,.5);box-shadow:0 3px 8px rgba(6,36,48,.45)}
+.cmJump::-webkit-scrollbar{display:none}
+.cmJ{flex:none;min-width:38px;height:36px;border-radius:12px;border:1.5px solid rgba(255,240,190,.5);background:rgba(10,52,66,.85);color:#d8eef2;font:600 17px var(--disp);padding:0 8px;display:flex;align-items:center;justify-content:center;gap:2px}
+.cmJ svg{width:13px;height:13px;margin-left:2px}
+.cmJ.lock{opacity:.6}
+.cmJ.on{background:linear-gradient(#ffe9a0,#f2c258);color:#4a2f06;border-color:#fff3c8;box-shadow:0 2px 0 #a8741f;opacity:1}
+.cmW.s2{margin-top:6px}
+.cmW.s2 .cmNode .md{font-size:26px}
+.cmS2{text-align:center;margin:0 10px 14px}
+.cmS2 .lk{width:40px;height:40px;display:block;margin:0 auto 4px;color:#ffe9a6}
+.cmS2 h3{font-size:24px}
+.cmS2 .soon{display:inline-block;margin-top:9px;padding:6px 16px;border-radius:15px;background:rgba(10,52,66,.9);border:1.5px solid rgba(255,240,190,.75);font:600 16px var(--disp);color:#ffe9a6;text-shadow:none}
 .cmCont{display:flex;align-items:center;gap:10px;margin:0 0 10px}
 .cmCont .cmBtn{flex:1}
 /* scheda livello */
