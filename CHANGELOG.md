@@ -4,6 +4,10 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v61 — 26 nov 2026 · Menu scorrevole, pannello stabile
+- Il menu principale scorre col dito anche con le sezioni aperte (lo scorrimento restava bloccato nella lista interna)
+- Il pannello informazioni in basso in partita ha altezza fissa: toccando le pedine il campo non si muove più su e giù
+
 ## v60 — 26 nov 2026 · Stagione 1: 10 mondi
 - La campagna passa da 3 a 10 mondi e da 24 a 83 livelli (7–10 livelli per mondo), presentata come «Stagione 1»
 - Nuovi mondi: Golfo delle Tempeste, Foresta dei Sussurri, Altopiani del Gelo, Valle dei Tuoni, Arcipelago Spezzato, Cratere Antico, Occhio del Ciclone; ognuno con colore di mappa, meteo e boss proprio
