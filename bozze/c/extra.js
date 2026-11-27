@@ -13,6 +13,7 @@
   document.addEventListener('pointerdown',function(e){if(e.target.closest&&e.target.closest('#ovStart button'))T0=Date.now()},true);
   function quiet(){return Date.now()-T0<6000}
   sfx=function(k){
+    if(k==='turn')return;
     if(quiet()&&k!=='sel')return;
     if(SND&&B[k]){var s=SND;SND=false;try{_sfx(k)}finally{SND=s}play(k);return}
     _sfx(k);
@@ -50,12 +51,13 @@
   });
 })();
 
-/* Bozza C: barre vita avversario sempre dentro il campo; finche' un nemico a piena vita non si e' mosso non mostra la barra. */
+/* Bozza C: barre vita avversario sempre dentro il campo; all'inizio partita restano nascoste finche' un nemico non si muove, poi compaiono su tutte e restano. */
 (function(){
-  var _hp=hpBar;
+  var _hp=hpBar,lastG=null,seen=false;
   hpBar=function(u,x,hy,hw){
-    if(u.o===1&&!u.moved&&!u.done&&Math.max(0,u.hv===undefined?u.hp:u.hv)>=mhp(u))return;
-    var top=Math.max(9,Math.round(lay.cs*.22))*0+4;
-    return _hp(u,x,Math.max(hy,top),hw);
+    if(g!==lastG){lastG=g;seen=false}
+    if(!seen&&(g.round>1||g.units.some(function(v){return v.o===1&&(v.moved||v.done)})))seen=true;
+    if(u.o===1&&!seen)return;
+    return _hp(u,x,Math.max(hy,4),hw);
   };
 })();
