@@ -49,3 +49,13 @@
     o.onclick=function(){o.remove()};document.body.appendChild(o);
   });
 })();
+
+/* Bozza C: barre vita avversario sempre dentro il campo; finche' un nemico a piena vita non si e' mosso non mostra la barra. */
+(function(){
+  var _hp=hpBar;
+  hpBar=function(u,x,hy,hw){
+    if(u.o===1&&!u.moved&&!u.done&&Math.max(0,u.hv===undefined?u.hp:u.hv)>=mhp(u))return;
+    var top=Math.max(9,Math.round(lay.cs*.22))*0+4;
+    return _hp(u,x,Math.max(hy,top),hw);
+  };
+})();
