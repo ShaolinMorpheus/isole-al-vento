@@ -51,13 +51,32 @@
   });
 })();
 
-/* Bozza C: barre vita avversario sempre dentro il campo; all'inizio partita restano nascoste finche' un nemico non si muove, poi compaiono su tutte e restano. */
+/* Bozza C: barra vita con cornice Blender; avversario nascosto finche' non si muove (poi su tutte); sempre dentro il campo. */
 (function(){
-  var _hp=hpBar,lastG=null,seen=false;
+  var _hp=hpBar,lastG=null,seen=false,FR=new Image();FR.src='assets/hp/ui_hp_barra.webp';
   hpBar=function(u,x,hy,hw){
     if(g!==lastG){lastG=g;seen=false}
     if(!seen&&(g.round>1||g.units.some(function(v){return v.o===1&&(v.moved||v.done)})))seen=true;
     if(u.o===1&&!seen)return;
-    return _hp(u,x,Math.max(hy,4),hw);
+    hy=Math.max(hy,5);
+    if(!FR.complete||!FR.naturalWidth)return _hp(u,x,hy,hw);
+    var cs=lay.cs,bh=Math.max(9,Math.round(cs*.22)),hx=x-hw/2,hv=Math.max(0,u.hv===undefined?u.hp:u.hv),f=hv/mhp(u);
+    ctx.fillStyle='rgba(8,24,32,.92)';rr(hx,hy,hw,bh,bh/2);ctx.fill();
+    ctx.save();rr(hx,hy,hw,bh,bh/2);ctx.clip();
+    var gr=ctx.createLinearGradient(0,hy,0,hy+bh),c1=f>.55?'#7fe6cf':f>.28?'#ffd36b':'#ff8a7a',c2=f>.55?'#2fa58f':f>.28?'#d69220':'#c53a2c';
+    gr.addColorStop(0,c1);gr.addColorStop(1,c2);ctx.fillStyle=gr;ctx.fillRect(hx,hy,Math.max(0,hw*f),bh);
+    ctx.fillStyle='rgba(255,255,255,.28)';ctx.fillRect(hx,hy+1,Math.max(0,hw*f),bh*.32);ctx.restore();
+    var fw=hw/.69,fh=bh/.76;ctx.drawImage(FR,x-fw/2,hy+bh/2-fh/2,fw,fh);
+    ctx.font='800 '+Math.round(bh*.92)+'px Nunito, system-ui, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.lineWidth=2.2;ctx.strokeStyle='rgba(8,18,26,.9)';ctx.lineJoin='round';var tx=String(Math.ceil(hv-.001));ctx.strokeText(tx,x,hy+bh/2+.5);ctx.fillStyle='#fff';ctx.fillText(tx,x,hy+bh/2+.5);
+    ctx.textBaseline='alphabetic';
+    if(u.boss||u.vip){
+      var R=bh*.82,bx=hx-R*.95-bh*.3,by=hy+bh/2;
+      ctx.save();ctx.translate(bx,by);ctx.lineJoin='round';ctx.lineWidth=2;ctx.strokeStyle='rgba(8,18,26,.95)';
+      ctx.fillStyle=u.boss?'#ef6a5a':'#6fd0ff';ctx.beginPath();
+      if(u.boss){ctx.moveTo(-R,R*.7);ctx.lineTo(-R,-R*.4);ctx.lineTo(-R*.5,R*.1);ctx.lineTo(0,-R*.8);ctx.lineTo(R*.5,R*.1);ctx.lineTo(R,-R*.4);ctx.lineTo(R,R*.7);ctx.closePath()}
+      else{for(var i=0;i<10;i++){var a=-Math.PI/2+i*Math.PI/5,r0=i%2?R*.45:R;ctx.lineTo(Math.cos(a)*r0,Math.sin(a)*r0)}ctx.closePath()}
+      ctx.stroke();ctx.fill();ctx.restore();
+    }
   };
 })();
