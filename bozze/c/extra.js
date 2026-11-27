@@ -9,11 +9,16 @@
   document.addEventListener('pointerdown',load,{passive:true});
   function play(n){var a=acx();if(!a||!B[n])return false;var s=a.createBufferSource(),g=a.createGain();s.buffer=B[n];g.gain.value=VOL[n]||1;s.connect(g);g.connect(a.destination);s.start();return true}
   var _sfx=sfx,_wx=weatherSfx;
+  var T0=0;
+  document.addEventListener('pointerdown',function(e){if(e.target.closest&&e.target.closest('#ovStart button'))T0=Date.now()},true);
+  function quiet(){return Date.now()-T0<6000}
   sfx=function(k){
+    if(quiet()&&k!=='sel')return;
     if(SND&&B[k]){var s=SND;SND=false;try{_sfx(k)}finally{SND=s}play(k);return}
     _sfx(k);
   };
   weatherSfx=function(w){
+    if(quiet())return;
     if(!SND||!w)return _wx(w);
     var n='w_'+(['pioggia','vento','gelo','nebbia'].indexOf(w.t)>=0?w.t:'sereno');
     if(!B[n])return _wx(w);
