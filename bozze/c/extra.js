@@ -20,3 +20,27 @@
     duck(5);play(n);
   };
 })();
+
+/* Bozza C: Arsenale con icone Blender (vita/attacco/passi/gittata) e foto ingrandibile al tocco. */
+(function(){
+  var IC={Vita:'vita',Attacco:'attacco',Passi:'passi',Gittata:'gittata'};
+  function fix(){
+    var l=document.querySelectorAll('.arRow .tx > span:not([data-ic])');
+    for(var i=0;i<l.length;i++){
+      var s=l[i],m=s.textContent.match(/^Vita (\d+) · Attacco (\d+) · Passi (\d+) · Gittata (\d+)/);
+      s.setAttribute('data-ic','1');if(!m)continue;
+      var h='',k=['Vita','Attacco','Passi','Gittata'];
+      for(var j=0;j<4;j++)h+='<span class="stc" title="'+k[j]+'"><img src="assets/icone/'+IC[k[j]]+'.webp" alt="'+k[j]+'"><b>'+m[j+1]+'</b></span>';
+      s.innerHTML=h;s.className='stRow';
+    }
+  }
+  new MutationObserver(fix).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('click',function(e){
+    var im=e.target.closest&&e.target.closest('.arRow img.sp');
+    if(!im)return;
+    var nm=im.parentNode.querySelector('.tx b');
+    var o=document.createElement('div');o.className='spZoom';
+    o.innerHTML='<img src="'+im.src+'" alt=""><div>'+(nm?nm.textContent:'')+'</div>';
+    o.onclick=function(){o.remove()};document.body.appendChild(o);
+  });
+})();
