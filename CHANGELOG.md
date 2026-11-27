@@ -4,6 +4,9 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v63 — 27 nov 2026 · Pedine in alto non più tagliate
+- Sopra la mappa c'è ora un po' di spazio: le pedine della prima riga non vengono più tagliate dalla cornice a inizio partita
+
 ## v62 — 26 nov 2026 · Caricamento più sicuro
 - Se un'immagine non arriva alla prima apertura (rete lenta) il gioco riprova da solo: niente più campo vuoto da riaprire
 

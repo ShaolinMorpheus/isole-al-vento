@@ -1036,6 +1036,9 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:63,d:'27 nov 2026',t:'Pedine in alto non piu tagliate',n:[
+  'Sopra la mappa c e ora un po di spazio: le pedine della prima riga non vengono piu tagliate dalla cornice a inizio partita',
+]},
 {v:62,d:'26 nov 2026',t:'Caricamento piu sicuro',n:[
   'Se una immagine non arriva alla prima apertura (rete lenta) il gioco riprova da solo: niente piu campo vuoto da riaprire',
 ]},
@@ -1704,11 +1707,12 @@ function recSheet(){
 /* --- disegno --- */
 /* --- camera: la mappa intera sta nello schermo (zoom 1); si può ingrandire e trascinare --- */
 const ZMAX=2.6;
+const TOPPAD=.6;
 const cam={z:1,ox:0,oy:0,fit:30,ready:false};
 function camClamp(){
-  const cs=cam.fit*cam.z,th=Math.round(cs*.27),bw=cs*W,bh=cs*H+th,m=8;
+  const cs=cam.fit*cam.z,th=Math.round(cs*.27),bw=cs*W,bh=cs*H+th+cs*TOPPAD,m=8;
   cam.ox=bw+2*m<=lay.cw?(lay.cw-bw)/2:Math.min(m,Math.max(lay.cw-bw-m,cam.ox));
-  cam.oy=bh+2*m<=lay.ch?(lay.ch-bh)/2+cs*.05:Math.min(m+cs*.12,Math.max(lay.ch-bh-m,cam.oy));
+  cam.oy=bh+2*m<=lay.ch?(lay.ch-bh)/2+cs*.05+cs*TOPPAD:Math.min(m+cs*.12+cs*TOPPAD,Math.max(lay.ch-bh-m,cam.oy));
 }
 function camLayout(){
   const cs=cam.fit*cam.z,dz=Math.round(cs*(gpReady()?.04:.24));
@@ -1731,7 +1735,7 @@ function size(){
   ctx.setTransform(d,0,0,d,0,0);
   const prev={cs:lay.cs,ox:lay.ox,oy:lay.oy,cw:lay.cw,ch:lay.ch};
   const pad=SEAON?8:3;
-  cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2)/(H+(GP.on?.12:.38)))));
+  cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2)/(H+(GP.on?.12:.38)+TOPPAD))));
   lay.cw=r.width;lay.ch=r.height;lay.dpr=d;
   if(cam.ready&&cam.z>1&&prev.cw>0){ // mantiene al centro ciò che si stava guardando
     const u=(prev.cw/2-prev.ox)/prev.cs,v=(prev.ch/2-prev.oy)/prev.cs,cs=cam.fit*cam.z;
