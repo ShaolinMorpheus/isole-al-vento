@@ -30,7 +30,7 @@
       var s=l[i],m=s.textContent.match(/^Vita (\d+) · Attacco (\d+) · Passi (\d+) · Gittata (\d+)/);
       s.setAttribute('data-ic','1');if(!m)continue;
       var h='',k=['Vita','Attacco','Passi','Gittata'];
-      for(var j=0;j<4;j++)h+='<span class="stc" title="'+k[j]+'"><img src="assets/icone/'+IC[k[j]]+'.webp" alt="'+k[j]+'"><b>'+m[j+1]+'</b></span>';
+      for(var j=0;j<4;j++)h+='<span class="stc" title="'+k[j]+'"><img src="assets/icone/'+IC[k[j]]+'.webp" alt="'+k[j]+'"><b>'+m[j+1]+'</b><small>'+k[j]+'</small></span>';
       s.innerHTML=h;s.className='stRow';
     }
   }

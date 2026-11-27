@@ -38,8 +38,9 @@ body.gpui .stat .c{font-size:15px;line-height:1.05}
 body.gpui .stat .c img{width:18px;height:18px;vertical-align:-4px}
 
 /* Arsenale: statistiche con icone */
-.arRow .tx span.stRow{display:flex;gap:10px;flex-wrap:wrap;margin:3px 0 1px}
-.stRow .stc{display:inline-flex;align-items:center;gap:2px}
+.arRow .tx span.stRow{display:flex;gap:8px;flex-wrap:wrap;margin:3px 0 1px}
+.stRow .stc{display:inline-flex;flex-direction:column;align-items:center;gap:0;min-width:46px}
+.stRow .stc small{display:block;font-size:10.5px;line-height:1.1;color:#d9f1f4}
 .stRow .stc img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(8,40,52,.5))}
 .stRow .stc b{display:inline!important;font:600 16px var(--disp,inherit)!important}
 .arRow img.sp{cursor:zoom-in}
