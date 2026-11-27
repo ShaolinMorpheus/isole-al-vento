@@ -29,3 +29,10 @@ body.gpui #ovStart .dt .wl>*{background:rgba(255,255,255,.14)!important;border-r
 .cmNode.boss.done .md{background-image:url(assets/campagna/medaglia_boss_vinto.webp)!important;color:#4a2f06}
 .cmNode.boss.lock .md{background-image:url(assets/campagna/medaglia_grigia.webp)!important}
 @keyframes cmPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 4px 4px rgba(10,40,50,.45))}50%{transform:scale(1.08);filter:drop-shadow(0 0 10px rgba(255,236,150,.95))}}
+
+/* pannello Round: il testo non esce piu' dal bordo */
+body.gpui .stat{align-self:stretch;min-height:58px;box-sizing:border-box;padding:0 10px!important;gap:0!important;justify-content:center}
+body.gpui .stat .r{font-size:11.5px;line-height:1.05}
+body.gpui .stat .r small{font-size:10.5px;line-height:1.1}
+body.gpui .stat .c{font-size:15px;line-height:1.05}
+body.gpui .stat .c img{width:18px;height:18px;vertical-align:-4px}
