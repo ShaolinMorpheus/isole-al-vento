@@ -52,7 +52,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 body.sea #stage::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:15px;box-shadow:inset 0 0 30px rgba(6,45,66,.38)}
 body.gpui #stage>button,body.gpui #stage>#zoomBox,body.gpui #stage>#toast{z-index:3}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#toast{position:absolute;left:50%;bottom:10px;z-index:4;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
+#toast{position:relative;flex:1;min-width:0;align-self:center;text-align:center;white-space:normal!important;line-height:1.15;font-size:13px!important;padding:5px 10px!important;border-radius:14px!important;max-height:42px;overflow:hidden;z-index:4;background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
 #toast.on{opacity:1}
 .foot{display:flex;flex-direction:column;gap:4px}
 #bPause{position:relative;z-index:3;flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(15,36,51,.82);display:flex;align-items:center;justify-content:center;padding:0}
@@ -255,14 +255,14 @@ setTimeout(finish,25000);
   <div id="tools">
     <button type="button" id="bAid" aria-label="Aiuti" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M18 6l-3.6 3.6M6 18l3.6-3.6M18 18l-3.6-3.6"/></svg><span id="aidN"></span></button>
     <button type="button" id="bPause" aria-label="Menu di gioco"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <span class="tsp"></span>
+    <div id="toast" role="status"></div>
     <div id="zoomBox" role="group" aria-label="Zoom della mappa">
       <button type="button" id="zIn" aria-label="Ingrandisci"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
       <button type="button" id="zOut" aria-label="Riduci"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
       <button type="button" id="zFit" aria-label="Mostra tutta la mappa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
   </div>
-  <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div></div>
+  <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas></div>
   <div id="goalBar" hidden></div>
   <div class="foot">
     <div id="info"></div>
@@ -466,6 +466,14 @@ function densify(m,r){
     if(!any)break;
   }
 }
+// Il vulcano deve restare sempre visibile: niente alberi o montagne sopra di lui (le chiome salgono dalla riga sotto).
+function openVol(m,vx,vy){
+  for(let y=vy;y<=vy+2;y++)for(let x=vx-1;x<=vx+1;x++){
+    if(y<0||y>=m.length||x<0||x>=m[0].length||(x===vx&&y===vy))continue;
+    if(m[y][x]==='F'||m[y][x]==='M')m[y][x]='P';
+  }
+  return m;
+}
 function genMap(seed){
   for(let k=0;k<80;k++){
     const r=rng(seed*31+k+1);
@@ -507,7 +515,7 @@ function newGame(seed,off){
   useBoard(null);
   seed=seed||((Math.random()*1e9)|0)+1;
   off=off?1:0;
-  const g={seed,off,bonus:[0,0],map:genMap(seed),wx:genWeather(seed),round:1,turn:off,first:off,step:0,coins:[3,3],units:[],over:null,why:'',nid:1,fx:[],log:[],trail:[],windN:0,thawN:0,erupted:false,eruptN:0,ev:[]};
+  const g={seed,off,bonus:[0,0],map:openVol(genMap(seed),VOL.x,VOL.y),wx:genWeather(seed),round:1,turn:off,first:off,step:0,coins:[3,3],units:[],over:null,why:'',nid:1,fx:[],log:[],trail:[],windN:0,thawN:0,erupted:false,eruptN:0,ev:[]};
   const add=(t,o,x,y)=>g.units.push(mkUnit(g,t,o,x,y));
   add('G',0,CX,H-2);add('A',0,CX-1,H-1);add('E',0,CX+1,H-1);
   add('G',1,CX,1);add('A',1,CX+1,0);add('E',1,CX-1,0);
@@ -540,6 +548,7 @@ function newLevel(def,opt){
     else if(ch==='T')cells.push([x,y]);
     map[y][x]=t;
   }
+  if(vol)openVol(map,vol[0],vol[1]);
   const G=Object.assign({t:'stations'},def.goal||{});if(G.t==='reach'&&!G.cells)G.cells=cells;
   const board={W:w,H:h,base,st,vol,erupt:def.erupt||4,maxr:def.rounds||24,maxu:def.maxu||8,hold:G.hold||3};
   useBoard({board});
@@ -1041,6 +1050,10 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:66,d:'28 nov 2026',t:'Vulcano sempre visibile, messaggi fuori dalla mappa',n:[
+  'Niente piu alberi o montagne che coprono il vulcano',
+  'Il messaggio nero sta nella riga dei comandi, fuori dalla mappa, e resta piu a lungo',
+]},
 {v:65,d:'28 nov 2026',t:'Comandi davvero fuori dalla mappa, Cura a scelta',n:[
   'Menu, aiuti e zoom stanno in una riga sopra la mappa, fuori dal campo: niente tocchi per sbaglio',
   'Il messaggio nero (meteo ecc.) ora compare in basso nella mappa',
@@ -1691,7 +1704,7 @@ function tutEnd(){
 function tutNext(){if(!tut)return;if(tut.i>=TUT.length-1){tutEnd();return}tut.i++;tutRender()}
 function tutCheck(){if(tut&&TUT[tut.i].done&&TUT[tut.i].done())tutNext()}
 let toastT=0;
-function toast(t,ms=1400){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),fast?10:ms)}
+function toast(t,ms=1400){ms=Math.max(ms,4500);const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove('on'),fast?10:ms)}
 
 function legend(){
   $('wl').innerHTML=Object.keys(WE).map(k=>`<div><b>${WE[k].n}</b>${WE[k].d}</div>`).join('');
@@ -2987,7 +3000,7 @@ window.IAV={
   unitImg:t=>'assets/pedine/'+GU.T[t]+'_oro_normale.png',
   unitImgBlu:t=>'assets/pedine/'+GU.T[t]+'_blu_normale.png',
   showStart:()=>{buildSeg();contButton();$('ovStart').hidden=false},
-  boardRows:seed=>{useBoard(null);const m=genMap(seed),r=m.map(row=>row.map(c=>c==='P'?'.':c==='C'?'.':c));r[BASE[0].y][BASE[0].x]='1';r[BASE[1].y][BASE[1].x]='2';return r.map(x=>x.join(''))}
+  boardRows:seed=>{useBoard(null);const m=openVol(genMap(seed),VOL.x,VOL.y),r=m.map(row=>row.map(c=>c==='P'?'.':c==='C'?'.':c));r[BASE[0].y][BASE[0].x]='1';r[BASE[1].y][BASE[1].x]='2';return r.map(x=>x.join(''))}
 };
 /* appoggio per le prove automatiche */
 window.Isole={setLook:(n)=>{LOOK=n;LS.set('isole-look',String(n))},

@@ -4,6 +4,10 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v66 — 28 nov 2026 · Vulcano sempre visibile, messaggi fuori dalla mappa
+- Niente più alberi o montagne che coprono il vulcano (mappe casuali e campagna)
+- Il messaggio nero sta nella riga dei comandi, fuori dalla mappa, e resta più a lungo
+
 ## v65 — 28 nov 2026 · Comandi davvero fuori dalla mappa, Cura a scelta
 - Menu, aiuti e zoom stanno in una riga sopra la mappa, fuori dal campo
 - Il messaggio nero (meteo ecc.) compare in basso nella mappa
