@@ -109,6 +109,7 @@ root.innerHTML=`<div class="cmTop"><button type="button" class="cmBack" id="cmBa
 document.body.appendChild(root);
 const sheet=el('div','ov');sheet.id='ovCmSheet';sheet.hidden=true;document.body.appendChild(sheet);
 const aid=el('div','ov');aid.id='ovAid';aid.hidden=true;document.body.appendChild(aid);
+IAV.onUsed=k=>{S.boost[k]--;S.stats.aids++;save();renderAll()};
 const adOv=el('div','ov');adOv.id='ovAd';adOv.hidden=true;adOv.innerHTML='<div class="adBox"><div class="adVid">4</div><p></p><button type="button" class="cmBtn" id="adClose" hidden>Prendi la ricompensa</button></div>';document.body.appendChild(adOv);
 {const b=el('div','adBan','Spazio pubblicitario (prova)');b.hidden=true;$('ovStart').appendChild(b)}
 let tab='map',focusId=null;
@@ -410,7 +411,7 @@ IAV.onAid=()=>{
     const r=el('div','cmP arBoost');r.style.margin='0';
     r.innerHTML=(BOOST[k].img?`<img src="${BOOST[k].img}" alt="">`:`<img src="${IAV.unitImg('G')}" alt="">`)+`<div class="tx"><b>${BOOST[k].n}</b><span>${BOOST[k].d}</span></div>`;
     const bt=el('button','cmBtn',used[k]?'Usato':'Usa ×'+S.boost[k]);bt.type='button';bt.style.cssText='flex:none;min-width:84px';bt.disabled=!!used[k]||S.boost[k]<1;
-    bt.onclick=()=>{const res=IAV.useBoost(k);if(res.ok){S.boost[k]--;S.stats.aids++;save();aid.hidden=true;renderAll()}else note(res.msg,1700)};
+    bt.onclick=()=>{const res=IAV.useBoost(k);if(res.ok&&res.pending){aid.hidden=true}else if(res.ok){S.boost[k]--;S.stats.aids++;save();aid.hidden=true;renderAll()}else note(res.msg,1700)};
     r.appendChild(bt);list.appendChild(r);
   }
   sc.appendChild(list);

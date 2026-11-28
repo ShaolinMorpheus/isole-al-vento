@@ -771,7 +771,7 @@ function boostUse(g,k){
   }else if(k==='cura'){
     const hurt=g.units.filter(u=>u.o===0&&u.hp<mhp(u));
     if(!hurt.length)return {ok:false,msg:'Nessuna unità ferita.'};
-    if(hurt.length===1){const u=hurt[0],n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}else g.healPick=true;
+    if(hurt.length===1){const u=hurt[0],n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}else{g.healPick=true;return {ok:true,pending:true}}
   }else if(k==='rinforzo'){
     if(g.units.filter(u=>u.o===0).length>=MAXU)return {ok:false,msg:'Hai già '+MAXU+' unità.'};
     const c=rfCell(g,0);if(!c)return {ok:false,msg:'Nessun posto libero sulla base.'};
@@ -1046,7 +1046,7 @@ const CHANGELOG=[
   'Il messaggio nero (meteo ecc.) ora compare in basso nella mappa',
   'Cornice gialla attorno alla mappa piu sottile: la mappa e piu grande',
   'Il Guaritore torna come prima: cura da solo le unita vicine a inizio turno',
-  'L aiuto Cura della campagna lo decidi tu: tocchi l unita ferita da curare e torna a piena vita',
+  'L aiuto Cura della campagna lo decidi tu: tocchi l unita ferita da curare e torna a piena vita; si consuma solo dopo il tocco (toccando altrove annulli)',
 ]},
 {v:64,d:'28 nov 2026',t:'Controlli, meno monete, IA Normale piu debole',n:[
   'L obiettivo della campagna e sotto la mappa, piu grande',
@@ -1616,7 +1616,7 @@ function renderInfo(){
   bEnd.classList.remove('pulse');
   if(!started){el.innerHTML='';return}
   if(g.over!==null){el.innerHTML='<b>Partita finita</b>';return}
-  if(g.healPick&&pl){el.innerHTML='<b>Cura: scegli l\u2019unità</b><span class="sub">Tocca una tua unità ferita: torna a piena vita.</span>';return}
+  if(g.healPick&&pl){el.innerHTML='<b>Cura: scegli l\u2019unità</b><span class="sub">Tocca una tua unità ferita: torna a piena vita. Tocca altrove per annullare (l\u2019aiuto non si consuma).</span>';return}
   if(!pl){el.innerHTML='<b>Turno del computer</b><span class="sub">Guarda cosa fa, poi tocca a te.</span>';return}
   if(u&&g.units.includes(u)){
     const T=UT[u.t],terr=terrInfo(u.x,u.y)[0];
@@ -2712,8 +2712,8 @@ function tap(x,y){
     }
   }
   if(g.healPick){
-    if(u&&u.o===0&&u.hp<mhp(u)){const n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1);g.healPick=false;sfx('recruit');buzz(25);toast(UT[u.t].n+' curato');saveGame();refreshUI();return}
-    toast('Tocca un\u2019unità ferita da curare');return;
+    if(u&&u.o===0&&u.hp<mhp(u)){const n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1);g.healPick=false;g.bu=g.bu||{};g.bu.cura=1;g.boostN=(g.boostN||0)+1;if(window.IAV&&IAV.onUsed)IAV.onUsed('cura');sfx('recruit');buzz(25);toast(UT[u.t].n+' curato');saveGame();refreshUI();return}
+    g.healPick=false;toast('Cura annullata: l\u2019aiuto non è stato usato');refreshUI();return;
   }
   if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null;if(sel)sfx('sel')}
   else if(u&&sees(g,0,u)){inspect=u;sel=null;tinfo=null}
