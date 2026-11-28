@@ -4,6 +4,13 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v64 — 28 nov 2026 · Comandi fuori dalla mappa, meno monete, Guaritore a scelta
+- Menu, aiuti e zoom stanno in una fascia sopra la mappa: non coprono più le caselle
+- L'obiettivo della campagna è sotto la mappa, più grande
+- Le monete arrivano più piano: +1 a round (invece di +2), più le stazioni
+- Livello Normale: il computer recluta e agisce meno spesso
+- Il Guaritore cura quando lo decidi tu: tocca un amico ferito accanto (casella verde) per curarlo di 2
+
 ## v63 — 27 nov 2026 · Pedine in alto non più tagliate
 - Sopra la mappa c'è ora un po' di spazio: le pedine della prima riga non vengono più tagliate dalla cornice a inizio partita
 

@@ -57,7 +57,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .foot{display:flex;flex-direction:column;gap:4px}
 #bPause{position:absolute;left:8px;top:8px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(15,36,51,.82);display:flex;align-items:center;justify-content:center;padding:0}
 #bPause svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
-#zoomBox{position:absolute;right:8px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
+#zoomBox{position:absolute;right:8px;top:5px;display:flex;flex-direction:row;gap:6px;z-index:2}
 #zoomBox button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(16,34,47,.82);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #zoomBox button[disabled]{opacity:.35;cursor:default}
 #zoomBox svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
@@ -216,12 +216,12 @@ body.gpui .btn[disabled]{color:#6f868c!important}
 body.gpui .ov:not(#ovStart) .card::before{inset:0;border:60px solid transparent;border-image:url(assets/menu/menu_pannello_piccolo.webp) 180 fill/60px stretch}
 body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-shadow:0 1px 3px rgba(12,70,88,.6)}
 
-#goalBar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:30px;padding:3px 12px;border-radius:12px;background:rgba(10,52,66,.78);border:1px solid rgba(255,236,170,.55);box-sizing:border-box;font-size:13px;line-height:1.2}
+#goalBar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:46px;padding:6px 14px;border-radius:12px;background:rgba(10,52,66,.78);border:1px solid rgba(255,236,170,.55);box-sizing:border-box;font-size:13px;line-height:1.2}
 #goalBar[hidden]{display:none}
-#goalBar b{font-family:var(--disp);font-weight:600;font-size:14px;color:#ffe9a6}
-#goalBar span{color:#e8f6f8;white-space:nowrap;font-weight:700;font-size:12.5px}
+#goalBar b{font-family:var(--disp);font-weight:600;font-size:18px;color:#ffe9a6}
+#goalBar span{color:#e8f6f8;white-space:nowrap;font-weight:700;font-size:16px}
 #goalBar i{font-style:normal;margin-right:5px}
-#bAid{position:absolute;left:8px;top:54px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,236,170,.7);background:rgba(120,78,10,.86);display:flex;align-items:center;justify-content:center;padding:0;color:#ffe9a6}
+#bAid{position:absolute;left:54px;top:5px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,236,170,.7);background:rgba(120,78,10,.86);display:flex;align-items:center;justify-content:center;padding:0;color:#ffe9a6}
 #bAid[hidden]{display:none}
 #bAid svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round}
 #bAid span{position:absolute;right:-5px;top:-6px;min-width:18px;height:18px;border-radius:9px;background:#ef6a5a;color:#fff;font:800 11px/18px var(--body);text-align:center;border:1.5px solid #fff}
@@ -250,7 +250,6 @@ setTimeout(finish,25000);
     <div class="wbox" id="wbox"></div>
     <div class="stat"><div class="r" id="rnd"></div><div class="c" id="coins"></div></div>
   </div>
-  <div id="goalBar" hidden></div>
   <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div>
     <button type="button" id="bAid" aria-label="Aiuti" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M18 6l-3.6 3.6M6 18l3.6-3.6M18 18l-3.6-3.6"/></svg><span id="aidN"></span></button>
     <button type="button" id="bPause" aria-label="Menu di gioco"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -260,6 +259,7 @@ setTimeout(finish,25000);
       <button type="button" id="zFit" aria-label="Mostra tutta la mappa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
   </div>
+  <div id="goalBar" hidden></div>
   <div class="foot">
     <div id="info"></div>
     <div class="btns">
@@ -391,7 +391,7 @@ const UT={
   K:{n:'Cavaliere',hp:8,atk:5,mv:4,rg:1,cost:5,d:'Veloce e forte, ma il bosco e la cenere lo frenano (3 passi)'},
   W:{n:'Sciamano',hp:6,atk:2,mv:2,rg:2,cost:4,d:'Da 2 caselle spinge il nemico di una; contro un ostacolo fa +1'},
   L:{n:'Lanciere',hp:9,atk:3,mv:2,rg:1,cost:3,d:'Resistente: contrattacca con tutta la forza'},
-  H:{n:'Guaritore',hp:6,atk:1,mv:3,rg:1,cost:4,d:'A inizio turno cura di 2 vita le unità amiche vicine'},
+  H:{n:'Guaritore',hp:6,atk:1,mv:3,rg:1,cost:4,d:'Una volta per turno cura di 2 vita un amico vicino, a tua scelta'},
   B:{n:'Balestriere',hp:5,atk:5,mv:1,rg:3,cost:5,d:'Colpisce da 3 caselle, ma si muove di una sola'},
   R:{n:'Alfiere',hp:7,atk:2,mv:3,rg:1,cost:4,d:'Le unità amiche vicine a lui fanno 1 passo in più'}
 };
@@ -853,7 +853,7 @@ function heldBy(g,o){return STATIONS.filter(s=>{const u=unitAt(g,s.x,s.y);return
 // g.turn = a chi tocca adesso (0 giocatore, 1 computer); g.step = 0 primo a muovere, 1 secondo.
 function startTurnOf(g,o){
   g.turn=o;g.lastRec=0;
-  g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<mhp(u)){const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
+  if(o===1)g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<mhp(u)){const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
   g.units.forEach(u=>{if(u.o===o){u.moved=false;u.done=false;u.aid=false;u.px=undefined;u.py=undefined}});
 }
 function endTurn(g){
@@ -871,7 +871,7 @@ function endTurn(g){
     if(g.over!==null)return;
     baseFall(g);
     if(g.over!==null)return;
-    g.coins[0]+=2+bonusAt(g,0)+heldBy(g,0);g.coins[1]+=2+bonusAt(g,1)+heldBy(g,1);
+    g.coins[0]+=INC+bonusAt(g,0)+heldBy(g,0);g.coins[1]+=INC+bonusAt(g,1)+heldBy(g,1);
     if(g.round>=MAXR){
       if(g.goal&&g.goal.t!=='stations'){
         if(g.goal.t==='survive'){g.over=0;g.why='Hai resistito per '+MAXR+' round.'}
@@ -894,7 +894,7 @@ function endTurn(g){
 // noise: imprecisione delle scelte. skip: probabilità che un'unità salti l'azione. bonus: monete extra a round.
 const AI_LEVELS={
   facile:{n:'Facile',noise:2.6,skip:0.45,bonus:0,norec:true},
-  normale:{n:'Normale',noise:1.8,skip:0.25,bonus:0},
+  normale:{n:'Normale',noise:2.2,skip:0.35,bonus:0,rec:.5},
   difficile:{n:'Difficile',noise:0.1,skip:0,bonus:0.25}
 };
 // Distanza di cammino da ogni casella fino a target (monti, vulcano e laghi aggirati, boschi e cenere costano 2).
@@ -1008,6 +1008,7 @@ function aiStep(g,o,lv){
     rfAI(g,o);
     if(norec(g)||(o===1&&g.rules&&g.rules.eNoRec))return false;
     const c=g.coins[o];
+    {const LV=AI_LEVELS[g.lvl];if(o===1&&LV&&LV.rec!==undefined&&Math.random()>LV.rec)return false}
     // ogni tanto risparmia per un Cavaliere
     const save=c>=3&&c<5&&g.units.filter(u=>u.o===o).length>=3&&Math.random()<.3;
     if(c>=2&&!save&&!canRecruit(g,o,'E')){
@@ -1036,6 +1037,13 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
+{v:64,d:'28 nov 2026',t:'Comandi fuori dalla mappa, meno monete, Guaritore a scelta',n:[
+  'Menu, aiuti e zoom stanno in una fascia sopra la mappa: non coprono piu le caselle',
+  'L obiettivo della campagna e sotto la mappa, piu grande',
+  'Le monete arrivano piu piano: +1 a round (invece di +2), piu le stazioni',
+  'Livello Normale: il computer recluta e agisce meno spesso',
+  'Il Guaritore cura quando lo decidi tu: tocca un amico ferito accanto (casella verde) per curarlo di 2',
+]},
 {v:63,d:'27 nov 2026',t:'Pedine in alto non piu tagliate',n:[
   'Sopra la mappa c e ora un po di spazio: le pedine della prima riga non vengono piu tagliate dalla cornice a inizio partita',
 ]},
@@ -1579,7 +1587,7 @@ function renderTop(){
   $('wbox').innerHTML=`<div class="wnow">${icon(n.t,n.dir)}<span>${wName(n)}</span></div><div class="wd">${WE[n.t].d}</div><div class="wnext">${icon(x.t,x.dir)}<span>Dopo: <b>${x.t==='vento'?'Vento':wName(x)}</b></span>${more}</div>`;
   $('rnd').innerHTML='Round '+g.round+' di '+MAXR+'<small>'+(g.first===0?'Muovi per primo':'Muovi per secondo')+(g.hold&&(g.hold[0]||g.hold[1])?' · stazioni '+g.hold[0]+'/'+HOLD+' contro '+g.hold[1]+'/'+HOLD:'')+'</small>';
   renderGoal();
-  $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>+'+(2+heldBy(g,0))+' a round</small>';
+  $('coins').innerHTML=(GP.on?'<img src="assets/interfaccia/icona_moneta.png" alt="">':'')+g.coins[0]+' <small>+'+(INC+heldBy(g,0))+' a round</small>';
 }
 function terrInfo(x,y){
   const t=tileAt(g,x,y),gelo=wNow(g).t==='gelo';
@@ -1604,7 +1612,7 @@ function renderInfo(){
     const T=UT[u.t],terr=terrInfo(u.x,u.y)[0];
     const tg=(u.o===0&&!u.done)?targetsFrom(g,u,u.x,u.y).length:0;
     let h='Unità nemica.';
-    if(u.o===0)h=u.done?'Ha già agito.':tg?'Rosso = danno, arancio = contrattacco.':u.moved?'Mosso. Nessun nemico a tiro.':'Tocca una casella chiara per muoverti.';
+    if(u.o===0)h=u.done?'Ha già agito.':(u.t==='H'&&g.units.some(e=>e.o===0&&e!==u&&md(u,e)<=1&&e.hp<mhp(e)))?'Tocca un amico ferito accanto (verde) per curarlo di 2.':tg?'Rosso = danno, arancio = contrattacco.':u.moved?'Mosso. Nessun nemico a tiro.':'Tocca una casella chiara per muoverti.';
     el.innerHTML=`<b>${u.o===0?'':'Nemico: '}${u.nm||T.n} · ${u.hp}/${mhp(u)} vita</b><span class="sub">Attacco ${atkOf(g,u)} · Passi ${mvOf(g,u)} · Gittata ${rgOf(g,u)} · ${terr}${u.t==='W'?' · Spinge il nemico':u.t==='K'?' · Bosco: 3 passi':''}</span><span class="sub">${h}</span>`;
   }else if(tinfo){
     const [n,d]=terrInfo(tinfo.x,tinfo.y);
@@ -1707,12 +1715,14 @@ function recSheet(){
 /* --- disegno --- */
 /* --- camera: la mappa intera sta nello schermo (zoom 1); si può ingrandire e trascinare --- */
 const ZMAX=2.6;
-const TOPPAD=.6;
+const TOPPAD=.6,INC=1;
+const topMin=()=>gpReady()?66:50;
+const topPad=cs=>Math.max(cs*TOPPAD,topMin());
 const cam={z:1,ox:0,oy:0,fit:30,ready:false};
 function camClamp(){
-  const cs=cam.fit*cam.z,th=Math.round(cs*.27),bw=cs*W,bh=cs*H+th+cs*TOPPAD,m=8;
+  const cs=cam.fit*cam.z,th=Math.round(cs*.27),bw=cs*W,bh=cs*H+th+topPad(cs),m=8;
   cam.ox=bw+2*m<=lay.cw?(lay.cw-bw)/2:Math.min(m,Math.max(lay.cw-bw-m,cam.ox));
-  cam.oy=bh+2*m<=lay.ch?(lay.ch-bh)/2+cs*.05+cs*TOPPAD:Math.min(m+cs*.12+cs*TOPPAD,Math.max(lay.ch-bh-m,cam.oy));
+  cam.oy=bh+2*m<=lay.ch?(lay.ch-bh)/2+cs*.05+topPad(cs):Math.min(m+cs*.12+topPad(cs),Math.max(lay.ch-bh-m,cam.oy));
 }
 function camLayout(){
   const cs=cam.fit*cam.z,dz=Math.round(cs*(gpReady()?.04:.24));
@@ -1735,7 +1745,7 @@ function size(){
   ctx.setTransform(d,0,0,d,0,0);
   const prev={cs:lay.cs,ox:lay.ox,oy:lay.oy,cw:lay.cw,ch:lay.ch};
   const pad=SEAON?8:3;
-  cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2)/(H+(GP.on?.12:.38)+TOPPAD))));
+  cam.fit=Math.max(10,Math.floor(Math.min((r.width-pad*2)/W,(r.height-pad*2-topMin())/(H+(GP.on?.12:.38)))));
   lay.cw=r.width;lay.ch=r.height;lay.dpr=d;
   if(cam.ready&&cam.z>1&&prev.cw>0){ // mantiene al centro ciò che si stava guardando
     const u=(prev.cw/2-prev.ox)/prev.cs,v=(prev.ch/2-prev.oy)/prev.cs,cs=cam.fit*cam.z;
@@ -2598,6 +2608,12 @@ function draw(ts){
     if(GEo){ctx.globalAlpha=.8+.2*Math.sin(tick*4);{const rw=cs*prs(),rh=cs*.92*prs();ctx.drawImage(GE.im.ui_anello_selezione,cx(sel.vx)-(rw-cs)/2,cy(sel.vy)+lay.fh*.06-(rh-cs*.92)*.35,rw,rh)}ctx.globalAlpha=1}
     else{ctx.strokeStyle='#ffe08a';ctx.lineWidth=3.5;
     ctx.beginPath();ctx.ellipse(gcx(sel.vx),gcy(sel.vy)+r*.62+1,cs*.47*prs(),cs*.18*prs(),0,0,7);ctx.stroke()}
+    if(!sel.done&&sel.t==='H'){
+      for(const e of g.units){if(e.o===0&&e!==sel&&md(sel,e)<=1&&e.hp<mhp(e)){
+        if(GEo&&GE.im.ui_casella_libera){const [fx0,fy0,fw0,fh0]=faceR(e.vx,e.vy,0);ctx.globalAlpha=.65+.35*Math.sin(tick*6);ctx.drawImage(GE.im.ui_casella_libera,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
+        else{ctx.strokeStyle='rgba(143,227,154,'+(.6+.4*Math.sin(tick*6))+')';ctx.lineWidth=4;ctx.beginPath();ctx.arc(gcx(e.vx),gcy(e.vy)-r*.12,cs*.47,0,7);ctx.stroke()}
+      }}
+    }
     if(!sel.done){
       const pulse=.6+.4*Math.sin(tick*6);
       for(const e of targetsFrom(g,sel,sel.x,sel.y)){
@@ -2690,6 +2706,9 @@ function tap(x,y){
       const rc=reach(g,sel);
       if(rc.has(x+','+y)){doMove(g,sel,x,y);sfx('move');afterAction();return}
     }
+  }
+  if(sel&&sel.t==='H'&&sel.o===0&&g.units.includes(sel)&&!sel.done&&u&&u.o===0&&u!==sel&&md(sel,u)<=1&&u.hp<mhp(u)){
+    const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1);sel.done=true;sel.moved=true;sfx('recruit');buzz(20);toast(UT[u.t].n+' curato di '+n);afterAction();return;
   }
   if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null;if(sel)sfx('sel')}
   else if(u&&sees(g,0,u)){inspect=u;sel=null;tinfo=null}
