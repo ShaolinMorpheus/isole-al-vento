@@ -4,6 +4,13 @@
 
 (Il registro è anche dentro il gioco, ma per ora è nascosto: in gioco si vede solo la versione.)
 
+## v65 — 28 nov 2026 · Comandi davvero fuori dalla mappa, Cura a scelta
+- Menu, aiuti e zoom stanno in una riga sopra la mappa, fuori dal campo
+- Il messaggio nero (meteo ecc.) compare in basso nella mappa
+- Cornice gialla attorno alla mappa più sottile: mappa più grande
+- Il Guaritore torna come prima: cura da solo le unità vicine a inizio turno
+- L'aiuto Cura della campagna lo decidi tu: tocchi l'unità ferita da curare e torna a piena vita
+
 ## v64 — 28 nov 2026 · Comandi fuori dalla mappa, meno monete, Guaritore a scelta
 - Menu, aiuti e zoom stanno in una fascia sopra la mappa: non coprono più le caselle
 - L'obiettivo della campagna è sotto la mappa, più grande

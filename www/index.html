@@ -52,12 +52,14 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 body.sea #stage::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:15px;box-shadow:inset 0 0 30px rgba(6,45,66,.38)}
 body.gpui #stage>button,body.gpui #stage>#zoomBox,body.gpui #stage>#toast{z-index:3}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
+#toast{position:absolute;left:50%;bottom:10px;z-index:4;transform:translateX(-50%);background:rgba(8,20,28,.86);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-family:var(--disp);font-weight:500;font-size:15px;pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap}
 #toast.on{opacity:1}
 .foot{display:flex;flex-direction:column;gap:4px}
-#bPause{position:absolute;left:8px;top:8px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(15,36,51,.82);display:flex;align-items:center;justify-content:center;padding:0}
+#bPause{position:relative;z-index:3;flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(15,36,51,.82);display:flex;align-items:center;justify-content:center;padding:0}
 #bPause svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
-#zoomBox{position:absolute;right:8px;top:5px;display:flex;flex-direction:row;gap:6px;z-index:2}
+#tools{display:flex;align-items:center;gap:8px;min-height:42px}
+#tools .tsp{flex:1}
+#zoomBox{position:relative;display:flex;flex-direction:row;gap:6px;z-index:2}
 #zoomBox button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:rgba(16,34,47,.82);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #zoomBox button[disabled]{opacity:.35;cursor:default}
 #zoomBox svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
@@ -221,7 +223,7 @@ body.gpui .ov:not(#ovStart) .card h2,body.gpui .ov:not(#ovStart) .card p{text-sh
 #goalBar b{font-family:var(--disp);font-weight:600;font-size:18px;color:#ffe9a6}
 #goalBar span{color:#e8f6f8;white-space:nowrap;font-weight:700;font-size:16px}
 #goalBar i{font-style:normal;margin-right:5px}
-#bAid{position:absolute;left:54px;top:5px;z-index:3;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,236,170,.7);background:rgba(120,78,10,.86);display:flex;align-items:center;justify-content:center;padding:0;color:#ffe9a6}
+#bAid{position:relative;z-index:3;flex:none;width:40px;height:40px;border-radius:12px;border:1px solid rgba(255,236,170,.7);background:rgba(120,78,10,.86);display:flex;align-items:center;justify-content:center;padding:0;color:#ffe9a6}
 #bAid[hidden]{display:none}
 #bAid svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round}
 #bAid span{position:absolute;right:-5px;top:-6px;min-width:18px;height:18px;border-radius:9px;background:#ef6a5a;color:#fff;font:800 11px/18px var(--body);text-align:center;border:1.5px solid #fff}
@@ -250,15 +252,17 @@ setTimeout(finish,25000);
     <div class="wbox" id="wbox"></div>
     <div class="stat"><div class="r" id="rnd"></div><div class="c" id="coins"></div></div>
   </div>
-  <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div>
+  <div id="tools">
     <button type="button" id="bAid" aria-label="Aiuti" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.4"/><path d="M6 6l3.6 3.6M18 6l-3.6 3.6M6 18l3.6-3.6M18 18l-3.6-3.6"/></svg><span id="aidN"></span></button>
     <button type="button" id="bPause" aria-label="Menu di gioco"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <span class="tsp"></span>
     <div id="zoomBox" role="group" aria-label="Zoom della mappa">
       <button type="button" id="zIn" aria-label="Ingrandisci"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
       <button type="button" id="zOut" aria-label="Riduci"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
       <button type="button" id="zFit" aria-label="Mostra tutta la mappa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
   </div>
+  <div id="stage"><canvas id="cv" aria-label="Mappa di gioco, 9 colonne per 13 righe. Pizzica per ingrandire, trascina per spostarti."></canvas><div id="toast" role="status"></div></div>
   <div id="goalBar" hidden></div>
   <div class="foot">
     <div id="info"></div>
@@ -391,7 +395,7 @@ const UT={
   K:{n:'Cavaliere',hp:8,atk:5,mv:4,rg:1,cost:5,d:'Veloce e forte, ma il bosco e la cenere lo frenano (3 passi)'},
   W:{n:'Sciamano',hp:6,atk:2,mv:2,rg:2,cost:4,d:'Da 2 caselle spinge il nemico di una; contro un ostacolo fa +1'},
   L:{n:'Lanciere',hp:9,atk:3,mv:2,rg:1,cost:3,d:'Resistente: contrattacca con tutta la forza'},
-  H:{n:'Guaritore',hp:6,atk:1,mv:3,rg:1,cost:4,d:'Una volta per turno cura di 2 vita un amico vicino, a tua scelta'},
+  H:{n:'Guaritore',hp:6,atk:1,mv:3,rg:1,cost:4,d:'A inizio turno cura di 2 vita le unità amiche vicine'},
   B:{n:'Balestriere',hp:5,atk:5,mv:1,rg:3,cost:5,d:'Colpisce da 3 caselle, ma si muove di una sola'},
   R:{n:'Alfiere',hp:7,atk:2,mv:3,rg:1,cost:4,d:'Le unità amiche vicine a lui fanno 1 passo in più'}
 };
@@ -757,7 +761,7 @@ function spawnWaves(g){
     }
   }
 }
-// Aiuti della campagna: cielo sereno (azzera il meteo di questo round), cura (+3 vita a tutte le tue unità), rinforzo (un Guerriero gratis sulla base).
+// Aiuti della campagna: cielo sereno (azzera il meteo di questo round), cura (scegli tu un'unità ferita: torna a piena vita), rinforzo (un Guerriero gratis sulla base).
 function boostUse(g,k){
   g.bu=g.bu||{};
   if(g.bu[k])return {ok:false,msg:'Già usato in questo livello.'};
@@ -767,7 +771,7 @@ function boostUse(g,k){
   }else if(k==='cura'){
     const hurt=g.units.filter(u=>u.o===0&&u.hp<mhp(u));
     if(!hurt.length)return {ok:false,msg:'Nessuna unità ferita.'};
-    for(const u of hurt){const n=Math.min(3,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}
+    if(hurt.length===1){const u=hurt[0],n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}else g.healPick=true;
   }else if(k==='rinforzo'){
     if(g.units.filter(u=>u.o===0).length>=MAXU)return {ok:false,msg:'Hai già '+MAXU+' unità.'};
     const c=rfCell(g,0);if(!c)return {ok:false,msg:'Nessun posto libero sulla base.'};
@@ -853,7 +857,7 @@ function heldBy(g,o){return STATIONS.filter(s=>{const u=unitAt(g,s.x,s.y);return
 // g.turn = a chi tocca adesso (0 giocatore, 1 computer); g.step = 0 primo a muovere, 1 secondo.
 function startTurnOf(g,o){
   g.turn=o;g.lastRec=0;
-  if(o===1)g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<mhp(u)){const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
+  g.units.filter(h=>h.o===o&&h.t==='H').forEach(h=>{for(const u of g.units)if(u.o===o&&u!==h&&md(h,u)<=1&&u.hp<mhp(u)){const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1)}});
   g.units.forEach(u=>{if(u.o===o){u.moved=false;u.done=false;u.aid=false;u.px=undefined;u.py=undefined}});
 }
 function endTurn(g){
@@ -1037,12 +1041,17 @@ let PSZ=LS.get('isole-psz')===null?1:Math.max(0,Math.min(2,(+LS.get('isole-psz')
 const prs=()=>1+(PSC[PSZ]-1)*.7; // anelli a terra e barra vita seguono la pedina
 /* Registro modifiche: la prima voce è la versione attuale. Si aggiorna a ogni modifica. */
 const CHANGELOG=[
-{v:64,d:'28 nov 2026',t:'Comandi fuori dalla mappa, meno monete, Guaritore a scelta',n:[
-  'Menu, aiuti e zoom stanno in una fascia sopra la mappa: non coprono piu le caselle',
+{v:65,d:'28 nov 2026',t:'Comandi davvero fuori dalla mappa, Cura a scelta',n:[
+  'Menu, aiuti e zoom stanno in una riga sopra la mappa, fuori dal campo: niente tocchi per sbaglio',
+  'Il messaggio nero (meteo ecc.) ora compare in basso nella mappa',
+  'Cornice gialla attorno alla mappa piu sottile: la mappa e piu grande',
+  'Il Guaritore torna come prima: cura da solo le unita vicine a inizio turno',
+  'L aiuto Cura della campagna lo decidi tu: tocchi l unita ferita da curare e torna a piena vita',
+]},
+{v:64,d:'28 nov 2026',t:'Controlli, meno monete, IA Normale piu debole',n:[
   'L obiettivo della campagna e sotto la mappa, piu grande',
   'Le monete arrivano piu piano: +1 a round (invece di +2), piu le stazioni',
   'Livello Normale: il computer recluta e agisce meno spesso',
-  'Il Guaritore cura quando lo decidi tu: tocca un amico ferito accanto (casella verde) per curarlo di 2',
 ]},
 {v:63,d:'27 nov 2026',t:'Pedine in alto non piu tagliate',n:[
   'Sopra la mappa c e ora un po di spazio: le pedine della prima riga non vengono piu tagliate dalla cornice a inizio partita',
@@ -1607,12 +1616,13 @@ function renderInfo(){
   bEnd.classList.remove('pulse');
   if(!started){el.innerHTML='';return}
   if(g.over!==null){el.innerHTML='<b>Partita finita</b>';return}
+  if(g.healPick&&pl){el.innerHTML='<b>Cura: scegli l\u2019unità</b><span class="sub">Tocca una tua unità ferita: torna a piena vita.</span>';return}
   if(!pl){el.innerHTML='<b>Turno del computer</b><span class="sub">Guarda cosa fa, poi tocca a te.</span>';return}
   if(u&&g.units.includes(u)){
     const T=UT[u.t],terr=terrInfo(u.x,u.y)[0];
     const tg=(u.o===0&&!u.done)?targetsFrom(g,u,u.x,u.y).length:0;
     let h='Unità nemica.';
-    if(u.o===0)h=u.done?'Ha già agito.':(u.t==='H'&&g.units.some(e=>e.o===0&&e!==u&&md(u,e)<=1&&e.hp<mhp(e)))?'Tocca un amico ferito accanto (verde) per curarlo di 2.':tg?'Rosso = danno, arancio = contrattacco.':u.moved?'Mosso. Nessun nemico a tiro.':'Tocca una casella chiara per muoverti.';
+    if(u.o===0)h=u.done?'Ha già agito.':tg?'Rosso = danno, arancio = contrattacco.':u.moved?'Mosso. Nessun nemico a tiro.':'Tocca una casella chiara per muoverti.';
     el.innerHTML=`<b>${u.o===0?'':'Nemico: '}${u.nm||T.n} · ${u.hp}/${mhp(u)} vita</b><span class="sub">Attacco ${atkOf(g,u)} · Passi ${mvOf(g,u)} · Gittata ${rgOf(g,u)} · ${terr}${u.t==='W'?' · Spinge il nemico':u.t==='K'?' · Bosco: 3 passi':''}</span><span class="sub">${h}</span>`;
   }else if(tinfo){
     const [n,d]=terrInfo(tinfo.x,tinfo.y);
@@ -1716,7 +1726,7 @@ function recSheet(){
 /* --- camera: la mappa intera sta nello schermo (zoom 1); si può ingrandire e trascinare --- */
 const ZMAX=2.6;
 const TOPPAD=.6,INC=1;
-const topMin=()=>gpReady()?66:50;
+const topMin=()=>0;
 const topPad=cs=>Math.max(cs*TOPPAD,topMin());
 const cam={z:1,ox:0,oy:0,fit:30,ready:false};
 function camClamp(){
@@ -2608,12 +2618,6 @@ function draw(ts){
     if(GEo){ctx.globalAlpha=.8+.2*Math.sin(tick*4);{const rw=cs*prs(),rh=cs*.92*prs();ctx.drawImage(GE.im.ui_anello_selezione,cx(sel.vx)-(rw-cs)/2,cy(sel.vy)+lay.fh*.06-(rh-cs*.92)*.35,rw,rh)}ctx.globalAlpha=1}
     else{ctx.strokeStyle='#ffe08a';ctx.lineWidth=3.5;
     ctx.beginPath();ctx.ellipse(gcx(sel.vx),gcy(sel.vy)+r*.62+1,cs*.47*prs(),cs*.18*prs(),0,0,7);ctx.stroke()}
-    if(!sel.done&&sel.t==='H'){
-      for(const e of g.units){if(e.o===0&&e!==sel&&md(sel,e)<=1&&e.hp<mhp(e)){
-        if(GEo&&GE.im.ui_casella_libera){const [fx0,fy0,fw0,fh0]=faceR(e.vx,e.vy,0);ctx.globalAlpha=.65+.35*Math.sin(tick*6);ctx.drawImage(GE.im.ui_casella_libera,fx0-2,fy0-2,fw0+4,fh0+4);ctx.globalAlpha=1}
-        else{ctx.strokeStyle='rgba(143,227,154,'+(.6+.4*Math.sin(tick*6))+')';ctx.lineWidth=4;ctx.beginPath();ctx.arc(gcx(e.vx),gcy(e.vy)-r*.12,cs*.47,0,7);ctx.stroke()}
-      }}
-    }
     if(!sel.done){
       const pulse=.6+.4*Math.sin(tick*6);
       for(const e of targetsFrom(g,sel,sel.x,sel.y)){
@@ -2707,8 +2711,9 @@ function tap(x,y){
       if(rc.has(x+','+y)){doMove(g,sel,x,y);sfx('move');afterAction();return}
     }
   }
-  if(sel&&sel.t==='H'&&sel.o===0&&g.units.includes(sel)&&!sel.done&&u&&u.o===0&&u!==sel&&md(sel,u)<=1&&u.hp<mhp(u)){
-    const n=Math.min(2,mhp(u)-u.hp);u.hp+=n;addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1);sel.done=true;sel.moved=true;sfx('recruit');buzz(20);toast(UT[u.t].n+' curato di '+n);afterAction();return;
+  if(g.healPick){
+    if(u&&u.o===0&&u.hp<mhp(u)){const n=mhp(u)-u.hp;u.hp=mhp(u);addFx(g,u.x,u.y,'+'+n,'#8fe39a',.1);g.healPick=false;sfx('recruit');buzz(25);toast(UT[u.t].n+' curato');saveGame();refreshUI();return}
+    toast('Tocca un\u2019unità ferita da curare');return;
   }
   if(u&&u.o===0){sel=(sel===u)?null:u;inspect=null;tinfo=null;if(sel)sfx('sel')}
   else if(u&&sees(g,0,u)){inspect=u;sel=null;tinfo=null}
@@ -2850,7 +2855,7 @@ function startLevel(def,opt){
 function useBoostUI(k){
   if(!canPlay())return {ok:false,msg:'Aspetta il tuo turno.'};
   const r=boostUse(g,k);
-  if(r.ok){sfx(k==='sereno'?'turn':'recruit');buzz(30);if(k==='sereno')flash=.7;sel=null;inspect=null;tinfo=null;saveGame();refreshUI();toast(k==='sereno'?'Il cielo si schiarisce':k==='cura'?'Le tue unità sono curate':'Un Guerriero arriva sulla tua base',1600)}
+  if(r.ok){sfx(k==='sereno'?'turn':'recruit');buzz(30);if(k==='sereno')flash=.7;sel=null;inspect=null;tinfo=null;saveGame();refreshUI();toast(k==='sereno'?'Il cielo si schiarisce':k==='cura'?(g.healPick?'Tocca l\u2019unità da curare':'Unità curata'):'Un Guerriero arriva sulla tua base',1600)}
   return r;
 }
 function startGame(withTut,seed){
