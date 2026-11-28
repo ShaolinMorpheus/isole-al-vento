@@ -80,3 +80,36 @@
     }
   };
 })();
+
+/* Bozza C: nebbia Blender, un solo velo morbido su tutto il terreno che ondeggia piano; vicino alle tue unita' si vede chiaro. */
+(function(){
+  var img=new Image();img.src='assets/effetti/eff_nebbia.webp';
+  var oc=document.createElement('canvas'),oct=oc.getContext('2d'),mk=document.createElement('canvas'),mkt=mk.getContext('2d'),mkKey='';
+  window.FOGFX=function(ctx,lay,seen,tick,W,H){
+    if(!img.complete||!img.naturalWidth)return false;
+    var d=lay.dpr||1,cw=ctx.canvas.width,ch=ctx.canvas.height;
+    if(oc.width!==cw||oc.height!==ch){oc.width=cw;oc.height=ch}
+    var X=lay.ox*d,Y=lay.oy*d,MW=lay.cs*W*d,MH=lay.fh*H*d;
+    oct.setTransform(1,0,0,1,0,0);oct.globalCompositeOperation='source-over';oct.clearRect(0,0,cw,ch);
+    oct.save();
+    var T=Math.max(MW,MH)*1.05;
+    function layer(sc,ox,oy,al){
+      var pat=oct.createPattern(img,'repeat');if(!pat)return;
+      var k=T*sc/img.naturalWidth;
+      pat.setTransform(new DOMMatrix().translate(X+ox*d,Y+oy*d).scale(k));
+      oct.globalAlpha=al;oct.fillStyle=pat;oct.fillRect(0,0,cw,ch)}
+    var cs=lay.cs;
+    layer(1,Math.sin(tick*.22)*cs*1.6,Math.sin(tick*.13+1)*cs*.25,.95);
+    layer(.72,-Math.sin(tick*.17+2)*cs*1.3+cs*2,cs*3+Math.sin(tick*.1)*cs*.2,.7);
+    oct.globalAlpha=1;oct.restore();
+    // maschera morbida: caselle viste
+    var key=W+'x'+H+':'+Array.from(seen).sort().join('|'),R=8;
+    if(key!==mkKey){mkKey=key;mk.width=W*R;mk.height=H*R;mkt.clearRect(0,0,mk.width,mk.height);
+      mkt.filter='blur('+(R*.55)+'px)';mkt.fillStyle='#fff';
+      seen.forEach(function(k){var p=k.split(',');var x=+p[0],y=+p[1];if(x<0||y<0||x>=W||y>=H)return;mkt.fillRect(x*R+1,y*R+1,R-2,R-2)});
+      mkt.filter='none'}
+    oct.globalCompositeOperation='destination-out';oct.globalAlpha=.97;oct.imageSmoothingQuality='high';oct.drawImage(mk,X,Y,MW,MH);
+    oct.globalCompositeOperation='source-over';oct.globalAlpha=1;
+    ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(oc,0,0);ctx.restore();
+    return true};
+})();

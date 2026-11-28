@@ -1963,7 +1963,7 @@ function groundDraw(c0,gelo,nebbia,seen,noGrid){
   for(let i=1;i<W;i++){c0.moveTo(cx(i),cy(0));c0.lineTo(cx(i),cy(0)+H*fh)}
   for(let j=1;j<H;j++){c0.moveTo(cx(0),cy(j));c0.lineTo(cx(0)+W*cs,cy(j))}
   c0.stroke();}
-  if(nebbia)for(const c of cells)if(!seen.has(c.x+','+c.y)){c0.fillStyle='rgba(205,220,226,.62)';c0.fillRect(cx(c.x),cy(c.y),cs,fh)}
+  if(nebbia&&!window.FOGFX)for(const c of cells)if(!seen.has(c.x+','+c.y)){c0.fillStyle='rgba(205,220,226,.62)';c0.fillRect(cx(c.x),cy(c.y),cs,fh)}
   c0.restore();
   return true;
 }
@@ -1984,7 +1984,7 @@ function groundCells(gelo,nebbia,seen){
     const X=cx(x),Y=cy(y),sx=(X-cx(0))*dpr,sy=(Y-cy(0))*dpr;
     ctx.save();rr(X+1,Y,cs-2,fh,r);ctx.clip();
     ctx.drawImage(GOFF,sx,sy,cs*dpr,ph*dpr,X,Y,cs,ph);ctx.restore();
-    if(nebbia&&!seen.has(x+','+y)){ctx.fillStyle='rgba(205,220,226,.62)';rr(X+1,Y,cs-2,fh,r);ctx.fill()}
+    if(nebbia&&!window.FOGFX&&!seen.has(x+','+y)){ctx.fillStyle='rgba(205,220,226,.62)';rr(X+1,Y,cs-2,fh,r);ctx.fill()}
   }
   return true;
 }
@@ -1996,7 +1996,7 @@ function drawBlock(x,y,t,gelo,tick,veil){
     if(nm&&nm.startsWith('vulcano_')){
       const vi=GO.im['terreno_'+nm];
       ctx.save();rr(px,py,w,fh,r);ctx.clip();ctx.drawImage(vi,px,py,w,fh);ctx.restore();
-      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
+      if(veil&&!window.FOGFX){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
       return;
     }
     const im=nm&&gpPick(nm,cs*lay.dpr);
@@ -2019,14 +2019,14 @@ function drawBlock(x,y,t,gelo,tick,veil){
         ctx.drawImage(im,ox,oy,sz,sz,X-.4,Y-.4,cs2+.8,fh+.8);
         if(LOOK===3){const hsh=((x*73856093)^(y*19349663))>>>0,v=((hsh%1000)/1000-.5)*.09;ctx.fillStyle=v>0?'rgba(255,255,220,'+v+')':'rgba(0,20,0,'+(-v)+')';ctx.fillRect(X,Y,cs2,fh)}
         if(LOOK===2){ctx.strokeStyle='rgba(10,30,10,.2)';ctx.lineWidth=Math.max(1,cs*.012);ctx.strokeRect(X,Y,cs2,fh)}
-        if(veil){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(X,Y,cs2,fh)}
+        if(veil&&!window.FOGFX){ctx.fillStyle='rgba(205,220,226,.62)';ctx.fillRect(X,Y,cs2,fh)}
         return;
       }
       const sz=194*sc;
       ctx.save();rr(px,py,w,fh,r);ctx.clip();
       ctx.drawImage(im,(im.width-sz)/2,0,sz,sz,px,py,w,fh);
       ctx.restore();
-      if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
+      if(veil&&!window.FOGFX){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh,r);ctx.fill()}
       return;
     }
   }
@@ -2070,7 +2070,7 @@ function drawBlock(x,y,t,gelo,tick,veil){
       for(const [a,b] of [[.18,.7],[.8,.78],[.12,.3]]){ctx.beginPath();ctx.ellipse(px+w*a,py+fh*b,w*.06,w*.035,0,0,7);ctx.fill()}
     }
   }
-  if(veil){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh+dz,r);ctx.fill()}
+  if(veil&&!window.FOGFX){ctx.fillStyle='rgba(205,220,226,.62)';rr(px,py,w,fh+dz,r);ctx.fill()}
 }
 // Oggetti che stanno sopra le caselle: si disegnano per riga, dal fondo verso di noi.
 function pine(bx,by,h,wd){
@@ -2550,6 +2550,7 @@ function draw(ts){
       drawUnit(gh.u,!vis(gh.u),1-k*.85,1-k);
     }
   }
+  if(nebbia&&window.FOGFX&&true)window.FOGFX(ctx,lay,seen,tick,W,H);
   // pericolo eruzione: sopra alberi, montagne e unità, così il segno si vede sempre
   if(started&&g.over===null&&g.hot&&g.hot.length){ // cenere ancora calda
     const ph=.55+.45*Math.sin(tick*4);
